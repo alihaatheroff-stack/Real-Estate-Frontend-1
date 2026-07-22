@@ -49,7 +49,7 @@ export function SiteHeader() {
             RE
           </span>
           <span className="min-w-0 leading-tight">
-            <span className="block font-display text-lg font-extrabold tracking-tight text-ink sm:text-xl">
+            <span className="block font-display text-lg font-semibold tracking-tight text-ink sm:text-xl">
               {SITE.name}
             </span>
             <span className="hidden truncate text-[11px] text-muted sm:block">

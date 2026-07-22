@@ -124,7 +124,7 @@ export function ProviderCard({ provider, variant = 'default' }: ProviderCardProp
   return (
     <Link
       to={providerPath(provider.id)}
-      className="flex h-full flex-col rounded-2xl border border-line bg-paper p-4 transition hover:border-brand/40 hover:shadow-soft"
+      className="flex h-full flex-col rounded-2xl border border-line bg-paper p-4 transition duration-300 hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-soft"
     >
       <div className="flex items-start gap-3">
         <img

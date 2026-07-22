@@ -19,7 +19,7 @@ import { Section } from '@/components/layout/Section'
 import { ProjectListCard, JobCard, ReviewsList, getEmployerById } from '@/features/referrals'
 import type { Employer } from '@/entities/employer/types'
 import { formatRating } from '@/shared/lib/format'
-import { PATHS, employerPath, employerProjectsPath, employerJobsPath } from '@/app/router/paths'
+import { PATHS, employerProjectsPath, employerJobsPath } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
 
 const FREEIO_GREEN = '#5BBB7B'

@@ -20,7 +20,8 @@ function AdCard({
     <Link
       to={ad.href}
       className={cn(
-        'group relative block min-h-0 overflow-hidden border border-white/20 bg-ink/40 shadow-soft backdrop-blur-sm',
+        'group relative block min-h-0 overflow-hidden border border-white/15 bg-ink/40 shadow-soft backdrop-blur-sm transition',
+        'hover:border-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
         tall ? 'aspect-[3/4]' : 'aspect-square',
         className,
       )}
@@ -28,14 +29,18 @@ function AdCard({
       <img
         src={ad.image}
         alt={ad.title}
-        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+        className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-105"
         loading="lazy"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/25 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 p-1.5 sm:p-2">
-        <p className="text-[10px] font-bold leading-tight text-paper sm:text-xs">{ad.title}</p>
+        <p className="text-[10px] font-semibold leading-tight tracking-wide text-paper sm:text-xs">
+          {ad.title}
+        </p>
         {ad.subtitle ? (
-          <p className="text-[9px] leading-tight text-paper/75 sm:text-[10px]">{ad.subtitle}</p>
+          <p className="mt-0.5 text-[9px] leading-tight text-paper/70 sm:text-[10px]">
+            {ad.subtitle}
+          </p>
         ) : null}
       </div>
     </Link>
@@ -47,7 +52,7 @@ function AdvertiseLink({ className }: { className?: string }) {
     <Link
       to={PATHS.advertise}
       className={cn(
-        'block bg-paper/90 px-2 py-1.5 text-center text-[10px] font-semibold text-ink hover:bg-accent',
+        'block border-t border-line/60 bg-paper/95 px-2 py-2 text-center text-[10px] font-semibold tracking-wide text-ink transition hover:bg-accent hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
         className,
       )}
     >
@@ -60,8 +65,8 @@ export function HeroAdRails() {
   return (
     <>
       {/* Left rail — flush to edge */}
-      <aside className="absolute inset-y-0 left-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-2 p-0 lg:flex">
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <aside className="absolute inset-y-0 left-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-1.5 p-0 lg:flex">
+        <div className="flex min-h-0 flex-1 flex-col gap-1.5">
           {LEFT_ADS.map((ad) => (
             <AdCard key={ad.id} ad={ad} tall className="min-h-0 flex-1 rounded-none aspect-auto" />
           ))}
@@ -70,8 +75,8 @@ export function HeroAdRails() {
       </aside>
 
       {/* Right rail — two tall ads only (Wix template) */}
-      <aside className="absolute inset-y-0 right-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-2 xl:flex">
-        <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <aside className="absolute inset-y-0 right-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-1.5 xl:flex">
+        <div className="flex min-h-0 flex-1 flex-col gap-1.5">
           {RIGHT_STACK_ADS.map((ad) => (
             <AdCard key={ad.id} ad={ad} tall className="min-h-0 flex-1 rounded-none aspect-auto" />
           ))}
@@ -85,10 +90,10 @@ export function HeroAdRails() {
           <Link
             key={ad.id}
             to={ad.href}
-            className="relative h-16 w-20 shrink-0 overflow-hidden border border-white/25"
+            className="relative h-16 w-20 shrink-0 overflow-hidden border border-white/20 transition hover:border-accent/50"
           >
             <img src={ad.image} alt={ad.title} className="h-full w-full object-cover" />
-            <span className="absolute inset-x-0 bottom-0 bg-ink/70 px-1 py-0.5 text-[9px] font-semibold text-paper">
+            <span className="absolute inset-x-0 bottom-0 bg-ink/75 px-1 py-0.5 text-[9px] font-semibold text-paper">
               {ad.title}
             </span>
           </Link>

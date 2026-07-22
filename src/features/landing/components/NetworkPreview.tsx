@@ -42,16 +42,15 @@ export function NetworkPreview() {
           </Link>
         }
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
         {ITEMS.map(({ icon: Icon, title, text }) => (
-          <article
-            key={title}
-            className="rounded-2xl border border-line bg-paper p-5 shadow-sm"
-          >
-            <div className="mb-3 inline-flex rounded-xl bg-brand-light p-2.5 text-brand">
+          <article key={title} className="group">
+            <div className="mb-3 inline-flex rounded-xl bg-brand-light p-2.5 text-brand transition duration-300 group-hover:bg-brand group-hover:text-white">
               <Icon className="h-5 w-5" />
             </div>
-            <h3 className="font-display text-lg font-bold text-ink">{title}</h3>
+            <h3 className="font-display text-lg font-semibold tracking-tight text-ink">
+              {title}
+            </h3>
             <p className="mt-2 text-sm leading-relaxed text-muted">{text}</p>
           </article>
         ))}

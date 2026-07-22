@@ -138,20 +138,22 @@ export function HeroFilterPanel({
   return (
     <div
       className={cn(
-        'flex max-h-[min(70vh,36rem)] w-full flex-col overflow-hidden rounded-2xl border border-white/20 bg-paper/95 shadow-soft backdrop-blur-md',
+        'animate-hero-panel-in flex max-h-[min(70vh,36rem)] w-full flex-col overflow-hidden rounded-2xl border border-white/25 bg-paper/95 shadow-[var(--shadow-panel)] backdrop-blur-xl',
         className,
       )}
     >
-      <div className="border-b border-line px-4 py-3">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-brand">
+      <div className="border-b border-line/80 bg-gradient-to-r from-brand-light/40 to-transparent px-4 py-3.5">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
           Find
         </p>
-        <h2 className="font-display text-lg font-bold text-ink">Filter providers</h2>
+        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+          Filter providers
+        </h2>
       </div>
 
-      <div className="flex-1 space-y-2.5 overflow-y-auto px-3 py-3">
+      <div className="landing-scroll-pane flex-1 space-y-3 overflow-y-auto px-3.5 py-3.5">
         {ROWS.map((row) => (
-          <div key={row.key} className="flex items-end gap-2">
+          <div key={row.key} className="flex items-end gap-2.5">
             <div className="min-w-0 flex-1">
               {row.type === 'input' ? (
                 <Input
@@ -160,7 +162,7 @@ export function HeroFilterPanel({
                   value={filters[row.key]}
                   onChange={(e) => onChange(row.key, e.target.value)}
                   placeholder="Enter ZIP code"
-                  className="h-10 rounded-lg text-sm"
+                  className="h-10 rounded-lg border-line/90 bg-white text-sm"
                 />
               ) : (
                 <Select
@@ -169,17 +171,17 @@ export function HeroFilterPanel({
                   placeholder={row.placeholder ?? 'Any'}
                   value={filters[row.key]}
                   onChange={(e) => onChange(row.key, e.target.value)}
-                  className="h-10 rounded-lg text-sm"
+                  className="h-10 rounded-lg border-line/90 bg-white text-sm"
                 />
               )}
             </div>
-            <label className="mb-1.5 flex max-w-[4.5rem] shrink-0 flex-col items-center gap-0.5 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-muted">
+            <label className="mb-1.5 flex min-h-10 max-w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-muted">
               {row.defaultLabel ?? 'Default'}
               <input
                 type="checkbox"
                 checked={Boolean(defaults[row.key])}
                 onChange={() => toggleDefault(row.key)}
-                className="h-3.5 w-3.5 accent-brand"
+                className="h-3.5 w-3.5 rounded border-line accent-brand"
                 aria-label={`Save ${row.label} as default`}
               />
             </label>
@@ -187,7 +189,7 @@ export function HeroFilterPanel({
         ))}
       </div>
 
-      <div className="border-t border-line p-3">
+      <div className="border-t border-line/80 bg-mist/40 p-3.5">
         <Link to={resultsHref} className="block">
           <Button className="w-full" size="lg" leftIcon={<Search className="h-4 w-4" />}>
             Search
