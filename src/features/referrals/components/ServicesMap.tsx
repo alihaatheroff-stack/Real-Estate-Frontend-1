@@ -1,0 +1,260 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import L from 'leaflet'
+import { Star, X } from 'lucide-react'
+import type { Service } from '@/entities/provider/types'
+import { getProviderForService } from '@/features/referrals/data/marketplace'
+import { createCircleMarkerIcon, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
+import { formatCurrency, formatRating } from '@/shared/lib/format'
+import { providerPath, servicePath } from '@/app/router/paths'
+
+type ServiceMarker = {
+  service: Service
+  position: [number, number]
+}
+
+type ServicesMapProps = {
+  services: Service[]
+  selectedId: string | null
+  hoveredId: string | null
+  onSelect: (id: string | null) => void
+  onHover: (id: string | null) => void
+}
+
+const DEFAULT_CENTER: [number, number] = [36.7378, -119.7871]
+const FALLBACK_IMAGE =
+  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80'
+
+function MapBounds({ markers }: { markers: ServiceMarker[] }) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (markers.length === 0) return
+    if (markers.length === 1) {
+      map.setView(markers[0].position, 11)
+      return
+    }
+    const bounds = L.latLngBounds(markers.map((m) => m.position))
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 12 })
+  }, [map, markers])
+
+  return null
+}
+
+function MapFlyTo({
+  position,
+  enabled,
+}: {
+  position: [number, number] | null
+  enabled: boolean
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!enabled || !position) return
+    map.flyTo(position, Math.max(map.getZoom(), 12), { duration: 0.45 })
+  }, [enabled, map, position])
+
+  return null
+}
+
+function markerStateFor(
+  serviceId: string,
+  selectedId: string | null,
+  hoveredId: string | null,
+): MarkerVisualState {
+  if (selectedId === serviceId) return 'selected'
+  if (hoveredId === serviceId) return 'hover'
+  return 'default'
+}
+
+function ServiceMarkerPin({
+  marker,
+  selectedId,
+  hoveredId,
+  onSelect,
+  onHover,
+}: {
+  marker: ServiceMarker
+  selectedId: string | null
+  hoveredId: string | null
+  onSelect: (id: string | null) => void
+  onHover: (id: string | null) => void
+}) {
+  const { service, position } = marker
+  const provider = getProviderForService(service)
+  const visualState = markerStateFor(service.id, selectedId, hoveredId)
+  const markerRef = useRef<L.Marker | null>(null)
+  const [imageSrc, setImageSrc] = useState(service.image)
+  const icon = useMemo(
+    () => createCircleMarkerIcon(service.image, visualState),
+    [service.image, visualState],
+  )
+
+  useEffect(() => {
+    const leafletMarker = markerRef.current
+    if (!leafletMarker) return
+    if (selectedId === service.id) {
+      leafletMarker.openPopup()
+    } else {
+      leafletMarker.closePopup()
+    }
+  }, [selectedId, service.id])
+
+  return (
+    <Marker
+      ref={markerRef}
+      position={position}
+      icon={icon}
+      zIndexOffset={visualState === 'selected' ? 1000 : visualState === 'hover' ? 500 : 0}
+      eventHandlers={{
+        click: (event) => {
+          L.DomEvent.stopPropagation(event.originalEvent)
+          onSelect(service.id)
+        },
+        mouseover: () => onHover(service.id),
+        mouseout: () => onHover(null),
+        popupclose: () => {
+          if (selectedId === service.id) onSelect(null)
+        },
+      }}
+    >
+      <Popup
+        className="service-map-card-popup"
+        closeButton={false}
+        offset={[0, -8]}
+        maxWidth={260}
+        minWidth={240}
+        autoPan
+        autoPanPadding={[24, 24]}
+      >
+        <div className="service-map-popup-card">
+          <div className="relative overflow-hidden rounded-t-xl">
+            <Link to={servicePath(service.id)} className="block">
+              <img
+                src={imageSrc}
+                alt={service.title}
+                className="aspect-[4/3] w-full object-cover"
+                onError={() => setImageSrc(FALLBACK_IMAGE)}
+              />
+            </Link>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onSelect(null)
+                markerRef.current?.closePopup()
+              }}
+              className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-ink shadow-sm transition hover:bg-white"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          <div className="space-y-2 p-3">
+            <Link
+              to={servicePath(service.id)}
+              className="line-clamp-2 text-sm font-bold leading-snug text-brand hover:underline"
+            >
+              {service.title}
+            </Link>
+
+            <div className="inline-flex items-center gap-1 text-xs text-ink">
+              <Star className="h-3.5 w-3.5 fill-accent text-accent" />
+              <span className="font-semibold">{formatRating(service.rating)}</span>
+              <span className="text-muted">({service.reviewCount} Reviews)</span>
+            </div>
+
+            <div className="flex items-center justify-between gap-2 border-t border-line/70 pt-2">
+              {provider ? (
+                <Link
+                  to={providerPath(provider.id)}
+                  className="flex min-w-0 items-center gap-2 hover:opacity-90"
+                >
+                  <img
+                    src={provider.image}
+                    alt={provider.name}
+                    className="h-7 w-7 shrink-0 rounded-full object-cover"
+                  />
+                  <span className="truncate text-xs font-medium text-ink">{provider.name}</span>
+                </Link>
+              ) : (
+                <span />
+              )}
+              <div className="shrink-0 text-right">
+                <p className="text-[10px] leading-none text-muted">Starting at:</p>
+                <p className="text-sm font-bold text-ink">
+                  {formatCurrency(service.startingPrice)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Popup>
+    </Marker>
+  )
+}
+
+export function ServicesMap({
+  services,
+  selectedId,
+  hoveredId,
+  onSelect,
+  onHover,
+}: ServicesMapProps) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const markers = useMemo(
+    () =>
+      services.flatMap((service) => {
+        const provider = getProviderForService(service)
+        if (!provider) return []
+        return [{ service, position: [provider.lat, provider.lng] as [number, number] }]
+      }),
+    [services],
+  )
+
+  const flyTarget = useMemo(() => {
+    const targetId = selectedId ?? hoveredId
+    if (!targetId) return null
+    const marker = markers.find((m) => m.service.id === targetId)
+    return marker?.position ?? null
+  }, [hoveredId, markers, selectedId])
+
+  if (!mounted) {
+    return <div className="h-full w-full animate-pulse bg-mist" aria-hidden />
+  }
+
+  return (
+    <MapContainer
+      center={DEFAULT_CENTER}
+      zoom={10}
+      className="services-map h-full w-full"
+      scrollWheelZoom
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapBounds markers={markers} />
+      <MapFlyTo position={flyTarget} enabled={Boolean(selectedId)} />
+      {markers.map((marker) => (
+        <ServiceMarkerPin
+          key={marker.service.id}
+          marker={marker}
+          selectedId={selectedId}
+          hoveredId={hoveredId}
+          onSelect={onSelect}
+          onHover={onHover}
+        />
+      ))}
+    </MapContainer>
+  )
+}
