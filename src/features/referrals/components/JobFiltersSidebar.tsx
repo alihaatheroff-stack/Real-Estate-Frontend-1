@@ -1,11 +1,15 @@
-import { useState, type ReactNode } from 'react'
-import { ChevronDown, Plus, Search } from 'lucide-react'
-import type { EmployerPosition } from '@/entities/employer/types'
+﻿import type { EmployerPosition } from '@/entities/employer/types'
+import {
+  FilterAside,
+  FilterCheckboxGroup,
+  FilterSearchButton,
+  FilterSection,
+  FilterSelectField,
+  toggleFilterValue,
+} from '@/features/referrals/components/filters/filterPrimitives'
+import { FREEIO_GREEN_HEX } from '@/shared/theme/freeio'
 import { cn } from '@/shared/lib/cn'
 
-const FREEIO_GREEN = '#5BBB7B'
-const FREEIO_GREEN_SOFT = '#E7F6ED'
-const VISIBLE = 4
 const PRICE_MAX = 600
 
 export type JobFiltersState = {
@@ -43,105 +47,6 @@ const SALARY_TYPE_OPTIONS: { label: string; value: EmployerPosition['salaryPerio
   { label: 'Yearly', value: 'year' },
 ]
 
-function toggleValue<T extends string>(list: T[], value: T) {
-  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
-}
-
-function FilterSection({
-  title,
-  children,
-  className,
-}: {
-  title: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <section className={cn('border-b border-[#eee] py-6', className)}>
-      <h3 className="mb-4 text-lg font-bold text-[#222]">{title}</h3>
-      {children}
-    </section>
-  )
-}
-
-function SelectField({
-  value,
-  placeholder,
-  options,
-  onChange,
-}: {
-  value: string
-  placeholder: string
-  options: string[]
-  onChange: (value: string) => void
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-14 w-full appearance-none rounded-xl border border-[#e5e7eb] bg-white px-4 pr-11 text-[15px] text-[#222] outline-none transition focus:border-[#5BBB7B]"
-      >
-        <option value="">{placeholder}</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9ca3af]" />
-    </div>
-  )
-}
-
-function CheckboxGroup({
-  options,
-  selected,
-  onToggle,
-}: {
-  options: string[]
-  selected: string[]
-  onToggle: (value: string) => void
-}) {
-  const [expanded, setExpanded] = useState(false)
-  const visible = expanded ? options : options.slice(0, VISIBLE)
-  const hiddenCount = Math.max(0, options.length - VISIBLE)
-
-  return (
-    <div>
-      <ul className="space-y-1">
-        {visible.map((option) => {
-          const checked = selected.includes(option)
-          return (
-            <li key={option}>
-              <label className="flex cursor-pointer items-center gap-3 py-2 text-[15px] text-[#222]">
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => onToggle(option)}
-                  className="h-5 w-5 shrink-0 rounded-[3px] border border-[#cfd4d9] accent-[#5BBB7B]"
-                />
-                <span className={cn(checked && 'font-medium')}>{option}</span>
-              </label>
-            </li>
-          )
-        })}
-      </ul>
-      {hiddenCount > 0 ? (
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          className="mt-2 inline-flex items-center gap-1.5 text-[15px] font-medium transition hover:opacity-80"
-          style={{ color: FREEIO_GREEN }}
-        >
-          <Plus className={cn('h-4 w-4 transition', expanded && 'rotate-45')} />
-          {expanded ? 'Show less' : 'Show More'}
-        </button>
-      ) : null}
-    </div>
-  )
-}
-
 export function JobFiltersSidebar({
   filters,
   onChange,
@@ -156,16 +61,9 @@ export function JobFiltersSidebar({
   embedded = false,
 }: JobFiltersSidebarProps) {
   return (
-    <aside
-      className={cn(
-        embedded
-          ? 'bg-white'
-          : 'rounded-2xl border border-[#eee] bg-white p-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)]',
-        className,
-      )}
-    >
+    <FilterAside embedded={embedded} className={className}>
       <FilterSection title="Categories" className={embedded ? 'pt-0' : undefined}>
-        <SelectField
+        <FilterSelectField
           value={filters.categories[0] ?? ''}
           placeholder="Categories"
           options={categoryOptions}
@@ -179,7 +77,7 @@ export function JobFiltersSidebar({
       </FilterSection>
 
       <FilterSection title="Salary Type">
-        <CheckboxGroup
+        <FilterCheckboxGroup
           options={SALARY_TYPE_OPTIONS.map((item) => item.label)}
           selected={filters.salaryPeriods.map(
             (period) =>
@@ -190,7 +88,7 @@ export function JobFiltersSidebar({
             if (!value) return
             onChange({
               ...filters,
-              salaryPeriods: toggleValue(filters.salaryPeriods, value),
+              salaryPeriods: toggleFilterValue(filters.salaryPeriods, value),
             })
           }}
         />
@@ -198,16 +96,10 @@ export function JobFiltersSidebar({
 
       <FilterSection title="Price">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span
-            className="inline-flex min-w-[3.5rem] items-center justify-center rounded-md px-3 py-1.5 text-sm font-semibold"
-            style={{ backgroundColor: FREEIO_GREEN_SOFT, color: FREEIO_GREEN }}
-          >
+          <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-md bg-freeio-soft px-3 py-1.5 text-sm font-semibold text-freeio">
             ${filters.priceMin}
           </span>
-          <span
-            className="inline-flex min-w-[3.5rem] items-center justify-center rounded-md px-3 py-1.5 text-sm font-semibold"
-            style={{ backgroundColor: FREEIO_GREEN_SOFT, color: FREEIO_GREEN }}
-          >
+          <span className="inline-flex min-w-[3.5rem] items-center justify-center rounded-md bg-freeio-soft px-3 py-1.5 text-sm font-semibold text-freeio">
             ${filters.priceMax}
           </span>
         </div>
@@ -225,9 +117,9 @@ export function JobFiltersSidebar({
                 priceMin: Math.min(filters.priceMin, nextMax),
               })
             }}
-            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-[#e8ecef] accent-[#5BBB7B]"
+            className="h-2 w-full cursor-pointer appearance-none rounded-full bg-freeio-track accent-freeio"
             style={{
-              background: `linear-gradient(to right, ${FREEIO_GREEN} 0%, ${FREEIO_GREEN} ${(filters.priceMax / PRICE_MAX) * 100}%, #e8ecef ${(filters.priceMax / PRICE_MAX) * 100}%, #e8ecef 100%)`,
+              background: `linear-gradient(to right, ${FREEIO_GREEN_HEX} 0%, ${FREEIO_GREEN_HEX} ${(filters.priceMax / PRICE_MAX) * 100}%, var(--color-freeio-track) ${(filters.priceMax / PRICE_MAX) * 100}%, var(--color-freeio-track) 100%)`,
             }}
           />
           <input
@@ -243,13 +135,13 @@ export function JobFiltersSidebar({
                 priceMax: Math.max(filters.priceMax, nextMin),
               })
             }}
-            className="absolute left-0 top-1 h-2 w-full cursor-pointer appearance-none rounded-full bg-transparent accent-[#5BBB7B] opacity-0"
+            className="absolute left-0 top-1 h-2 w-full cursor-pointer appearance-none rounded-full bg-transparent accent-freeio opacity-0"
           />
         </div>
       </FilterSection>
 
       <FilterSection title="Type">
-        <SelectField
+        <FilterSelectField
           value={filters.employmentTypes[0] ?? ''}
           placeholder="Type"
           options={employmentTypeOptions}
@@ -263,7 +155,7 @@ export function JobFiltersSidebar({
       </FilterSection>
 
       <FilterSection title="Location">
-        <SelectField
+        <FilterSelectField
           value={filters.locations[0] ?? ''}
           placeholder="Location"
           options={locationOptions}
@@ -277,7 +169,7 @@ export function JobFiltersSidebar({
       </FilterSection>
 
       <FilterSection title="Experience">
-        <SelectField
+        <FilterSelectField
           value={filters.experiences[0] ?? ''}
           placeholder="Experience"
           options={experienceOptions}
@@ -291,7 +183,7 @@ export function JobFiltersSidebar({
       </FilterSection>
 
       <FilterSection title="Industry">
-        <SelectField
+        <FilterSelectField
           value={filters.industries[0] ?? ''}
           placeholder="Industry"
           options={industryOptions}
@@ -304,8 +196,8 @@ export function JobFiltersSidebar({
         />
       </FilterSection>
 
-      <FilterSection title="Qualification" className="border-b-0 pb-2">
-        <SelectField
+      <FilterSection title="Qualification" className={cn('border-b-0 pb-2')}>
+        <FilterSelectField
           value={filters.qualifications[0] ?? ''}
           placeholder="Qualification"
           options={qualificationOptions}
@@ -318,15 +210,7 @@ export function JobFiltersSidebar({
         />
       </FilterSection>
 
-      <button
-        type="button"
-        onClick={onSearch}
-        className="mt-4 inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl text-[15px] font-semibold text-white transition hover:brightness-95"
-        style={{ backgroundColor: FREEIO_GREEN }}
-      >
-        <Search className="h-5 w-5" />
-        Search
-      </button>
-    </aside>
+      <FilterSearchButton onClick={onSearch} />
+    </FilterAside>
   )
 }

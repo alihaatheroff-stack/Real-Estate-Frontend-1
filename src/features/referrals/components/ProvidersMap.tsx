@@ -1,20 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { MapPin, Star, X } from 'lucide-react'
+import { MapPin, Star, Volume2, X } from 'lucide-react'
 import type { Provider } from '@/entities/provider/types'
-import { createCircleMarkerIcon, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
+import type { ProfileResultAd } from '@/features/referrals/data/profileResultAds'
+import { createCircleMarkerIcon, PINNED_MARKER_OPTIONS, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
+import { MapMeasureTools } from '@/features/referrals/components/MapMeasureTools'
+import { MapBasemapLayer } from '@/features/referrals/components/MapBasemapLayer'
+import {
+  LOCATION_ZOOM,
+  MapFlyTo,
+  MapInvalidateSize,
+} from '@/features/referrals/lib/mapCamera'
 import { formatRating } from '@/shared/lib/format'
 import { providerPath } from '@/app/router/paths'
 
 type ProviderMarker = {
   provider: Provider
   position: [number, number]
+  ad?: ProfileResultAd
 }
 
 type ProvidersMapProps = {
   providers: Provider[]
+  /** Sponsored ads keyed by provider id — pins + popup banners. */
+  adsByProviderId?: Record<string, ProfileResultAd>
   selectedId: string | null
   hoveredId: string | null
   onSelect: (id: string | null) => void
@@ -29,29 +40,12 @@ function MapBounds({ markers }: { markers: ProviderMarker[] }) {
   useEffect(() => {
     if (markers.length === 0) return
     if (markers.length === 1) {
-      map.setView(markers[0].position, 11)
+      map.setView(markers[0].position, LOCATION_ZOOM)
       return
     }
     const bounds = L.latLngBounds(markers.map((m) => m.position))
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 12 })
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: LOCATION_ZOOM })
   }, [map, markers])
-
-  return null
-}
-
-function MapFlyTo({
-  position,
-  enabled,
-}: {
-  position: [number, number] | null
-  enabled: boolean
-}) {
-  const map = useMap()
-
-  useEffect(() => {
-    if (!enabled || !position) return
-    map.flyTo(position, Math.max(map.getZoom(), 12), { duration: 0.45 })
-  }, [enabled, map, position])
 
   return null
 }
@@ -73,6 +67,18 @@ function rateLabel(provider: Provider) {
   return 'Rate on request'
 }
 
+function AdTopBanner() {
+  return (
+    <div
+      className="flex items-center justify-center gap-1.5 bg-[#16a34a] px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-white"
+      aria-hidden
+    >
+      <Volume2 className="h-3 w-3 shrink-0 fill-white" strokeWidth={2.25} />
+      Advertisement
+    </div>
+  )
+}
+
 function ProviderMarkerPin({
   marker,
   selectedId,
@@ -86,13 +92,14 @@ function ProviderMarkerPin({
   onSelect: (id: string | null) => void
   onHover: (id: string | null) => void
 }) {
-  const { provider, position } = marker
+  const { provider, position, ad } = marker
   const visualState = markerStateFor(provider.id, selectedId, hoveredId)
   const markerRef = useRef<L.Marker | null>(null)
   const icon = useMemo(
-    () => createCircleMarkerIcon(provider.image, visualState),
+    () => createCircleMarkerIcon(provider.image, visualState, PINNED_MARKER_OPTIONS),
     [provider.image, visualState],
   )
+  const isAd = Boolean(ad)
 
   useEffect(() => {
     const leafletMarker = markerRef.current
@@ -123,15 +130,22 @@ function ProviderMarkerPin({
       }}
     >
       <Popup
-        className="service-map-card-popup"
+        className={isAd ? 'service-map-card-popup service-map-card-popup--ad' : 'service-map-card-popup'}
         closeButton={false}
         offset={[0, -8]}
         maxWidth={260}
         minWidth={240}
-        autoPan
-        autoPanPadding={[24, 24]}
+        autoPan={false}
       >
-        <div className="service-map-popup-card">
+        <div
+          className={
+            isAd
+              ? 'service-map-popup-card overflow-hidden bg-[#eef7fd]'
+              : 'service-map-popup-card'
+          }
+        >
+          {isAd ? <AdTopBanner /> : null}
+
           <div className="relative flex items-center gap-3 border-b border-line/70 p-3">
             <Link to={providerPath(provider.id)} className="shrink-0">
               <img
@@ -141,6 +155,11 @@ function ProviderMarkerPin({
               />
             </Link>
             <div className="min-w-0 flex-1">
+              {ad ? (
+                <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-[#2563eb]">
+                  Sponsored · {ad.label}
+                </p>
+              ) : null}
               <Link
                 to={providerPath(provider.id)}
                 className="block truncate text-sm font-bold text-brand hover:underline"
@@ -196,6 +215,7 @@ function ProviderMarkerPin({
 
 export function ProvidersMap({
   providers,
+  adsByProviderId,
   selectedId,
   hoveredId,
   onSelect,
@@ -209,11 +229,15 @@ export function ProvidersMap({
 
   const markers = useMemo(
     () =>
-      providers.map((provider) => ({
-        provider,
-        position: [provider.lat, provider.lng] as [number, number],
-      })),
-    [providers],
+      providers.map((provider) => {
+        const ad = adsByProviderId?.[provider.id]
+        return {
+          provider,
+          position: [provider.lat, provider.lng] as [number, number],
+          ad,
+        }
+      }),
+    [adsByProviderId, providers],
   )
 
   const flyTarget = useMemo(() => {
@@ -234,12 +258,15 @@ export function ProvidersMap({
       className="services-map h-full w-full"
       scrollWheelZoom
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <MapBasemapLayer />
+      <MapMeasureTools />
+      <MapInvalidateSize />
       <MapBounds markers={markers} />
-      <MapFlyTo position={flyTarget} enabled={Boolean(selectedId)} />
+      <MapFlyTo
+        position={flyTarget}
+        enabled={Boolean(selectedId || hoveredId)}
+        focusKey={selectedId ?? hoveredId}
+      />
       {markers.map((marker) => (
         <ProviderMarkerPin
           key={marker.provider.id}

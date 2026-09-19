@@ -1,14 +1,20 @@
-import { forwardRef, useState, type KeyboardEvent } from 'react'
+import { forwardRef, useMemo, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { Heart, Star } from 'lucide-react'
 import { formatCurrency, formatRating } from '@/shared/lib/format'
 import { cn } from '@/shared/lib/cn'
 import type { Service } from '@/entities/provider/types'
-import { getProviderForService } from '@/features/referrals/data/marketplace'
+import { AuthRequiredDialog } from '@/features/auth'
+import { SaveToFolderDialog } from '@/features/favorites/SaveToFolderDialog'
+import {
+  referralServiceFavoriteDraft,
+  useFavoriteToggle,
+} from '@/features/favorites/useFavoriteToggle'
+import { getProviderForService } from '@/features/referrals/api/repository'
 import { providerPath } from '@/app/router/paths'
 
 const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1000&q=80'
+  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
 
 type ServiceMapCardProps = {
   service: Service
@@ -23,11 +29,15 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
   ref,
 ) {
   const provider = getProviderForService(service)
-  const [saved, setSaved] = useState(false)
   const [imageSrc, setImageSrc] = useState(service.image)
   const featured = service.featured ?? false
+  const draft = useMemo(
+    () => referralServiceFavoriteDraft(service, provider),
+    [provider, service],
+  )
+  const favorite = useFavoriteToggle(draft)
 
-  function openService(event?: { stopPropagation?: () => void }) {
+  function selectOnMap(event?: { stopPropagation?: () => void }) {
     event?.stopPropagation?.()
     onSelect(service.id)
   }
@@ -35,16 +45,18 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
   function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      openService()
+      selectOnMap()
     }
   }
 
   return (
     <article
       ref={ref}
-      role="link"
+      role="button"
       tabIndex={0}
-      onClick={() => openService()}
+      aria-pressed={selected}
+      aria-label={`Show ${service.title} on the map`}
+      onClick={() => selectOnMap()}
       onKeyDown={handleKeyDown}
       onMouseEnter={() => onHover(service.id)}
       onMouseLeave={() => onHover(null)}
@@ -77,19 +89,23 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
           tabIndex={0}
           onClick={(event) => {
             event.stopPropagation()
-            setSaved((value) => !value)
+            favorite.toggleSave()
           }}
           onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault()
               event.stopPropagation()
-              setSaved((value) => !value)
+              favorite.toggleSave()
             }
           }}
-          className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-muted shadow-sm transition hover:text-brand"
-          aria-label={saved ? 'Remove from saved' : 'Save service'}
+          className="absolute right-2 top-2 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+          aria-label={favorite.saved ? 'Remove from saved' : 'Save service'}
+          aria-pressed={favorite.saved}
         >
-          <Heart className={cn('h-4 w-4', saved && 'fill-brand text-brand')} />
+          <Heart
+            className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
+            strokeWidth={2.2}
+          />
         </span>
       </div>
 
@@ -132,6 +148,16 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
           </div>
         </div>
       </div>
+      <SaveToFolderDialog
+        open={favorite.saveOpen}
+        draft={favorite.draft}
+        onClose={favorite.closeSave}
+      />
+      <AuthRequiredDialog
+        open={favorite.authOpen}
+        onClose={favorite.closeAuth}
+        action="save favorites"
+      />
     </article>
   )
 })

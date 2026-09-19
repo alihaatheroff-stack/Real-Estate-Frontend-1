@@ -1,5 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react'
-import { ArrowUpRight, Plus, X } from 'lucide-react'
+﻿import { useEffect } from 'react'
+import { ArrowLeftToLine, ArrowUpRight } from 'lucide-react'
 import { Select } from '@/components/ui/Select'
 import {
   ENGLISH_LEVEL_OPTIONS,
@@ -8,11 +8,12 @@ import {
   FREELANCER_TYPE_OPTIONS,
   GENDER_OPTIONS,
   type HeroFiltersState,
-} from '@/features/search/data/categories'
-import { cn } from '@/shared/lib/cn'
-
-const FREEIO_GREEN = '#5BBB7B'
-const FREEIO_GREEN_SOFT = '#E7F6ED'
+} from '@/features/search'
+import {
+  FilterCheckboxGroup,
+  FilterSection,
+  toggleFilterValue,
+} from '@/features/referrals/components/filters/filterPrimitives'
 
 type ProviderFiltersDrawerProps = {
   open: boolean
@@ -26,20 +27,6 @@ type ProviderFiltersDrawerProps = {
   onApply: () => void
 }
 
-type FilterSectionProps = {
-  title: string
-  children: ReactNode
-}
-
-function FilterSection({ title, children }: FilterSectionProps) {
-  return (
-    <section className="border-b border-[#eee] px-6 py-5">
-      <h3 className="mb-4 text-lg font-bold text-[#222]">{title}</h3>
-      {children}
-    </section>
-  )
-}
-
 function parseMulti(value: string) {
   return value
     .split(',')
@@ -49,78 +36,6 @@ function parseMulti(value: string) {
 
 function serializeMulti(values: string[]) {
   return values.join(',')
-}
-
-function CheckboxRow({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string
-  checked: boolean
-  onChange: () => void
-}) {
-  return (
-    <label className="flex cursor-pointer items-center gap-3 py-2 text-[15px] text-[#222]">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={onChange}
-        className="h-[18px] w-[18px] shrink-0 rounded-[3px] border border-[#cfd4d9] accent-[#5BBB7B]"
-      />
-      <span>{label}</span>
-    </label>
-  )
-}
-
-function ExpandableCheckboxList({
-  options,
-  selected,
-  onChange,
-  initialVisible = 5,
-}: {
-  options: { label: string; value: string }[]
-  selected: string[]
-  onChange: (next: string[]) => void
-  initialVisible?: number
-}) {
-  const [expanded, setExpanded] = useState(false)
-  const visible = expanded ? options : options.slice(0, initialVisible)
-  const hiddenCount = Math.max(0, options.length - initialVisible)
-
-  function toggle(value: string) {
-    if (selected.includes(value)) {
-      onChange(selected.filter((item) => item !== value))
-      return
-    }
-    onChange([...selected, value])
-  }
-
-  return (
-    <div>
-      <div>
-        {visible.map((option) => (
-          <CheckboxRow
-            key={option.value}
-            label={option.label}
-            checked={selected.includes(option.value)}
-            onChange={() => toggle(option.value)}
-          />
-        ))}
-      </div>
-      {hiddenCount > 0 ? (
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          className="mt-2 inline-flex items-center gap-1.5 text-[15px] font-medium transition hover:opacity-80"
-          style={{ color: FREEIO_GREEN }}
-        >
-          <Plus className={cn('h-4 w-4 transition', expanded && 'rotate-45')} />
-          {expanded ? 'Show less' : 'Show More'}
-        </button>
-      ) : null}
-    </div>
-  )
 }
 
 function FilterSelect({
@@ -141,11 +56,11 @@ function FilterSelect({
         placeholder={placeholder}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="rounded-lg border-[#dfe3e8] bg-white pr-10 text-[15px] text-[#6b7280]"
+        className="rounded-lg border-freeio-border bg-white pr-10 text-[15px] text-freeio-muted"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#222]"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-freeio-ink"
       >
         ▼
       </span>
@@ -185,48 +100,57 @@ export function ProviderFiltersDrawer({
         className="relative flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl animate-drawer-in"
         aria-label="All filters"
       >
-        <div className="flex items-center justify-between border-b border-[#eee] px-6 py-5">
-          <h2 className="text-xl font-bold text-[#222]">All Filters</h2>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-freeio-border-soft px-6 py-5">
+          <div>
+            <h2 className="text-lg font-bold text-freeio-ink">All Filters</h2>
             <button
               type="button"
               onClick={onReset}
-              className="text-sm font-medium text-[#6b7280] hover:underline"
+              className="mt-1 text-[13px] font-medium text-freeio-muted hover:text-freeio hover:underline"
             >
-              Reset
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl transition"
-              style={{ backgroundColor: FREEIO_GREEN_SOFT, color: '#6b7280' }}
-              aria-label="Close filters"
-            >
-              <X className="h-5 w-5" />
+              Reset all
             </button>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-freeio-soft text-freeio-muted transition"
+            aria-label="Close filters"
+          >
+            <ArrowLeftToLine className="h-5 w-5" />
+          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <FilterSection title="Categories">
-            <ExpandableCheckboxList
+          <FilterSection title="Categories" variant="drawer">
+            <FilterCheckboxGroup
               options={FREELANCER_CATEGORY_OPTIONS}
               selected={selectedCategories}
-              onChange={(next) => onChange('pspCategory', serializeMulti(next))}
+              onToggle={(value) =>
+                onChange(
+                  'pspCategory',
+                  serializeMulti(toggleFilterValue(selectedCategories, value)),
+                )
+              }
               initialVisible={5}
             />
           </FilterSection>
 
-          <FilterSection title="Regions">
-            <ExpandableCheckboxList
+          <FilterSection title="Regions" variant="drawer">
+            <FilterCheckboxGroup
               options={FREELANCER_REGION_OPTIONS}
               selected={selectedRegions}
-              onChange={(next) => onChange('region', serializeMulti(next))}
+              onToggle={(value) =>
+                onChange(
+                  'region',
+                  serializeMulti(toggleFilterValue(selectedRegions, value)),
+                )
+              }
               initialVisible={5}
             />
           </FilterSection>
 
-          <FilterSection title="Types">
+          <FilterSection title="Types" variant="drawer">
             <FilterSelect
               placeholder="Types"
               options={FREELANCER_TYPE_OPTIONS}
@@ -235,7 +159,7 @@ export function ProviderFiltersDrawer({
             />
           </FilterSection>
 
-          <FilterSection title="Gender">
+          <FilterSection title="Gender" variant="drawer">
             <FilterSelect
               placeholder="Gender"
               options={GENDER_OPTIONS}
@@ -244,7 +168,7 @@ export function ProviderFiltersDrawer({
             />
           </FilterSection>
 
-          <FilterSection title="English Level">
+          <FilterSection title="English Level" variant="drawer">
             <FilterSelect
               placeholder="English Level"
               options={ENGLISH_LEVEL_OPTIONS}
@@ -260,8 +184,7 @@ export function ProviderFiltersDrawer({
                 onApply()
                 onClose()
               }}
-              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white transition hover:brightness-95"
-              style={{ backgroundColor: FREEIO_GREEN }}
+              className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-freeio text-base font-semibold text-white transition hover:brightness-95"
             >
               Find Listing
               <ArrowUpRight className="h-4 w-4" />

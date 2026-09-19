@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/Badge'
 import { formatCurrency, formatRating } from '@/shared/lib/format'
 import { cn } from '@/shared/lib/cn'
 import type { Service } from '@/entities/provider/types'
-import { getProviderForService } from '@/features/referrals/data/marketplace'
+import { getProviderForService } from '@/features/referrals/api/repository'
 
 type ServiceListItemProps = {
   service: Service

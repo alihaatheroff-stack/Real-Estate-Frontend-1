@@ -39,7 +39,7 @@ export function PostOfferPage() {
         </label>
         <div className="flex flex-wrap gap-2 pt-2">
           <Button type="submit">Submit offer</Button>
-          <Link to={PATHS.referrals}>
+          <Link to={PATHS.home}>
             <Button type="button" variant="outline">
               Cancel
             </Button>

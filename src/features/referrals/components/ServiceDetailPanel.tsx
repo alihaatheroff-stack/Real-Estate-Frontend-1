@@ -6,8 +6,8 @@ import { ReviewsList } from '@/features/referrals/components/ReviewsList'
 import {
   getProviderForService,
   getServiceById,
-  REVIEWS,
-} from '@/features/referrals/data/marketplace'
+  listReviews,
+} from '@/features/referrals/api/repository'
 import { formatRating } from '@/shared/lib/format'
 import { providerPath } from '@/app/router/paths'
 
@@ -115,7 +115,7 @@ export function ServiceDetailPanel({ serviceId, onBack }: ServiceDetailPanelProp
         <div>
           <h3 className="mb-3 font-display text-base font-bold text-ink">Reviews</h3>
           <ReviewsList
-            reviews={REVIEWS}
+            reviews={listReviews()}
             averageRating={service.rating}
             reviewCount={service.reviewCount}
           />

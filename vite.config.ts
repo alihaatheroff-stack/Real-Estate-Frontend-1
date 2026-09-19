@@ -10,4 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    // Keep pdf.js out of the dep optimizer so its worker stays compatible.
+    exclude: ['pdfjs-dist'],
+  },
+  worker: {
+    format: 'es',
+  },
 })

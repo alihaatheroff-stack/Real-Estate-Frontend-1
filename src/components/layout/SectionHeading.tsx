@@ -10,6 +10,8 @@ type SectionHeadingProps = {
   action?: ReactNode
   className?: string
   align?: 'left' | 'center'
+  /** `subsection` reads as a nested part under a parent section. */
+  size?: 'section' | 'subsection'
 }
 
 export function SectionHeading({
@@ -21,34 +23,59 @@ export function SectionHeading({
   action,
   className,
   align = 'left',
+  size = 'section',
 }: SectionHeadingProps) {
+  const isSubsection = size === 'subsection'
+
   return (
     <div
       className={cn(
-        'mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        'flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between',
+        isSubsection ? 'mb-6 gap-2' : 'mb-10',
         align === 'center' && 'items-center text-center sm:flex-col sm:items-center',
         className,
       )}
     >
-      <div className={cn('max-w-2xl space-y-2', align === 'center' && 'mx-auto')}>
+      <div className={cn('max-w-2xl space-y-2', isSubsection && 'space-y-1', align === 'center' && 'mx-auto')}>
         {eyebrow ? (
           <p
             className={cn(
-              'text-xs font-semibold uppercase tracking-[0.18em] text-brand',
+              'font-semibold uppercase text-brand',
+              isSubsection ? 'text-[0.65rem] tracking-[0.16em]' : 'text-xs tracking-[0.18em]',
               eyebrowClassName,
             )}
           >
             {eyebrow}
           </p>
         ) : null}
-        <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          {title}
-        </h2>
+        {isSubsection ? (
+          <h3 className="font-display text-lg font-semibold tracking-tight text-ink sm:text-xl">
+            {title}
+          </h3>
+        ) : (
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            {title}
+          </h2>
+        )}
         {subtitle ? (
-          <p className="text-lg font-medium leading-snug text-ink/80 sm:text-xl">{subtitle}</p>
+          <p
+            className={cn(
+              'leading-snug text-muted',
+              isSubsection ? 'text-sm sm:text-base' : 'text-base sm:text-lg',
+            )}
+          >
+            {subtitle}
+          </p>
         ) : null}
         {description ? (
-          <p className="text-base leading-relaxed text-muted sm:text-lg">{description}</p>
+          <p
+            className={cn(
+              'leading-relaxed text-muted',
+              isSubsection ? 'text-sm' : 'text-sm sm:text-base',
+            )}
+          >
+            {description}
+          </p>
         ) : null}
       </div>
       {action}

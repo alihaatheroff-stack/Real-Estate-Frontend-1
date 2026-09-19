@@ -10,7 +10,7 @@ import {
   Shield,
 } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
-import { REFERRAL_CATEGORIES } from '@/features/referrals/data/marketplace'
+import { listReferralCategories } from '@/features/referrals/api/repository'
 
 const ICONS = {
   agent: Building2,
@@ -26,7 +26,7 @@ const ICONS = {
 export function CategoryGrid() {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-      {REFERRAL_CATEGORIES.map((category) => {
+      {listReferralCategories().map((category) => {
         const Icon = ICONS[category.id as keyof typeof ICONS] ?? Building2
         return (
           <Link

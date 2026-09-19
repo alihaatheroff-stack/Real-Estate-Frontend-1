@@ -1,4 +1,5 @@
 import type { SelectHTMLAttributes } from 'react'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { cn } from '@/shared/lib/cn'
 
 type Option = { label: string; value: string }
@@ -8,6 +9,8 @@ type SelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   options: Option[]
   placeholder?: string
   labelClassName?: string
+  /** Show trailing info icon for QA / why-this-question help. */
+  showQaMark?: boolean
 }
 
 export function Select({
@@ -17,13 +20,19 @@ export function Select({
   options,
   placeholder,
   id,
+  showQaMark = false,
   ...props
 }: SelectProps) {
   const selectId = id ?? props.name
 
   return (
     <label className={cn('flex w-full flex-col gap-1.5 text-sm', labelClassName)}>
-      {label ? <span className="font-medium text-ink-soft">{label}</span> : null}
+      {label ? (
+        <span className="inline-flex items-center gap-1 font-bold text-ink">
+          {label}
+          {showQaMark ? <FieldQaMark field={label} /> : null}
+        </span>
+      ) : null}
       <select
         id={selectId}
         className={cn(

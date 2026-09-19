@@ -12,11 +12,37 @@ export type HeroFiltersState = {
   condition: string
   priceBand: string
   subField: string
+  percentageShare: string
+  willingToTrain: string
   motive: string
   language: string
   referral: string
   zip: string
   radius: string
+  clientExperience: string
+  vacancy: string
+  propertyTitle: string
+  saleType: string
+  govAgencies: string
+  yourExperience: string
+  formOfPayment: string
+  educationArchive: string
+  arMeasurementTools: string
+  paymentPacket: string
+  tierSelection: string
+  paymentMethods: string
+  paymentTerms: string
+  cardNumber: string
+  expirationDate: string
+  securityCode: string
+  stripeLink: string
+  paypalLink: string
+  squareLink: string
+  venmoLink: string
+  zelleEmail: string
+  zellePhone: string
+  cashAppLink: string
+  chequeSameAsBusiness: string
   datePosted: string
   responseTime: string
   deliveryTime: string
@@ -36,7 +62,7 @@ export const SERVICE_DISTANCE_MAX = 100
 export const SERVICE_DISTANCE_DEFAULT = 50
 
 export const DEFAULT_FILTERS: HeroFiltersState = {
-  find: 'service',
+  find: '',
   pspCategory: '',
   representation: '',
   financing: '',
@@ -44,12 +70,38 @@ export const DEFAULT_FILTERS: HeroFiltersState = {
   condition: '',
   priceBand: '',
   subField: '',
+  percentageShare: '',
+  willingToTrain: '',
   motive: '',
   language: '',
   referral: '',
   zip: '',
   radius: '',
-  datePosted: 'all',
+  clientExperience: '',
+  vacancy: '',
+  propertyTitle: '',
+  saleType: '',
+  govAgencies: '',
+  yourExperience: '',
+  formOfPayment: '',
+  educationArchive: '',
+  arMeasurementTools: '',
+  paymentPacket: '',
+  tierSelection: '',
+  paymentMethods: '',
+  paymentTerms: '',
+  cardNumber: '',
+  expirationDate: '',
+  securityCode: '',
+  stripeLink: '',
+  paypalLink: '',
+  squareLink: '',
+  venmoLink: '',
+  zelleEmail: '',
+  zellePhone: '',
+  cashAppLink: '',
+  chequeSameAsBusiness: '',
+  datePosted: '',
   responseTime: '',
   deliveryTime: '',
   priceFrom: String(SERVICE_BUDGET_MIN),
@@ -63,17 +115,18 @@ export const DEFAULT_FILTERS: HeroFiltersState = {
 export const FIND_OPTIONS: FilterOption[] = [
   { label: 'Service', value: 'service' },
   { label: 'Profile', value: 'profile' },
-  { label: 'Agency', value: 'agency' },
+  { label: 'Office', value: 'agency' },
 ]
 
 export const PSP_CATEGORIES: FilterOption[] = [
-  { label: 'Real Estate Agent', value: 'agent' },
+  { label: 'Architect', value: 'architect' },
+  { label: 'Agent', value: 'agent' },
+  { label: 'Builder', value: 'builder' },
   { label: 'Broker', value: 'broker' },
   { label: 'Transaction Coordinator', value: 'coordinator' },
   { label: 'Appraiser', value: 'appraiser' },
   { label: 'Attorney', value: 'attorney' },
   { label: 'Mortgage Consultant', value: 'mortgage' },
-  { label: 'Architect', value: 'architect' },
   { label: 'Insurance', value: 'insurance' },
   { label: 'Flooring (Trade)', value: 'flooring' },
   { label: 'Locksmith (Trade)', value: 'locksmith' },
@@ -110,12 +163,36 @@ export const CONDITION_OPTIONS: FilterOption[] = [
 ]
 
 export const PRICE_OPTIONS: FilterOption[] = [
-  { label: 'High Luxury', value: 'luxury' },
+  { label: 'Luxury', value: 'luxury' },
   { label: 'Mid', value: 'mid' },
   { label: 'Economic', value: 'economic' },
 ]
 
+export const PERCENTAGE_SHARE_OPTIONS: FilterOption[] = [
+  { label: '10%', value: '10' },
+  { label: '20%', value: '20' },
+  { label: '30%', value: '30' },
+  { label: '40%', value: '40' },
+  { label: '50%', value: '50' },
+  { label: 'Negotiable', value: 'negotiable' },
+]
+
+export const WILLING_TO_TRAIN_OPTIONS: FilterOption[] = [
+  { label: 'Yes', value: 'yes' },
+  { label: 'No', value: 'no' },
+  { label: 'Maybe', value: 'maybe' },
+]
+
+/** Drawer/register order (Yes → Maybe → no). Differs from WILLING_TO_TRAIN_OPTIONS. */
+export const WILLING_TO_TRAIN_FILTER_OPTIONS: FilterOption[] = [
+  { label: 'Yes', value: 'yes' },
+  { label: 'Maybe', value: 'maybe' },
+  { label: 'no', value: 'no' },
+]
+
 export const MOTIVE_OPTIONS: FilterOption[] = [
+  { label: 'Serious', value: 'serious' },
+  { label: 'Wasting time', value: 'wasting-time' },
   { label: 'Has to right now', value: 'urgent' },
   { label: '3–6 months', value: 'planned' },
   { label: 'Maybe if convinced', value: 'maybe' },
@@ -167,11 +244,10 @@ export const DELIVERY_TIME_OPTIONS: FilterOption[] = [
 ]
 
 export const ENGLISH_LEVEL_OPTIONS: FilterOption[] = [
-  { label: 'Basic', value: 'basic' },
-  { label: 'Conversational', value: 'conversational' },
-  { label: 'Fluent', value: 'fluent' },
-  { label: 'Native Or Bilingual', value: 'native' },
-  { label: 'Professional', value: 'professional' },
+  { label: 'Low', value: 'Low' },
+  { label: 'Middle', value: 'Middle' },
+  { label: 'High', value: 'High' },
+
 ]
 
 export const REGIONS_OPTIONS: FilterOption[] = [
@@ -237,47 +313,41 @@ export const SUB_FIELD_OPTIONS: FilterOption[] = [
 
 export const LANGUAGE_OPTIONS: FilterOption[] = [
   { label: 'English', value: 'en' },
-  { label: 'Spanish', value: 'es' },
-  { label: 'Mandarin', value: 'zh' },
-  { label: 'Urdu', value: 'ur' },
   { label: 'Hindi', value: 'hi' },
+  { label: 'Mandarin', value: 'zh' },
+  { label: 'Spanish', value: 'es' },
+  { label: 'Urdu', value: 'ur' },
 ]
 
 export const PROPERTY_FIELDS = [
   {
     id: 'commercial',
     title: 'Commercial',
-    image:
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/commercial.png',
   },
   {
     id: 'industrial',
     title: 'Industrial',
-    image:
-      'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/industrial.png',
   },
   {
     id: 'multi-unit',
     title: 'Multi-Unit',
-    image:
-      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/multi-unit.png',
   },
   {
     id: 'agricultural',
     title: 'Agricultural',
-    image:
-      'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/agricultural.png',
   },
   {
     id: 'residential',
     title: 'Residential',
-    image:
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/residential.png',
   },
   {
     id: 'mixed-use',
     title: 'Mixed-Use',
-    image:
-      'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=800&q=80',
+    image: '/images/fields/mixed-use.png',
   },
 ] as const

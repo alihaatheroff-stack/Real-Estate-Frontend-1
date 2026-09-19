@@ -9,16 +9,16 @@ export function LandingHero() {
   const { filters, updateFilter, toSearchParams } = useProviderFilters()
 
   return (
-    <section className="relative h-[min(92vh,820px)] min-h-[560px] w-full overflow-hidden border-b border-line">
+    <section className="relative h-[600px] w-full overflow-hidden border-b border-line sm:h-[620px]">
       <HeroSlideshow activeIndex={activeIndex} onChange={setActiveIndex} />
       <HeroAdRails />
 
-      <div className="absolute inset-y-0 left-0 z-[7] flex items-center px-3 py-8 sm:px-4 lg:pl-[clamp(8rem,12vw,12rem)] xl:px-[clamp(8.5rem,12vw,12.5rem)]">
+      <div className="absolute bottom-0 left-0 top-0 z-[7] flex items-start px-2 pb-[4.75rem] pt-1.5 sm:px-3 sm:pb-20 lg:left-[clamp(7.5rem,11vw,11rem)] lg:px-2 xl:right-[clamp(7.5rem,11vw,11rem)]">
         <HeroFilterPanel
           filters={filters}
           onChange={updateFilter}
           toSearchParams={toSearchParams}
-          className="w-full max-w-[20rem] sm:max-w-[22rem]"
+          className="h-auto max-h-full w-full max-w-[16.2rem] sm:max-w-[18rem]"
         />
       </div>
     </section>

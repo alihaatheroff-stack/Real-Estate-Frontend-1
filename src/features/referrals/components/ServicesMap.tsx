@@ -1,11 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { Star, X } from 'lucide-react'
 import type { Service } from '@/entities/provider/types'
-import { getProviderForService } from '@/features/referrals/data/marketplace'
-import { createCircleMarkerIcon, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
+import { getProviderForService } from '@/features/referrals/api/repository'
+import { MapMeasureTools } from '@/features/referrals/components/MapMeasureTools'
+import { MapBasemapLayer } from '@/features/referrals/components/MapBasemapLayer'
+import { createCircleMarkerIcon, PINNED_MARKER_OPTIONS, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
+import {
+  LOCATION_ZOOM,
+  MapFlyTo,
+  MapInvalidateSize,
+} from '@/features/referrals/lib/mapCamera'
 import { formatCurrency, formatRating } from '@/shared/lib/format'
 import { providerPath, servicePath } from '@/app/router/paths'
 
@@ -24,7 +31,7 @@ type ServicesMapProps = {
 
 const DEFAULT_CENTER: [number, number] = [36.7378, -119.7871]
 const FALLBACK_IMAGE =
-  'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80'
+  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
 
 function MapBounds({ markers }: { markers: ServiceMarker[] }) {
   const map = useMap()
@@ -32,29 +39,12 @@ function MapBounds({ markers }: { markers: ServiceMarker[] }) {
   useEffect(() => {
     if (markers.length === 0) return
     if (markers.length === 1) {
-      map.setView(markers[0].position, 11)
+      map.setView(markers[0].position, LOCATION_ZOOM)
       return
     }
     const bounds = L.latLngBounds(markers.map((m) => m.position))
-    map.fitBounds(bounds, { padding: [48, 48], maxZoom: 12 })
+    map.fitBounds(bounds, { padding: [48, 48], maxZoom: LOCATION_ZOOM })
   }, [map, markers])
-
-  return null
-}
-
-function MapFlyTo({
-  position,
-  enabled,
-}: {
-  position: [number, number] | null
-  enabled: boolean
-}) {
-  const map = useMap()
-
-  useEffect(() => {
-    if (!enabled || !position) return
-    map.flyTo(position, Math.max(map.getZoom(), 12), { duration: 0.45 })
-  }, [enabled, map, position])
 
   return null
 }
@@ -88,7 +78,7 @@ function ServiceMarkerPin({
   const markerRef = useRef<L.Marker | null>(null)
   const [imageSrc, setImageSrc] = useState(service.image)
   const icon = useMemo(
-    () => createCircleMarkerIcon(service.image, visualState),
+    () => createCircleMarkerIcon(service.image, visualState, PINNED_MARKER_OPTIONS),
     [service.image, visualState],
   )
 
@@ -126,8 +116,7 @@ function ServiceMarkerPin({
         offset={[0, -8]}
         maxWidth={260}
         minWidth={240}
-        autoPan
-        autoPanPadding={[24, 24]}
+        autoPan={false}
       >
         <div className="service-map-popup-card">
           <div className="relative overflow-hidden rounded-t-xl">
@@ -239,12 +228,15 @@ export function ServicesMap({
       className="services-map h-full w-full"
       scrollWheelZoom
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <MapBasemapLayer />
+      <MapMeasureTools />
+      <MapInvalidateSize />
       <MapBounds markers={markers} />
-      <MapFlyTo position={flyTarget} enabled={Boolean(selectedId)} />
+      <MapFlyTo
+        position={flyTarget}
+        enabled={Boolean(selectedId || hoveredId)}
+        focusKey={selectedId ?? hoveredId}
+      />
       {markers.map((marker) => (
         <ServiceMarkerPin
           key={marker.service.id}

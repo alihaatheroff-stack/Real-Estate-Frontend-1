@@ -1,0 +1,871 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { cn } from '@/shared/lib/cn'
+import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
+
+type HeroFilterSelectProps = {
+  label: string
+  placeholder: string
+  options?: string[]
+  /** Recursive nested checkbox tree (always shown indented when open). */
+  tree?: FilterTreeNode[]
+  value: string[]
+  onChange: (next: string[]) => void
+  optionsByLetter?: Record<string, string[]>
+  /** Nested trees keyed by top-level option label (e.g. Agent → types). */
+  nestedTrees?: Record<string, FilterTreeNode[]>
+  /** Tighter spacing so all landing fields fit without panel scroll. */
+  compact?: boolean
+  /** Render the menu in-flow (for scrollable drawers that clip absolute menus). */
+  inlineMenu?: boolean
+  /** Show trailing info icon for QA / why-this-question help. */
+  showQaMark?: boolean
+  /** Open the menu on hover and close when the pointer leaves. */
+  openOnHover?: boolean
+  /** Keep the Ex. placeholder in the trigger even when values are selected. */
+  alwaysShowPlaceholder?: boolean
+  /** Two-column menu: options left, draggable priority list right (register). */
+  showPriorityPanel?: boolean
+  className?: string
+}
+
+function toggleValue(list: string[], item: string) {
+  return list.includes(item) ? list.filter((v) => v !== item) : [...list, item]
+}
+
+function moveItem(list: string[], from: number, to: number) {
+  if (from === to || from < 0 || to < 0 || to >= list.length) return list
+  const next = [...list]
+  const [item] = next.splice(from, 1)
+  next.splice(to, 0, item)
+  return next
+}
+
+function preferenceLabel(value: string) {
+  return value.split(' > ').join(' · ')
+}
+
+function formatPreferenceSummary(values: string[]) {
+  return values
+    .map((item, index) => `${index + 1}. ${preferenceLabel(item)}`)
+    .join('  ·  ')
+}
+
+function PriorityRankList({
+  value,
+  onChange,
+}: {
+  value: string[]
+  onChange: (next: string[]) => void
+}) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [overIndex, setOverIndex] = useState<number | null>(null)
+
+  return (
+    <div className="w-full" onMouseDown={(e) => e.stopPropagation()}>
+      {value.length === 0 ? (
+        <p className="px-2.5 py-2 text-sm text-muted">
+          Select on the left in order of preference.
+        </p>
+      ) : (
+        <div className="space-y-0.5">
+          {value.map((item, index) => (
+            <div
+              key={item}
+              draggable
+              onDragStart={(e) => {
+                e.dataTransfer.effectAllowed = 'move'
+                e.dataTransfer.setData('text/plain', String(index))
+                setDragIndex(index)
+              }}
+              onDragOver={(e) => {
+                e.preventDefault()
+                e.dataTransfer.dropEffect = 'move'
+                if (overIndex !== index) setOverIndex(index)
+              }}
+              onDragLeave={() => {
+                if (overIndex === index) setOverIndex(null)
+              }}
+              onDrop={(e) => {
+                e.preventDefault()
+                const from = dragIndex ?? Number(e.dataTransfer.getData('text/plain'))
+                if (!Number.isNaN(from)) onChange(moveItem(value, from, index))
+                setDragIndex(null)
+                setOverIndex(null)
+              }}
+              onDragEnd={() => {
+                setDragIndex(null)
+                setOverIndex(null)
+              }}
+              className={cn(
+                'flex cursor-grab items-center gap-1 rounded-md px-1.5 py-2 text-sm leading-snug text-ink active:cursor-grabbing',
+                overIndex === index && dragIndex !== null && dragIndex !== index
+                  ? 'bg-brand-light/80 ring-1 ring-brand/30'
+                  : 'hover:bg-mist/70',
+                dragIndex === index && 'opacity-50',
+              )}
+            >
+              <GripVertical
+                className="h-3.5 w-3.5 shrink-0 text-muted"
+                aria-hidden
+              />
+              <span className="min-w-0 flex-1 truncate">
+                <span className="font-bold tabular-nums">{index + 1}.= -</span>
+                <span className="font-medium text-brand">{preferenceLabel(item)}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function NestBlock({
+  children,
+  className,
+  compact = false,
+}: {
+  children: ReactNode
+  className?: string
+  compact?: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        'mt-0.5 space-y-0.5 pl-2',
+        !compact && 'border-l-2 border-black/25',
+        className,
+      )}
+      data-nested
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>
+  )
+}
+
+function OptionsAlignGrid({
+  children,
+  compact = false,
+}: {
+  children: ReactNode
+  compact?: boolean
+}) {
+  if (!compact) return <>{children}</>
+  return <div className="flex w-full flex-col">{children}</div>
+}
+
+/** Ballot-style checked box: rounded square with check breaking the top-right corner. */
+function CheckedBallotIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      className={className}
+      aria-hidden
+    >
+      <path
+        d="M12.25 3.1H4.6A2.1 2.1 0 0 0 2.5 5.2v6.2A2.1 2.1 0 0 0 4.6 13.5h6.2a2.1 2.1 0 0 0 2.1-2.1V7.15"
+        stroke="currentColor"
+        strokeWidth="1.55"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.35 8.05 6.9 10.55 13.55 2.85"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function OptionRow({
+  item,
+  checked,
+  onToggle,
+  compact = false,
+  optionKey,
+  hovered = false,
+}: {
+  item: string
+  checked: boolean
+  onToggle: () => void
+  compact?: boolean
+  optionKey?: string
+  hovered?: boolean
+}) {
+  if (compact) {
+    return (
+      <div data-option-key={optionKey ?? item} className="flex w-full items-start gap-x-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex items-center justify-center self-start py-2 pl-2.5"
+          aria-label={checked ? `Unselect ${item}` : `Select ${item}`}
+        >
+          {checked ? (
+            <CheckedBallotIcon className="h-4 w-4 text-ink" />
+          ) : (
+            <span
+              className="h-3.5 w-3.5 rounded-[4px] border-[1.55px] border-ink/40 bg-white"
+              aria-hidden
+            />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          data-option-key={optionKey ?? item}
+          className={cn(
+            'self-start whitespace-nowrap py-2 text-left text-sm leading-snug text-ink',
+            checked && 'font-medium',
+            hovered && 'underline decoration-ink underline-offset-4',
+          )}
+        >
+          {item}
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      data-option-key={optionKey ?? item}
+      className={cn(
+        'flex items-start gap-1.5 px-2 py-1.5 transition-colors rounded-sm hover:bg-ink/5',
+        checked && 'bg-sky-400/20',
+      )}
+    >
+      <span className="inline-block w-5 shrink-0" aria-hidden />
+      <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
+        <span className="relative mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onToggle}
+            className="register-check"
+          />
+        </span>
+        <span className="mt-0.5 min-w-0 flex-1 whitespace-normal break-words text-sm leading-snug text-black">
+          {item}
+        </span>
+      </label>
+    </div>
+  )
+}
+
+/** Selectable heading row for parents that have nested options. */
+function GroupHeadingRow({
+  item,
+  checked,
+  onToggle,
+  compact = false,
+  optionKey,
+  hovered = false,
+}: {
+  item: string
+  checked: boolean
+  onToggle: () => void
+  compact?: boolean
+  optionKey?: string
+  hovered?: boolean
+}) {
+  if (compact) {
+    return (
+      <div data-option-key={optionKey ?? item} className="flex w-full items-center gap-x-3">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="inline-flex items-center justify-center self-center py-2 pl-2.5"
+          aria-label={checked ? `Unselect ${item}` : `Select ${item}`}
+        >
+          {checked ? (
+            <CheckedBallotIcon className="h-4 w-4 text-ink" />
+          ) : (
+            <span
+              className="h-3.5 w-3.5 rounded-[4px] border-[1.55px] border-ink/40 bg-white"
+              aria-hidden
+            />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={onToggle}
+          data-option-key={optionKey ?? item}
+          className="flex min-w-0 flex-1 items-center gap-2 py-2 pr-2.5 text-left text-sm font-semibold leading-snug text-ink"
+        >
+          <span
+            className={cn(
+              'shrink-0 whitespace-nowrap',
+              hovered && 'underline decoration-ink underline-offset-4',
+            )}
+          >
+            {item}
+          </span>
+          <span
+            className="mt-1.5 min-w-[2rem] flex-1 border-b border-dotted border-ink/45"
+            aria-hidden
+          />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      data-option-key={optionKey ?? item}
+      className={cn(
+        'flex items-start gap-1.5 px-2 py-1.5 transition-colors rounded-sm hover:bg-ink/5',
+        checked && 'bg-sky-400/20',
+      )}
+    >
+      <span className="inline-block w-5 shrink-0" aria-hidden />
+      <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2">
+        <span className="relative mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center self-start">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={onToggle}
+            className="register-check"
+          />
+        </span>
+        <span className="mt-0.5 shrink-0 whitespace-nowrap text-sm font-semibold leading-snug text-black">
+          {item}
+        </span>
+        <span
+          className="mt-2 min-w-[2rem] flex-1 border-b border-dotted border-black/40"
+          aria-hidden
+        />
+      </label>
+    </div>
+  )
+}
+
+function LinkRow({ item, href, compact = false }: { item: string; href: string; compact?: boolean }) {
+  return (
+    <div
+      className={cn(
+        'flex items-start gap-1.5 px-2 py-1.5',
+        compact ? 'rounded-lg px-2.5 py-2 hover:bg-mist' : 'rounded-sm hover:bg-ink/5',
+      )}
+    >
+      <span className="inline-block w-5 shrink-0" aria-hidden />
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="min-w-0 flex-1 whitespace-normal break-words text-sm leading-snug text-brand underline underline-offset-2 hover:text-brand-dark"
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {item}
+      </a>
+    </div>
+  )
+}
+
+function TreeNodes({
+  nodes,
+  value,
+  onChange,
+  path = '',
+  compact = false,
+  hoveredKey = null,
+}: {
+  nodes: FilterTreeNode[]
+  value: string[]
+  onChange: (next: string[]) => void
+  path?: string
+  compact?: boolean
+  hoveredKey?: string | null
+}) {
+  return (
+    <OptionsAlignGrid compact={compact}>
+      {nodes.map((node, index) => {
+        const nodePath = path ? `${path} > ${node.label}` : node.label
+        const checked = value.includes(nodePath)
+        const hasChildren = Boolean(node.children?.length)
+
+        if (!hasChildren && !node.href) {
+          return (
+            <OptionRow
+              key={`${nodePath}-${index}`}
+              item={node.label}
+              checked={checked}
+              compact={compact}
+              optionKey={nodePath}
+              hovered={hoveredKey === nodePath}
+              onToggle={() => onChange(toggleValue(value, nodePath))}
+            />
+          )
+        }
+
+        return (
+          <div key={`${nodePath}-${index}`}>
+            {node.href ? (
+              <LinkRow item={node.label} href={node.href} compact={compact} />
+            ) : (
+              <GroupHeadingRow
+                item={node.label}
+                checked={checked}
+                compact={compact}
+                optionKey={nodePath}
+                hovered={hoveredKey === nodePath}
+                onToggle={() => onChange(toggleValue(value, nodePath))}
+              />
+            )}
+            {hasChildren ? (
+              <NestBlock className={path ? 'ml-4' : 'ml-5'} compact={compact}>
+                <TreeNodes
+                  nodes={node.children!}
+                  value={value}
+                  onChange={onChange}
+                  path={nodePath}
+                  compact={compact}
+                  hoveredKey={hoveredKey}
+                />
+              </NestBlock>
+            ) : null}
+          </div>
+        )
+      })}
+    </OptionsAlignGrid>
+  )
+}
+
+export function HeroFilterSelect({
+  label,
+  placeholder,
+  options = [],
+  tree,
+  value,
+  onChange,
+  optionsByLetter,
+  nestedTrees = {},
+  compact = false,
+  inlineMenu = false,
+  showQaMark = false,
+  openOnHover = false,
+  alwaysShowPlaceholder = false,
+  showPriorityPanel = false,
+  className,
+}: HeroFilterSelectProps) {
+  const [open, setOpen] = useState(false)
+  const [hoveredKey, setHoveredKey] = useState<string | null>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const lastPointRef = useRef({ x: 0, y: 0 })
+  const closeTimerRef = useRef<number>(0)
+
+  useEffect(() => {
+    return () => window.clearTimeout(closeTimerRef.current)
+  }, [])
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener('mousedown', onPointerDown)
+    return () => document.removeEventListener('mousedown', onPointerDown)
+  }, [open])
+
+  useEffect(() => {
+    if (!open) setHoveredKey(null)
+  }, [open])
+
+  function updateHoveredFromPoint(x: number, y: number) {
+    const el = document.elementFromPoint(x, y)
+    const row = el?.closest('[data-option-key]') as HTMLElement | null
+    setHoveredKey(row?.dataset.optionKey ?? null)
+  }
+
+  const summary = alwaysShowPlaceholder
+    ? placeholder
+    : value.length > 0
+      ? formatPreferenceSummary(value)
+      : placeholder
+
+  function renderTopItem(item: string) {
+    const childTree = nestedTrees[item]
+    const checked = value.includes(item)
+    const hasNest = Boolean(childTree?.length)
+
+    if (!hasNest) {
+      return (
+        <OptionRow
+          key={item}
+          item={item}
+          checked={checked}
+          compact={compact}
+          optionKey={item}
+          hovered={hoveredKey === item}
+          onToggle={() => onChange(toggleValue(value, item))}
+        />
+      )
+    }
+
+    return (
+      <div key={item} className="relative">
+        <GroupHeadingRow
+          item={item}
+          checked={checked}
+          compact={compact}
+          optionKey={item}
+          hovered={hoveredKey === item}
+          onToggle={() => onChange(toggleValue(value, item))}
+        />
+        <NestBlock className="ml-5" compact={compact}>
+          <TreeNodes
+            nodes={childTree!}
+            value={value}
+            onChange={onChange}
+            path={item}
+            compact={compact}
+            hoveredKey={hoveredKey}
+          />
+        </NestBlock>
+      </div>
+    )
+  }
+
+  const letterEntries = optionsByLetter
+    ? Object.entries(optionsByLetter)
+    : null
+
+  // Register fields keep the title inside the same bordered shell as the trigger.
+  const labelInsideShell = compact && inlineMenu
+
+  const labelNode = (
+    <label
+      className={cn(
+        'inline-flex max-w-full items-center gap-1 font-bold',
+        compact
+          ? 'text-sm leading-snug text-ink'
+          : 'text-sm text-white',
+        labelInsideShell && 'px-2 pt-2',
+      )}
+    >
+      <span className={compact ? 'truncate' : undefined}>{label}</span>
+      {showQaMark ? <FieldQaMark field={label} /> : null}
+    </label>
+  )
+
+  return (
+    <div
+      ref={rootRef}
+      className={cn(
+        'relative overflow-visible',
+        compact
+          ? 'w-full shrink-0'
+          : 'shrink-0 space-y-1',
+        className,
+      )}
+      onMouseEnter={
+        openOnHover
+          ? () => {
+            window.clearTimeout(closeTimerRef.current)
+            setOpen(true)
+          }
+          : undefined
+      }
+    >
+      {labelInsideShell ? null : labelNode}
+      <div
+        className={cn(
+          labelInsideShell ? undefined : 'mt-1',
+          // Register (compact + inline): one shared shell for label + trigger + menu
+          labelInsideShell &&
+            cn(
+              'relative overflow-hidden border-2 bg-white shadow-sm transition',
+              open || value.length > 0
+                ? cn(
+                    // Sharp top corners so green never wraps the top curve; L/R/B stay brand.
+                    // Top edge stays invisible (no gray/green line).
+                    'rounded-b-xl rounded-t-none border-t-transparent',
+                    open
+                      ? 'border-b-brand border-l-brand border-r-brand'
+                      : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
+                  )
+                : 'rounded-xl border-ink/15',
+            ),
+        )}
+      >
+        {labelInsideShell ? labelNode : null}
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => {
+            window.clearTimeout(closeTimerRef.current)
+            if (openOnHover) {
+              if (open) {
+                setOpen(false)
+                return
+              }
+              setOpen(true)
+              return
+            }
+            setOpen((prev) => !prev)
+          }}
+          className={cn(
+            'flex w-full min-w-0 items-center justify-between border text-left outline-none transition',
+            compact
+              ? cn(
+                'min-h-11 shrink-0 items-start bg-white px-2 py-1.5 text-sm leading-tight',
+                alwaysShowPlaceholder || value.length === 0
+                  ? 'text-ink-soft'
+                  : 'text-ink',
+                labelInsideShell
+                  ? 'rounded-none border-0 shadow-none ring-0 focus:border-transparent focus:ring-0'
+                  : cn(
+                    'rounded-xl border-2 border-ink/15 shadow-sm focus:border-brand focus:ring-2 focus:ring-brand/25',
+                    value.length > 0 ? 'border-brand/40' : null,
+                    open && 'border-brand ring-2 ring-brand/25',
+                  ),
+              )
+              : cn(
+                'h-8 rounded-full border-white bg-ink/35 px-3 py-2 text-sm focus:ring-1 focus:ring-white/40',
+                value.length > 0 ? 'text-white' : 'text-white/60',
+              ),
+          )}
+        >
+          <span className="min-w-0 flex-1 truncate pr-1.5" title={summary}>
+            {summary}
+          </span>
+          {open ? (
+            <ChevronUp
+              className={cn(
+                'shrink-0',
+                compact ? 'h-3.5 w-3.5 text-brand' : 'h-4 w-4 opacity-70',
+              )}
+            />
+          ) : (
+            <ChevronDown
+              className={cn(
+                'shrink-0',
+                compact ? 'h-3.5 w-3.5 text-ink-soft' : 'h-4 w-4 opacity-70',
+              )}
+            />
+          )}
+        </button>
+
+        {open ? (
+          <div
+            className={cn(
+              'z-[60] overflow-hidden animate-slide-in',
+              labelInsideShell
+                ? 'relative mt-0 rounded-none border-0 bg-white shadow-none ring-0'
+                : cn(
+                  compact
+                    ? 'mt-1.5 rounded-xl border-2 border-ink/40 bg-white shadow-md ring-1 ring-ink/15'
+                    : 'mt-0.5 rounded-md border border-black bg-white shadow-md',
+                  inlineMenu
+                    ? 'relative'
+                    : 'absolute left-0 right-0 top-full',
+                ),
+            )}
+          >
+          {labelInsideShell ? (
+            <div
+              className="mx-auto h-px w-[90%] bg-line"
+              aria-hidden
+            />
+          ) : null}
+          {compact && showPriorityPanel ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2">
+              <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
+                Select in order of preference. First pick is 1.
+              </p>
+              <div className="px-3 py-2">
+                <p className="text-xs font-bold leading-snug text-ink">
+                  Your Prioritized, Toggleable,{' '}
+                  {label.replace(/:\s*$/, '').trim()} Option
+                </p>
+                <p className="pt-0.5 text-[10px] leading-snug text-muted">
+                  Drag to change priority.
+                </p>
+              </div>
+            </div>
+          ) : compact ? (
+            <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
+              Select in order of preference. First pick is 1.
+            </p>
+          ) : null}
+          <div
+            ref={menuRef}
+            className={cn(
+              'landing-scroll-pane max-h-[20rem] overflow-y-auto',
+              compact ? 'space-y-0.5 p-2' : 'bg-white p-1',
+            )}
+            onMouseMove={(event) => {
+              lastPointRef.current = { x: event.clientX, y: event.clientY }
+              updateHoveredFromPoint(event.clientX, event.clientY)
+            }}
+            onScroll={() => {
+              const { x, y } = lastPointRef.current
+              updateHoveredFromPoint(x, y)
+            }}
+          >
+            {(() => {
+              const optionsPane = tree ? (
+                <TreeNodes
+                  nodes={tree}
+                  value={value}
+                  onChange={onChange}
+                  compact={compact}
+                  hoveredKey={hoveredKey}
+                />
+              ) : letterEntries ? (
+                letterEntries.map(([letter, items]) => (
+                  <div key={letter} className={compact ? 'mb-2 last:mb-0' : 'mb-1'}>
+                    <div
+                      className={cn(
+                        'sticky top-0 z-10 px-2 py-1.5 text-xs font-bold uppercase tracking-wide',
+                        compact
+                          ? 'border-b border-line bg-white px-3 py-2 text-ink shadow-sm'
+                          : 'bg-white text-black/55',
+                      )}
+                    >
+                      {letter}...
+                    </div>
+                    <div
+                      className={cn(
+                        'ml-2 pl-1',
+                        compact ? 'mt-1 pl-2' : 'border-l border-black/20',
+                      )}
+                    >
+                      <OptionsAlignGrid compact={compact}>
+                        {items.map((item) => renderTopItem(item))}
+                      </OptionsAlignGrid>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <OptionsAlignGrid compact={compact}>
+                  {options.map((item) => renderTopItem(item))}
+                </OptionsAlignGrid>
+              )
+
+              if (compact && showPriorityPanel) {
+                return (
+                  <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 sm:gap-0">
+                    <div className="min-w-0">{optionsPane}</div>
+                    <div className="sm:pl-2">
+                      <PriorityRankList value={value} onChange={onChange} />
+                    </div>
+                  </div>
+                )
+              }
+
+              return optionsPane
+            })()}
+          </div>
+        </div>
+      ) : null}
+      </div>
+    </div>
+  )
+}
+
+type HeroFilterZipProps = {
+  label?: string
+  zip: string
+  onZipChange: (zip: string) => void
+  radius: string[]
+  onRadiusChange: (next: string[]) => void
+  radiusOptions: string[]
+  className?: string
+}
+
+/** Zipcode text field with Mile Radius nested multi-select under it. */
+export function HeroFilterZip({
+  label = 'Zipcode',
+  zip,
+  onZipChange,
+  radius,
+  onRadiusChange,
+  radiusOptions,
+  className,
+}: HeroFilterZipProps) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    if (open) document.addEventListener('mousedown', onPointerDown)
+    return () => document.removeEventListener('mousedown', onPointerDown)
+  }, [open])
+
+  const summary = zip
+    ? radius.length > 0
+      ? `${zip} · ${radius.join(', ')}`
+      : zip
+    : 'Enter zipcode...'
+
+  return (
+    <div ref={rootRef} className={cn('space-y-1', className)}>
+      <label className="text-sm font-bold text-white">{label}</label>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={cn(
+          'flex h-8 w-full min-w-0 items-center justify-between rounded-full border border-white bg-ink/35 px-3 py-2 text-left text-sm outline-none transition focus:ring-1 focus:ring-white/40',
+          zip || radius.length > 0 ? 'text-white' : 'text-white/60',
+        )}
+      >
+        <span className="truncate">{summary}</span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 opacity-70" />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-70" />
+        )}
+      </button>
+
+      {open ? (
+        <div className="z-50 mt-1 w-full overflow-hidden rounded-md border border-white/40 bg-ink/95 shadow-md">
+          <div className="landing-scroll-pane space-y-2 p-2">
+            <div>
+              <label className="mb-1 block px-2 text-xs font-semibold text-white/55">
+                Zipcode
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={zip}
+                onChange={(e) => onZipChange(e.target.value)}
+                placeholder="93728"
+                className="w-full rounded-md border border-white/40 bg-ink/50 px-3 py-2 text-sm text-white outline-none placeholder:text-white/40 focus:ring-1 focus:ring-white/40"
+              />
+            </div>
+            <div>
+              <div className="mb-1 px-2 text-xs font-semibold text-white/55">
+                Mile Radius
+              </div>
+              <NestBlock className="ml-2">
+                {radiusOptions.map((option) => (
+                  <OptionRow
+                    key={option}
+                    item={option}
+                    checked={radius.includes(option)}
+                    onToggle={() =>
+                      onRadiusChange(toggleValue(radius, option))
+                    }
+                  />
+                ))}
+              </NestBlock>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}

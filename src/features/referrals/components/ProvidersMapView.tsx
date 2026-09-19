@@ -1,30 +1,58 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { List, ListFilter, Map as MapIcon } from 'lucide-react'
+import {
+  FeaturedAgentAdCard,
+  adBannerPlacementFor,
+} from '@/features/referrals/components/FeaturedAgentAdCard'
 import { ProviderFiltersDrawer } from '@/features/referrals/components/ProviderFiltersDrawer'
 import { ProviderListCard } from '@/features/referrals/components/ProviderListCard'
 import { ProvidersMap } from '@/features/referrals/components/ProvidersMap'
+import {
+  ResultsFilterButton,
+  ResultsPagination,
+  ResultsSortMenu,
+  ResultsSplitView,
+} from '@/features/referrals/components/ResultsSplitView'
+import {
+  pickProfileResultAd,
+  profileAdInsertIndex,
+  type ProfileResultAd,
+} from '@/features/referrals/data/profileResultAds'
+import { useMapResultsInteraction } from '@/features/referrals/hooks/useMapResultsInteraction'
+import { useResultsPagination } from '@/features/referrals/hooks/useResultsPagination'
+import {
+  PROVIDER_SORT_OPTIONS,
+  type ProviderSortKey,
+} from '@/features/referrals/model/sort'
 import { type HeroFiltersState } from '@/features/search'
 import { PATHS } from '@/app/router/paths'
 import type { Provider } from '@/entities/provider/types'
-import { cn } from '@/shared/lib/cn'
 
-export type ProviderSortKey =
-  | 'default'
-  | 'newest'
-  | 'oldest'
-  | 'price-asc'
-  | 'price-desc'
-  | 'random'
+const PAGE_SIZE = 7
 
-const SORT_OPTIONS: { label: string; value: ProviderSortKey }[] = [
-  { label: 'Sort by (Default)', value: 'default' },
-  { label: 'Newest', value: 'newest' },
-  { label: 'Oldest', value: 'oldest' },
-  { label: 'Lowest Price', value: 'price-asc' },
-  { label: 'Highest Price', value: 'price-desc' },
-  { label: 'Random', value: 'random' },
-]
+type FeedItem =
+  | { kind: 'provider'; provider: Provider }
+  | { kind: 'ad'; ad: ProfileResultAd; provider: Provider }
+
+/** Build a page feed that stays even in the 2-col grid (providers + one ad). */
+function buildFeedWithAd(providers: Provider[], page: number): FeedItem[] {
+  const slot = pickProfileResultAd(page)
+  const organic = slot
+    ? providers.filter((provider) => provider.id !== slot.provider.id)
+    : providers
+
+  const items: FeedItem[] = organic.map((provider) => ({
+    kind: 'provider',
+    provider,
+  }))
+  if (items.length === 0 || !slot) return items
+
+  const insertAt = profileAdInsertIndex(page, items.length)
+  items.splice(insertAt, 0, { kind: 'ad', ad: slot.ad, provider: slot.provider })
+  return items
+}
+
+export type { ProviderSortKey }
 
 type ProvidersMapViewProps = {
   providers: Provider[]
@@ -55,27 +83,27 @@ export function ProvidersMapView({
   resultLabel = 'results',
 }: ProvidersMapViewProps) {
   const navigate = useNavigate()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [mobileView, setMobileView] = useState<'list' | 'map'>('list')
-  const itemRefs = useRef<Record<string, HTMLElement | null>>({})
+  const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
+    useResultsPagination(providers, PAGE_SIZE)
+  const feedItems = buildFeedWithAd(pagedItems, page)
+  const pageAd = useMemo(() => pickProfileResultAd(page), [page])
 
-  const sortLabel = useMemo(
-    () => SORT_OPTIONS.find((option) => option.value === sort)?.label ?? 'Sort by (Default)',
-    [sort],
-  )
-
-  useEffect(() => {
-    if (!hoveredId) return
-    itemRefs.current[hoveredId]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [hoveredId])
-
-  useEffect(() => {
-    if (selectedId && !providers.some((p) => p.id === selectedId)) {
-      setSelectedId(null)
+  const mapProviders = useMemo(() => {
+    if (!pageAd) return providers
+    if (providers.some((provider) => provider.id === pageAd.provider.id)) {
+      return providers
     }
-  }, [selectedId, providers])
+    return [...providers, pageAd.provider]
+  }, [pageAd, providers])
+
+  const adsByProviderId = useMemo(() => {
+    if (!pageAd) return undefined
+    return { [pageAd.provider.id]: pageAd.ad }
+  }, [pageAd])
+
+  const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
+    useMapResultsInteraction(mapProviders)
 
   function applyFilters() {
     const params = toSearchParams()
@@ -84,145 +112,126 @@ export function ProvidersMapView({
     navigate(`${PATHS.profileResults}?${params.toString()}`)
   }
 
+  function focusProvider(id: string | null) {
+    setSelectedId(id)
+  }
+
+  function hoverProvider(id: string | null) {
+    setHoveredId(id)
+    if (id) setSelectedId(id)
+  }
+
   return (
-    <>
-      <div className="flex h-[calc(100dvh-4.25rem)] flex-col lg:h-[calc(100dvh-5rem)]">
-        <div className="flex min-h-0 flex-1">
-          <aside
-            className={cn(
-              'flex min-h-0 w-full flex-col border-r border-line bg-[#f8f9fb] lg:w-[48%]',
-              mobileView === 'map' && 'hidden lg:flex',
-            )}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white px-4 py-4 sm:px-5">
-              <p className="text-[15px] text-[#222]">
-                {count === 0 ? (
-                  'No results'
-                ) : (
-                  <>
-                    Showing all <span className="font-semibold">{count}</span> {resultLabel}
-                  </>
-                )}
-                {q ? (
-                  <span className="mt-1 block text-sm text-muted">
-                    <Link to={PATHS.referrals} className="text-brand hover:underline">
-                      Referrals home
-                    </Link>
-                    {' · '}
-                    “{q}”
-                  </span>
-                ) : null}
-              </p>
-
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setFiltersOpen(true)}
-                  className="inline-flex h-11 items-center gap-2 rounded-lg border border-[#e5e7eb] bg-[#f7f9fc] px-4 text-[15px] font-medium text-[#222] transition hover:border-[#5BBB7B] hover:text-[#5BBB7B]"
-                >
-                  <ListFilter className="h-4 w-4" />
-                  Filter
-                </button>
-
-                <label className="relative inline-flex min-w-[10.5rem]">
-                  <span className="sr-only">Sort by</span>
-                  <select
-                    value={sort}
-                    onChange={(e) => onSortChange(e.target.value as ProviderSortKey)}
-                    className="h-11 w-full appearance-none rounded-lg border border-[#e5e7eb] bg-white py-2 pl-3 pr-9 text-[15px] font-medium text-[#222] outline-none transition focus:border-[#5BBB7B]"
-                    aria-label={sortLabel}
-                  >
-                    {SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#222]"
-                  >
-                    ▼
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+    <ResultsSplitView
+      rootClassName="flex h-full min-h-0 flex-1 flex-col overflow-hidden"
+      asideClassName="bg-freeio-wash lg:w-[48%]"
+      toolbarClassName="flex items-start justify-between gap-3 border-b border-line bg-white px-4 py-4 sm:px-5"
+      showMapBarClassName="border-t border-line bg-white p-3 lg:hidden"
+      mapPanelClassName="bg-mist lg:w-[52%]"
+      mapInnerClassName="absolute inset-0 overflow-hidden bg-mist"
+      toolbarStart={
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+            <ResultsFilterButton onClick={() => setFiltersOpen(true)} />
+            <p className="text-base text-muted">
               {count === 0 ? (
-                <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center">
-                  <p className="font-display text-xl font-bold text-ink">No profiles match</p>
-                  <p className="mt-2 text-sm text-muted">
-                    Try clearing filters or widening your search.
-                  </p>
-                </div>
+                'No results'
               ) : (
-                <div className="flex flex-col gap-4">
-                  {providers.map((provider) => (
-                    <ProviderListCard
-                      key={provider.id}
-                      ref={(el) => {
-                        itemRefs.current[provider.id] = el
-                      }}
-                      provider={provider}
-                      selected={selectedId === provider.id}
-                      active={hoveredId === provider.id}
-                      onSelect={setSelectedId}
-                      onHover={setHoveredId}
-                    />
-                  ))}
-                </div>
+                <>
+                  Showing{' '}
+                  <span className="font-semibold text-ink">
+                    {pageStart} – {pageEnd}
+                  </span>{' '}
+                  of <span className="font-semibold text-ink">{count}</span>{' '}
+                  {resultLabel}
+                </>
               )}
-            </div>
-
-            <div className="border-t border-line bg-white p-3 lg:hidden">
-              <button
-                type="button"
-                onClick={() => setMobileView('map')}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white"
-              >
-                <MapIcon className="h-4 w-4" />
-                Show Map
-              </button>
-            </div>
-          </aside>
-
-          <div
-            className={cn(
-              'relative min-h-[320px] flex-1 bg-mist lg:w-[52%]',
-              mobileView === 'list' && 'hidden lg:block',
-            )}
-          >
-            <ProvidersMap
-              providers={providers}
-              selectedId={selectedId}
-              hoveredId={hoveredId}
-              onSelect={setSelectedId}
-              onHover={setHoveredId}
-            />
-
-            <div className="absolute left-4 top-4 z-[500] lg:hidden">
-              <button
-                type="button"
-                onClick={() => setMobileView('list')}
-                className="inline-flex items-center gap-2 rounded-xl border border-line bg-paper px-4 py-2 text-sm font-semibold text-ink shadow-soft"
-              >
-                <List className="h-4 w-4" />
-                Show List
-              </button>
-            </div>
+            </p>
           </div>
+          {q ? (
+            <p className="text-sm text-muted">
+              <Link to={PATHS.home} className="text-brand hover:underline">
+                Home
+              </Link>
+              {' · '}“{q}”
+            </p>
+          ) : null}
         </div>
-      </div>
-
-      <ProviderFiltersDrawer
-        open={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        filters={filters}
-        onChange={onFilterChange}
-        onReset={onResetFilters}
-        onApply={applyFilters}
-      />
-    </>
+      }
+      toolbarEnd={
+        <ResultsSortMenu
+          options={PROVIDER_SORT_OPTIONS}
+          value={sort}
+          onChange={onSortChange}
+          clearValue="default"
+        />
+      }
+      list={
+        count === 0 ? (
+          <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center">
+            <p className="font-display text-xl font-bold text-ink">No profiles match</p>
+            <p className="mt-2 text-sm text-muted">
+              Try clearing filters or widening your search.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 items-stretch gap-4">
+            {feedItems.map((item) =>
+              item.kind === 'ad' ? (
+                <FeaturedAgentAdCard
+                  key={item.ad.id}
+                  ref={(el) => {
+                    itemRefs.current[item.provider.id] = el
+                  }}
+                  ad={item.ad}
+                  provider={item.provider}
+                  bannerPlacement={adBannerPlacementFor(item.provider.id)}
+                  selected={selectedId === item.provider.id}
+                  active={hoveredId === item.provider.id}
+                  onSelect={focusProvider}
+                  onHover={hoverProvider}
+                />
+              ) : (
+                <ProviderListCard
+                  key={item.provider.id}
+                  ref={(el) => {
+                    itemRefs.current[item.provider.id] = el
+                  }}
+                  provider={item.provider}
+                  selected={selectedId === item.provider.id}
+                  active={hoveredId === item.provider.id}
+                  onSelect={focusProvider}
+                  onHover={hoverProvider}
+                />
+              ),
+            )}
+          </div>
+        )
+      }
+      pagination={
+        <ResultsPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      }
+      scrollResetKey={page}
+      map={
+        <ProvidersMap
+          providers={mapProviders}
+          adsByProviderId={adsByProviderId}
+          selectedId={selectedId}
+          hoveredId={hoveredId}
+          onSelect={focusProvider}
+          onHover={setHoveredId}
+        />
+      }
+      drawer={
+        <ProviderFiltersDrawer
+          open={filtersOpen}
+          onClose={() => setFiltersOpen(false)}
+          filters={filters}
+          onChange={onFilterChange}
+          onReset={onResetFilters}
+          onApply={applyFilters}
+        />
+      }
+    />
   )
 }

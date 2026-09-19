@@ -1,5 +1,13 @@
-import type { Employer, EmployerPosition, EmployerProject } from '@/entities/employer/types'
+import type {
+  Employer,
+  EmployerEmployee,
+  EmployerPosition,
+  EmployerProject,
+} from '@/entities/employer/types'
 import type { Review } from '@/entities/provider/types'
+import { employerCoords } from '@/features/referrals/lib/geo'
+
+export { getCityCoords, milesBetween } from '@/features/referrals/lib/geo'
 
 export const EMPLOYER_CATEGORY_OPTIONS = [
   { label: 'Brokerage', value: 'brokerage' },
@@ -33,6 +41,70 @@ const CATEGORY_LABEL: Record<string, string> = {
   'marketing-media': 'Marketing & Media',
 }
 
+/** Category-relevant cover photos for company profile banners. */
+const COVER_BY_CATEGORY: Record<string, readonly string[]> = {
+  brokerage: [
+    '/images/stock/photo-1560518883-ce09059eeffa.jpg', // house keys
+    '/images/stock/photo-1568605114967-8130f3a36994.jpg', // suburban home
+    '/images/stock/photo-1600585154340-be6161a56a0c.jpg', // modern home
+    '/images/stock/photo-1600596542815-ffad4c1539a9.jpg', // luxury exterior
+    '/images/stock/photo-1449844908441-8829872d2607.jpg', // neighborhood
+  ],
+  'mortgage-finance': [
+    '/images/stock/photo-1560518883-ce09059eeffa.jpg', // house keys
+    '/images/stock/photo-1450101499163-c8848c66ca85.jpg', // documents / desk
+    '/images/stock/photo-1521791055366-0d553872125f.jpg', // handshake
+    '/images/stock/photo-1454165804606-c3d57bc86b40.jpg', // business meeting
+  ],
+  development: [
+    '/images/stock/photo-1486406146926-c627a92ad1ab.jpg', // skyline
+    '/images/stock/photo-1503387762-592deb58ef4e.jpg', // construction
+    '/images/stock/photo-1545324418-cc1a3fa10c00.jpg', // apartment tower
+    '/images/stock/photo-1613490493576-7fde63acd811.jpg', // modern build
+  ],
+  'property-management': [
+    '/images/stock/photo-1545324418-cc1a3fa10c00.jpg', // multifamily
+    '/images/stock/photo-1564013799919-ab600027ffc6.jpg', // managed property
+    '/images/stock/photo-1600607687939-ce8a6c25118c.jpg', // interior
+    '/images/stock/photo-1449844908441-8829872d2607.jpg', // neighborhood
+  ],
+  'legal-title': [
+    '/images/stock/photo-1450101499163-c8848c66ca85.jpg', // documents
+    '/images/stock/photo-1497366216548-37526070297c.jpg', // office
+    '/images/stock/photo-1521791055366-0d553872125f.jpg', // handshake
+    '/images/stock/photo-1454165804606-c3d57bc86b40.jpg', // meeting
+  ],
+  'architecture-design': [
+    '/images/stock/photo-1600607687939-ce8a6c25118c.jpg', // interior design
+    '/images/stock/photo-1600585154340-be6161a56a0c.jpg', // modern architecture
+    '/images/stock/photo-1497366811353-6870744d04b2.jpg', // studio / office
+    '/images/stock/photo-1613490493576-7fde63acd811.jpg', // designed home
+  ],
+  'construction-trade': [
+    '/images/stock/photo-1503387762-592deb58ef4e.jpg', // construction site
+    '/images/stock/photo-1586528116311-ad8dd3c8310d.jpg', // warehouse / trade
+    '/images/stock/photo-1486406146926-c627a92ad1ab.jpg', // commercial build
+    '/images/stock/photo-1600585154340-be6161a56a0c.jpg', // finished build
+  ],
+  'marketing-media': [
+    '/images/stock/photo-1600607687939-ce8a6c25118c.jpg', // styled interior
+    '/images/stock/photo-1564013799919-ab600027ffc6.jpg', // lifestyle listing
+    '/images/stock/photo-1497366811353-6870744d04b2.jpg', // creative office
+    '/images/stock/photo-1600596542815-ffad4c1539a9.jpg', // hero listing shot
+  ],
+}
+
+const FALLBACK_COVERS = COVER_BY_CATEGORY.brokerage
+
+function defaultCoverImage(employerId: string, category: string): string {
+  const pool = COVER_BY_CATEGORY[category] ?? FALLBACK_COVERS
+  let hash = 0
+  for (let i = 0; i < employerId.length; i += 1) {
+    hash = (hash + employerId.charCodeAt(i) * (i + 1)) % pool.length
+  }
+  return pool[hash] ?? pool[0]
+}
+
 type EmployerSeed = {
   id: string
   name: string
@@ -59,7 +131,8 @@ type EmployerSeed = {
 }
 
 function slugEmail(name: string) {
-  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, '.')}@example.com`
+  const local = name.toLowerCase().match(/[a-z0-9]+/)?.[0] ?? 'info'
+  return `${local}@example.com`
 }
 
 const EXTRA_PROJECT_TEMPLATES: Array<{
@@ -313,6 +386,154 @@ function defaultReviews(rating: number): Review[] {
   ]
 }
 
+const TEAM_FIRST_NAMES = [
+  'Ava',
+  'Noah',
+  'Sophia',
+  'Liam',
+  'Isabella',
+  'Ethan',
+  'Mia',
+  'Lucas',
+  'Amelia',
+  'James',
+  'Harper',
+  'Benjamin',
+  'Evelyn',
+  'Oliver',
+  'Charlotte',
+  'Henry',
+  'Grace',
+  'Jack',
+  'Lily',
+  'Daniel',
+  'Zoe',
+  'Samuel',
+  'Nora',
+  'Caleb',
+  'Emma',
+  'Mason',
+  'Chloe',
+  'Logan',
+  'Aria',
+  'Owen',
+  'Ella',
+  'Wyatt',
+  'Scarlett',
+  'Leo',
+  'Layla',
+  'Julian',
+  'Penelope',
+  'Hudson',
+  'Riley',
+  'Ezra',
+] as const
+
+const TEAM_LAST_NAMES = [
+  'Mitchell',
+  'Patel',
+  'Chen',
+  'Brooks',
+  'Ruiz',
+  'Cole',
+  'Thompson',
+  'Nguyen',
+  'Foster',
+  'Rivera',
+  'Diaz',
+  'Shaw',
+  'Park',
+  'Bennett',
+  'Hayes',
+  'Morgan',
+  'Kim',
+  'Sullivan',
+  'Anders',
+  'Cruz',
+  'Marshall',
+  'Ortiz',
+  'Quinn',
+  'Reed',
+  'Walsh',
+  'Torres',
+  'Bailey',
+  'Price',
+  'Hughes',
+  'Myers',
+] as const
+
+const TEAM_ROLES = [
+  'Managing Broker',
+  'Senior Agent',
+  'Listing Coordinator',
+  'Marketing Manager',
+  'Operations Lead',
+  'Acquisitions Analyst',
+  'Property Manager',
+  'Leasing Specialist',
+  'Transaction Coordinator',
+  'Client Success Manager',
+  'Finance Analyst',
+  'Project Manager',
+  'Design Lead',
+  'Community Manager',
+  'HR Coordinator',
+  'Office Administrator',
+  'Buyer Agent',
+  'Escrow Associate',
+  'Market Researcher',
+  'Referral Specialist',
+] as const
+
+const TEAM_AVATARS = [
+  '/images/profile/m1.jpg',
+  '/images/profile/F_1.jpg',
+  '/images/profile/m2.jpg',
+  '/images/profile/F_2.jpg',
+  '/images/profile/m3.jpg',
+  '/images/profile/F3.jpg',
+  '/images/profile/m4.jpg',
+  '/images/profile/F_4.jpg',
+  '/images/profile/m6.jpg',
+  '/images/profile/F_5.jpg',
+  '/images/profile/m8.jpg',
+] as const
+
+function teamCountFromRange(employees: string) {
+  const match = employees.match(/(\d+)\s*-\s*(\d+)/)
+  if (!match) return 8
+  return Number(match[2])
+}
+
+function defaultTeam(employerId: string, employees: string): EmployerEmployee[] {
+  const count = teamCountFromRange(employees)
+  const hash = [...employerId].reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  const usedNames = new Set<string>()
+
+  return Array.from({ length: count }, (_, index) => {
+    let name = ''
+    let attempt = 0
+    do {
+      const first =
+        TEAM_FIRST_NAMES[(hash + index * 7 + attempt * 3) % TEAM_FIRST_NAMES.length]
+      const last =
+        TEAM_LAST_NAMES[(hash + index * 11 + attempt * 5) % TEAM_LAST_NAMES.length]
+      name = `${first} ${last}`
+      attempt += 1
+    } while (usedNames.has(name) && attempt < 200)
+    usedNames.add(name)
+
+    const role = TEAM_ROLES[(hash + index * 5) % TEAM_ROLES.length]
+    const avatar = TEAM_AVATARS[(hash + index) % TEAM_AVATARS.length]
+    return {
+      id: `${employerId}-emp-${index + 1}`,
+      name,
+      role,
+      avatar,
+    }
+  })
+}
+
 function buildEmployer(seed: EmployerSeed): Employer {
   const categoryLabel = CATEGORY_LABEL[seed.category] ?? seed.category
   const categories = [categoryLabel, ...(seed.extraCategories ?? [])]
@@ -323,6 +544,7 @@ function buildEmployer(seed: EmployerSeed): Employer {
     seed.category,
     seed.positionTitles,
   )
+  const [lat, lng] = employerCoords(seed.city, seed.id)
 
   return {
     id: seed.id,
@@ -330,17 +552,20 @@ function buildEmployer(seed: EmployerSeed): Employer {
     logoInitials: seed.logoInitials,
     logoColor: seed.logoColor,
     logoUrl: seed.logoUrl,
-    coverImage: seed.coverImage,
+    coverImage: seed.coverImage ?? defaultCoverImage(seed.id, seed.category),
     tagline: seed.tagline,
     category: seed.category,
     categories,
     city: seed.city,
     state: seed.state,
+    lat,
+    lng,
     rating: seed.rating,
     reviewCount: seed.reviewCount,
     openProjects: projects.length,
     foundedYear: seed.foundedYear,
     employees: seed.employees,
+    team: defaultTeam(seed.id, seed.employees),
     email: slugEmail(seed.name),
     phone: '(555) 123-4567',
     about:
@@ -361,7 +586,47 @@ function buildEmployer(seed: EmployerSeed): Employer {
   }
 }
 
+function withFeaturedEmployee(
+  employer: Employer,
+  employee: EmployerEmployee,
+): Employer {
+  const rest = employer.team.filter((member) => member.name !== employee.name)
+  return {
+    ...employer,
+    team: [employee, ...rest],
+  }
+}
+
 export const EMPLOYERS: Employer[] = [
+  withFeaturedEmployee(
+    buildEmployer({
+      id: 'e0',
+      name: 'Alumax Realty & Mortgage',
+      logoInitials: 'AR',
+      logoColor: '#0F4C81',
+      coverImage: '/images/stock/photo-1568605114967-8130f3a36994.jpg',
+      tagline: 'Fresno brokerage, mortgage & referral partners',
+      category: 'brokerage',
+      extraCategories: ['Mortgage & Finance', 'Residential'],
+      city: 'Fresno',
+      state: 'CA',
+      rating: 5.0,
+      reviewCount: 86,
+      openProjects: 2,
+      foundedYear: 2008,
+      employees: '10-20',
+      about:
+        'Full-service realty and mortgage team helping Central Valley buyers and sellers close with confidence — clear guidance, strong negotiation, and trusted local market insight.',
+      projectTitles: ['Listing support for Fresno inventory', 'Buyer consultation package'],
+      positionTitles: ['Commercial Real Estate Agent', 'Loan Officer Assistant'],
+    }),
+    {
+      id: 'e0-emp-rigoberto',
+      name: 'Rigoberto Peraza',
+      role: 'Commercial Real Estate',
+      avatar: '/images/profile/rigoberto-peraza.jpg',
+    },
+  ),
   buildEmployer({
     id: 'e1',
     name: 'Valley Realty Group',
@@ -576,6 +841,242 @@ export const EMPLOYERS: Employer[] = [
     about: 'HOA and rental portfolio management for local owners.',
     projectTitles: ['HOA board packet preparation', 'Turnover inspection checklist'],
     positionTitles: ['Community Manager', 'Maintenance Coordinator'],
+  }),
+  buildEmployer({
+    id: 'e14',
+    name: 'Central Valley Realty Group',
+    logoInitials: 'CV',
+    logoColor: '#1B6B4F',
+    tagline: 'Commercial & residential brokerage',
+    category: 'brokerage',
+    city: 'Fresno',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 22,
+    openProjects: 3,
+    foundedYear: 2004,
+    employees: '20-30',
+    about:
+      'Commercial and residential brokerage focused on investor placements, leasing, and partner referrals across the Central Valley.',
+    projectTitles: ['Commercial lease support package', 'Investor tour coordination'],
+    positionTitles: ['Commercial Agent', 'Deal Connector'],
+  }),
+  buildEmployer({
+    id: 'e15',
+    name: 'Summit Mortgage Group',
+    logoInitials: 'SM',
+    logoColor: '#0369A1',
+    tagline: 'Residential mortgage guidance',
+    category: 'mortgage-finance',
+    city: 'Clovis',
+    state: 'CA',
+    rating: 4.8,
+    reviewCount: 16,
+    openProjects: 1,
+    foundedYear: 2011,
+    employees: '10-20',
+    about: 'Mortgage consulting for purchase, refinance, and credit-ready buyers.',
+    projectTitles: ['Pre-approval pipeline support'],
+    positionTitles: ['Mortgage Consultant', 'Loan Processor'],
+  }),
+  buildEmployer({
+    id: 'e16',
+    name: 'Valley Closing Pros',
+    logoInitials: 'VC',
+    logoColor: '#334155',
+    tagline: 'Transaction & closing support',
+    category: 'brokerage',
+    extraCategories: ['Legal & Title'],
+    city: 'Fresno',
+    state: 'CA',
+    rating: 5.0,
+    reviewCount: 19,
+    openProjects: 2,
+    foundedYear: 2009,
+    employees: '10-20',
+    about: 'Transaction coordination and closing support for agents and brokerages.',
+    projectTitles: ['Escrow timeline management', 'Disclosure package review'],
+    positionTitles: ['Transaction Coordinator', 'Strategic Intro Specialist'],
+  }),
+  buildEmployer({
+    id: 'e17',
+    name: 'Pacific Recreation Build',
+    logoInitials: 'PR',
+    logoColor: '#9A3412',
+    tagline: 'Venue build & fit-out',
+    category: 'construction-trade',
+    city: 'Seattle',
+    state: 'WA',
+    rating: 4.7,
+    reviewCount: 11,
+    openProjects: 2,
+    foundedYear: 2014,
+    employees: '20-30',
+    about: 'Build sequencing and fit-out for amusement, trampoline, and recreation venues.',
+    projectTitles: ['Park fit-out bid package', 'Ride-zone sequencing plan'],
+    positionTitles: ['Site Superintendent', 'Estimator'],
+  }),
+  buildEmployer({
+    id: 'e18',
+    name: 'Rahman Legal Advisors',
+    logoInitials: 'RL',
+    logoColor: '#1E40AF',
+    tagline: 'Real estate counsel',
+    category: 'legal-title',
+    city: 'Fresno',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 13,
+    openProjects: 1,
+    foundedYear: 2007,
+    employees: '10-20',
+    about: 'Transaction counsel for agents, investors, and PSPs across contracts and disputes.',
+    projectTitles: ['Contract risk review package'],
+    positionTitles: ['Paralegal – Real Estate', 'Contracts Associate'],
+  }),
+  buildEmployer({
+    id: 'e19',
+    name: 'Horizon Membership Co',
+    logoInitials: 'HM',
+    logoColor: '#0E7490',
+    tagline: 'Venue membership programs',
+    category: 'property-management',
+    city: 'Miami',
+    state: 'FL',
+    rating: 4.7,
+    reviewCount: 15,
+    openProjects: 2,
+    foundedYear: 2013,
+    employees: '10-20',
+    about: 'Membership and pass programs for crowdfunded recreation venues and family clubs.',
+    projectTitles: ['Member retention campaign', 'Family-plan packaging'],
+    positionTitles: ['Membership Specialist', 'Retention Coordinator'],
+  }),
+  buildEmployer({
+    id: 'e20',
+    name: 'Precision Home Inspect',
+    logoInitials: 'PH',
+    logoColor: '#B45309',
+    tagline: 'Pre-purchase inspections',
+    category: 'construction-trade',
+    city: 'Fresno',
+    state: 'CA',
+    rating: 4.8,
+    reviewCount: 21,
+    openProjects: 1,
+    foundedYear: 2010,
+    employees: '10-20',
+    about: 'Certified home inspections with same-day reports for buyers and investors.',
+    projectTitles: ['Investor punch-list package'],
+    positionTitles: ['Home Inspector', 'Report Coordinator'],
+  }),
+  buildEmployer({
+    id: 'e21',
+    name: 'Lopez Insurance Group',
+    logoInitials: 'LI',
+    logoColor: '#0369A1',
+    tagline: 'Landlord & investor coverage',
+    category: 'mortgage-finance',
+    city: 'Clovis',
+    state: 'CA',
+    rating: 4.7,
+    reviewCount: 12,
+    openProjects: 1,
+    foundedYear: 2008,
+    employees: '10-20',
+    about: 'Property insurance for landlords, flippers, and small commercial owners.',
+    projectTitles: ['Landlord coverage review'],
+    positionTitles: ['Insurance Specialist', 'Claims Support'],
+  }),
+  buildEmployer({
+    id: 'e22',
+    name: 'Lone Star Tourism Advisors',
+    logoInitials: 'LS',
+    logoColor: '#7C3AED',
+    tagline: 'Visitor demand strategy',
+    category: 'marketing-media',
+    city: 'Austin',
+    state: 'TX',
+    rating: 4.9,
+    reviewCount: 10,
+    openProjects: 2,
+    foundedYear: 2016,
+    employees: '10-20',
+    about: 'Tourism demand mapping for destination venues and recreation campaigns.',
+    projectTitles: ['Visitor-flow analysis', 'Season planning brief'],
+    positionTitles: ['Tourism Analyst', 'Campaign Coordinator'],
+  }),
+  buildEmployer({
+    id: 'e23',
+    name: 'Pacific Venue Analytics',
+    logoInitials: 'PV',
+    logoColor: '#15803D',
+    tagline: 'Mission-fit underwriting',
+    category: 'development',
+    city: 'Los Angeles',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 17,
+    openProjects: 2,
+    foundedYear: 2015,
+    employees: '10-20',
+    about: 'Screens recreation venues for demand fit and mission alignment before campaigns open.',
+    projectTitles: ['Venue demand screening', 'Pledge-readiness review'],
+    positionTitles: ['Venue Analyst', 'Risk Reviewer'],
+  }),
+  buildEmployer({
+    id: 'e24',
+    name: 'Mendez Compliance Law',
+    logoInitials: 'MC',
+    logoColor: '#1E3A5F',
+    tagline: 'Crowdfund compliance counsel',
+    category: 'legal-title',
+    city: 'San Diego',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 9,
+    openProjects: 1,
+    foundedYear: 2006,
+    employees: '10-20',
+    about: 'Keeps recreation crowdfunding campaigns compliant from interest list through offering readiness.',
+    projectTitles: ['Offering docs readiness review'],
+    positionTitles: ['Compliance Counsel', 'Paralegal – Offerings'],
+  }),
+  buildEmployer({
+    id: 'e25',
+    name: 'Torres Network Hub',
+    logoInitials: 'TN',
+    logoColor: '#0F766E',
+    tagline: 'Professional network groups',
+    category: 'brokerage',
+    city: 'Clovis',
+    state: 'CA',
+    rating: 4.8,
+    reviewCount: 14,
+    openProjects: 2,
+    foundedYear: 2017,
+    employees: '10-20',
+    about: 'Builds and leads referral network groups for real estate professionals.',
+    projectTitles: ['Network onboarding kit', 'Partner matching sessions'],
+    positionTitles: ['Network Group Lead', 'Community Coordinator'],
+  }),
+  buildEmployer({
+    id: 'e26',
+    name: 'Singh Capital Relations',
+    logoInitials: 'SC',
+    logoColor: '#9A3412',
+    tagline: 'LP & sponsor updates',
+    category: 'development',
+    city: 'Madera',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 11,
+    openProjects: 1,
+    foundedYear: 2014,
+    employees: '10-20',
+    about: 'Investor relations and capital-partner updates for sponsors and deal teams.',
+    projectTitles: ['LP update digest package'],
+    positionTitles: ['Investor Relations Partner', 'CRM Coordinator'],
   }),
 ]
 

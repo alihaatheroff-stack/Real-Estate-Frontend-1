@@ -11,7 +11,7 @@ export function ServiceGallery({ images, title }: ServiceGalleryProps) {
   const [active, setActive] = useState(0)
   const [failed, setFailed] = useState<Record<number, boolean>>({})
   const fallback =
-    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80'
+    '/images/stock/photo-1560518883-ce09059eeffa.jpg'
 
   if (images.length === 0) return null
 

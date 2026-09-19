@@ -14,7 +14,7 @@ export const LEFT_ADS: HeroAd[] = [
     title: '50% Referrals',
     subtitle: 'Partner spotlight',
     image:
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=80',
+      '/images/stock/photo-1600596542815-ffad4c1539a9.jpg',
     href: PATHS.advertise,
   },
   {
@@ -22,7 +22,7 @@ export const LEFT_ADS: HeroAd[] = [
     title: 'Lux Realty',
     subtitle: 'Of California',
     image:
-      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=400&q=80',
+      '/images/stock/photo-1613490493576-7fde63acd811.jpg',
     href: PATHS.advertise,
   },
 ]
@@ -33,7 +33,7 @@ export const RIGHT_STACK_ADS: HeroAd[] = [
     title: 'Appraisers',
     subtitle: 'Verified PSPs',
     image:
-      'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=400&q=80',
+      '/images/stock/photo-1568605114967-8130f3a36994.jpg',
     href: PATHS.advertise,
   },
   {
@@ -41,7 +41,7 @@ export const RIGHT_STACK_ADS: HeroAd[] = [
     title: 'Law Firm',
     subtitle: 'Deal counsel',
     image:
-      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=400&q=80',
+      '/images/stock/photo-1497366811353-6870744d04b2.jpg',
     href: PATHS.advertise,
   },
 ]

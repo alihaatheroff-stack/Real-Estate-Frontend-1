@@ -6,13 +6,37 @@ export const PATHS = {
   employerResults: '/referrals/employer-results',
   employerProjects: '/referrals/employers/:id/projects',
   employerJobs: '/referrals/employers/:id/jobs',
+  employerEmployees: '/referrals/employers/:id/employees',
   employerDetail: '/referrals/employers/:id',
   serviceDetail: '/referrals/services/:id',
   providerProfile: '/referrals/providers/:id',
   providerServices: '/referrals/providers/:id/services',
   postOffer: '/referrals/post',
   crowdfunding: '/crowdfunding',
+  lcreCrowdfunding: '/crowdfunding/lcre',
+  network: '/network',
   networkFeed: '/network/feed',
+  networkExplore: '/network/explore',
+  networkProfile: '/network/profile/:memberId',
+  networkFriends: '/network/friends',
+  networkMessages: '/network/messages',
+  networkGroups: '/network/groups',
+  networkGroup: '/network/groups/:groupId',
+  networkForums: '/network/forums',
+  networkForum: '/network/forums/:forumId',
+  networkArticles: '/network/articles',
+  networkArticle: '/network/articles/:articleId',
+  networkWatch: '/network/watch',
+  networkMarketplace: '/network/marketplace',
+  networkEvents: '/network/events',
+  networkPhotos: '/network/photos',
+  networkSaved: '/network/saved',
+  networkNotes: '/network/notes',
+  networkEducation: '/network/education',
+  networkDashboard: '/network/dashboard',
+  networkNotifications: '/network/notifications',
+  networkSearch: '/network/search',
+  networkSettings: '/network/settings',
   shop: '/shop',
   signIn: '/auth/sign-in',
   registerPsp: '/auth/register/psp',
@@ -45,4 +69,28 @@ export function employerProjectsPath(id: string) {
 
 export function employerJobsPath(id: string) {
   return `/referrals/employers/${id}/jobs`
+}
+
+export function employerEmployeesPath(id: string) {
+  return `/referrals/employers/${id}/employees`
+}
+
+export function networkProfilePath(memberId: string) {
+  return `/network/profile/${memberId}`
+}
+
+export function networkGroupPath(groupId: string) {
+  return `/network/groups/${groupId}`
+}
+
+export function networkForumPath(forumId: string) {
+  return `/network/forums/${forumId}`
+}
+
+export function networkArticlePath(articleId: string) {
+  return `/network/articles/${articleId}`
+}
+
+export function networkSettingsPath(tab?: string) {
+  return tab ? `/network/settings?tab=${tab}` : '/network/settings'
 }

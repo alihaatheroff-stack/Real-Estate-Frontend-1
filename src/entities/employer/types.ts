@@ -32,6 +32,14 @@ export type EmployerPosition = {
   image?: string
 }
 
+export type EmployerEmployee = {
+  id: string
+  name: string
+  role: string
+  /** Optional profile photo */
+  avatar?: string
+}
+
 export type Employer = {
   id: string
   name: string
@@ -48,11 +56,16 @@ export type Employer = {
   categories: string[]
   city: string
   state: string
+  lat: number
+  lng: number
   rating: number
   reviewCount: number
   openProjects: number
   foundedYear: number
+  /** Display range shown in About Me, e.g. "10-20" */
   employees: string
+  /** Individual team members listed on the employees page */
+  team: EmployerEmployee[]
   email: string
   phone: string
   about: string

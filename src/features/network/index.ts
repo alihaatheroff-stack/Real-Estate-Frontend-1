@@ -1,2 +1,3 @@
-/** Placeholder — network feature ships after referrals delivery. */
-export {}
+export { NetworkPreview } from '@/features/network/components/NetworkPreview'
+export { LoggedInNetworkSection } from '@/features/network/components/LoggedInNetworkSection'
+export { NETWORK_LEARN_MORE } from '@/features/network/data/networkLearnMore'

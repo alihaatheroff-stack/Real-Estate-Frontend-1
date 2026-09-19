@@ -1,12 +1,12 @@
 export const PILLARS = [
   {
     id: 'referrals',
-    title: 'Referrals',
+    title: 'Referral',
     description: 'Zip-code relevant providers, mentorship, and deal-ready introductions.',
   },
   {
     id: 'crowdfunding',
-    title: 'Crowdfunding',
+    title: 'Crowdfund',
     description: 'Faith-aligned recreational real estate — pledge interest until SEC approval.',
   },
   {

@@ -5,12 +5,7 @@ import {
 } from '@/features/search/data/categories'
 
 const SERVICE_FILTER_KEYS: (keyof HeroFiltersState)[] = [
-  'datePosted',
-  'priceFrom',
-  'priceTo',
   'radius',
-  'responseTime',
-  'deliveryTime',
 ]
 
 export function useProviderFilters(initial?: Partial<HeroFiltersState>) {
@@ -46,9 +41,6 @@ export function useProviderFilters(initial?: Partial<HeroFiltersState>) {
       }
     }
 
-    if (!params.has('datePosted')) params.set('datePosted', filters.datePosted)
-    if (!params.has('priceFrom')) params.set('priceFrom', filters.priceFrom)
-    if (!params.has('priceTo')) params.set('priceTo', filters.priceTo)
     if (filters.radius && !params.has('radius')) params.set('radius', filters.radius)
 
     return params

@@ -67,20 +67,20 @@ export function HeroSlideshow({ activeIndex, onChange }: HeroSlideshowProps) {
         type="button"
         aria-label="Previous slide"
         onClick={() => go(-1)}
-        className="absolute left-[clamp(8.5rem,12vw,12.5rem)] top-1/2 z-[4] hidden -translate-y-1/2 rounded-full border border-white/30 bg-paper/90 p-2.5 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
+        className="absolute left-[calc(clamp(7.5rem,11vw,11rem)/2)] top-[calc((100%-2.25rem)/2)] z-[8] hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         aria-label="Next slide"
         onClick={() => go(1)}
-        className="absolute right-[clamp(8.5rem,12vw,12.5rem)] top-1/2 z-[4] hidden -translate-y-1/2 rounded-full border border-white/30 bg-paper/90 p-2.5 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
+        className="absolute right-[calc(clamp(7.5rem,11vw,11rem)/2)] top-[calc((100%-2.25rem)/2)] z-[8] hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-3.5 w-3.5" />
       </button>
 
-      <div className="absolute bottom-3 left-0 right-0 z-[5] px-3 sm:bottom-5 sm:px-4 lg:left-[clamp(7.5rem,11vw,11rem)] lg:right-0 lg:px-3 xl:right-[clamp(7.5rem,11vw,11rem)]">
+      <div className="absolute bottom-1.5 left-0 right-0 z-[5] px-3 sm:bottom-2.5 sm:px-4 lg:left-[clamp(7.5rem,11vw,11rem)] lg:right-0 lg:px-3 xl:right-[clamp(7.5rem,11vw,11rem)]">
         <div className="flex w-full items-center justify-between gap-2">
           {HERO_SLIDES.map((item, index) => (
             <button

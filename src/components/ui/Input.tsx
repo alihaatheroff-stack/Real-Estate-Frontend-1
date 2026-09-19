@@ -1,17 +1,26 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { cn } from '@/shared/lib/cn'
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
-  label?: string
+  label?: ReactNode
   suffix?: ReactNode
+  /** Show trailing info icon for QA / why-this-question help. */
+  showQaMark?: boolean
 }
 
-export function Input({ className, label, id, suffix, ...props }: InputProps) {
+export function Input({ className, label, id, suffix, showQaMark = false, ...props }: InputProps) {
   const inputId = id ?? props.name
+  const qaField = typeof label === 'string' ? label : props.name ?? 'field'
 
   return (
     <label className="flex w-full flex-col gap-1.5 text-sm">
-      {label ? <span className="font-medium text-ink-soft">{label}</span> : null}
+      {label ? (
+        <span className="inline-flex items-center gap-1 font-bold text-ink">
+          {label}
+          {showQaMark ? <FieldQaMark field={qaField} /> : null}
+        </span>
+      ) : null}
       <div className="relative">
         <input
           id={inputId}

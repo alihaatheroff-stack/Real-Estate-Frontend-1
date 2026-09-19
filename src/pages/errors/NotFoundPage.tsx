@@ -12,7 +12,7 @@ export function NotFoundPage() {
         <Link to={PATHS.home}>
           <Button>Home</Button>
         </Link>
-        <Link to={PATHS.referrals}>
+        <Link to={PATHS.results}>
           <Button variant="outline">Referrals</Button>
         </Link>
       </div>

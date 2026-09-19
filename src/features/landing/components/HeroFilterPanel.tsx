@@ -2,23 +2,29 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
-import { Input } from '@/components/ui/Input'
 import { PATHS } from '@/app/router/paths'
 import {
-  CONDITION_OPTIONS,
-  FIELD_OPTIONS,
-  FIND_OPTIONS,
-  FINANCING_OPTIONS,
-  LANGUAGE_OPTIONS,
-  MOTIVE_OPTIONS,
-  PRICE_OPTIONS,
-  PSP_CATEGORIES,
-  RADIUS_OPTIONS,
-  REPRESENTATION_OPTIONS,
-  SUB_FIELD_OPTIONS,
+  HeroFilterSelect,
+  BUYING_TREE,
+  CLIENT_EXPERIENCE_TREE,
+  CLIENT_MOTIVE_OPTIONS,
+  FIELD_TREE,
+  FIND_FILTER_OPTIONS,
+  FORM_OF_PAYMENT_TREE,
+  LANGUAGE_BY_LETTER,
+  PRICE_DEMOGRAPHY_OPTIONS,
+  PROPERTY_CONDITION_OPTIONS,
+  PSP_BY_LETTER,
+  PSP_NESTED_TREES,
+  REPRESENTATION_TOP_TREE,
+  SALE_TYPE_TREE,
+  TITLE_OPTIONS,
+  VACANCY_OPTIONS,
+  YOUR_EXPERIENCE_OPTIONS,
+  joinCsv,
+  splitCsv,
   type HeroFiltersState,
-} from '@/features/search/data/categories'
+} from '@/features/search'
 import { cn } from '@/shared/lib/cn'
 
 type HeroFilterPanelProps = {
@@ -31,168 +37,279 @@ type HeroFilterPanelProps = {
   className?: string
 }
 
-type FilterKey = keyof HeroFiltersState
-
-const ROWS: {
-  key: FilterKey
-  label: string
-  options?: { label: string; value: string }[]
-  placeholder?: string
-  type?: 'select' | 'input'
-  defaultLabel?: string
-}[] = [
-  {
-    key: 'find',
-    label: 'Find',
-    options: FIND_OPTIONS,
-    placeholder: 'Service',
-    defaultLabel: 'Save as Default Opt',
-  },
-  {
-    key: 'pspCategory',
-    label: "A–Z PSP's Multi-Select",
-    options: PSP_CATEGORIES,
-    placeholder: 'Real Estate Agent…',
-  },
-  {
-    key: 'representation',
-    label: 'Representation (If RE Agent Selected)',
-    options: REPRESENTATION_OPTIONS,
-    placeholder: 'Selling…',
-  },
-  {
-    key: 'financing',
-    label: 'Buying / Mortgage',
-    options: FINANCING_OPTIONS,
-    placeholder: 'Cash or mortgage',
-  },
-  {
-    key: 'field',
-    label: 'Field options',
-    options: FIELD_OPTIONS,
-    placeholder: 'Commercial…',
-  },
-  {
-    key: 'priceBand',
-    label: 'Price demography',
-    options: PRICE_OPTIONS,
-    placeholder: 'Luxury / Mid…',
-  },
-  {
-    key: 'subField',
-    label: 'Sub-field',
-    options: SUB_FIELD_OPTIONS,
-    placeholder: 'As many as needed',
-  },
-  {
-    key: 'motive',
-    label: "Motive's",
-    options: MOTIVE_OPTIONS,
-    placeholder: 'Urgency',
-  },
-  {
-    key: 'condition',
-    label: 'Condition',
-    options: CONDITION_OPTIONS,
-    placeholder: 'New construction…',
-  },
-  {
-    key: 'language',
-    label: 'Language',
-    options: LANGUAGE_OPTIONS,
-    placeholder: 'Preferred language',
-  },
-  {
-    key: 'zip',
-    label: 'ZIP code',
-    type: 'input',
-  },
-  {
-    key: 'radius',
-    label: 'Mile radius',
-    options: RADIUS_OPTIONS,
-    placeholder: 'Select mile radius',
-  },
-]
-
 export function HeroFilterPanel({
   filters,
   onChange,
   toSearchParams,
   className,
 }: HeroFilterPanelProps) {
-  const [defaults, setDefaults] = useState<Record<string, boolean>>({})
+  const [saveAsDefault, setSaveAsDefault] = useState(false)
+
   const params = toSearchParams()
-  const target =
-    filters.find === 'agency'
-      ? PATHS.employerResults
-      : filters.find === 'profile'
-        ? PATHS.profileResults
-        : PATHS.results
+  const findLabels = splitCsv(filters.find).map((value) => {
+    if (value === 'service') return 'Service'
+    if (value === 'profile') return 'Profile'
+    if (value === 'agency') return 'Office'
+    return value
+  })
+  const target = findLabels.includes('Office')
+    ? PATHS.employerResults
+    : findLabels.includes('Profile')
+      ? PATHS.profileResults
+      : PATHS.results
   const resultsHref = `${target}?${params.toString()}`
 
-  function toggleDefault(key: string) {
-    setDefaults((prev) => ({ ...prev, [key]: !prev[key] }))
+  const representation = splitCsv(filters.representation)
+  const selectedPsp = splitCsv(filters.pspCategory)
+  const selectedFields = splitCsv(filters.field)
+  const showRepresentation = selectedPsp.some(
+    (value) => value === 'Agent' || value.startsWith('Agent > '),
+  )
+  const showBuying = representation.some(
+    (value) => value === 'Buying' || value === 'Mortgage',
+  )
+
+  function setFilterList(key: keyof HeroFiltersState, next: string[]) {
+    if (key === 'find') {
+      const mapped = next.map((label) => {
+        if (label === 'Service') return 'service'
+        if (label === 'Profile') return 'profile'
+        if (label === 'Office') return 'agency'
+        return label
+      })
+      onChange(key, joinCsv(mapped) as HeroFiltersState[typeof key])
+      return
+    }
+    if (key === 'pspCategory') {
+      onChange(key, joinCsv(next) as HeroFiltersState[typeof key])
+      const stillAgent = next.some(
+        (value) => value === 'Agent' || value.startsWith('Agent > '),
+      )
+      if (!stillAgent) {
+        onChange('representation', '')
+        onChange('financing', '')
+      }
+      return
+    }
+    if (key === 'representation') {
+      onChange(key, joinCsv(next) as HeroFiltersState[typeof key])
+      const stillBuying = next.some(
+        (value) => value === 'Buying' || value === 'Mortgage',
+      )
+      if (!stillBuying) onChange('financing', '')
+      return
+    }
+    onChange(key, joinCsv(next) as HeroFiltersState[typeof key])
   }
 
   return (
     <div
       className={cn(
-        'animate-hero-panel-in flex max-h-[min(70vh,36rem)] w-full flex-col overflow-hidden rounded-2xl border border-white/25 bg-paper/95 shadow-[var(--shadow-panel)] backdrop-blur-xl',
+        'animate-hero-panel-in flex w-full flex-col overflow-hidden rounded-lg border border-white/50 bg-white/35 shadow-sm backdrop-blur-md',
         className,
       )}
     >
-      <div className="border-b border-line/80 bg-gradient-to-r from-brand-light/40 to-transparent px-4 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand">
-          Find
-        </p>
-        <h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-          Filter providers
-        </h2>
-      </div>
+      <div className="landing-scroll-pane max-h-[28.5rem] overflow-x-hidden overflow-y-auto px-3 pt-1 pb-1.5">
+        <div className="flex flex-col gap-1">
+          <HeroFilterSelect
+            compact
+            label="Search By: "
+            placeholder="Ex. (Service, Profile, Office)"
+            options={FIND_FILTER_OPTIONS}
+            value={findLabels}
+            onChange={(next) => setFilterList('find', next)}
+          />
 
-      <div className="landing-scroll-pane flex-1 space-y-3 overflow-y-auto px-3.5 py-3.5">
-        {ROWS.map((row) => (
-          <div key={row.key} className="flex items-end gap-2.5">
-            <div className="min-w-0 flex-1">
-              {row.type === 'input' ? (
-                <Input
-                  label={row.label}
-                  name={row.key}
-                  value={filters[row.key]}
-                  onChange={(e) => onChange(row.key, e.target.value)}
-                  placeholder="Enter ZIP code"
-                  className="h-10 rounded-lg border-line/90 bg-white text-sm"
-                />
-              ) : (
-                <Select
-                  label={row.label}
-                  options={row.options ?? []}
-                  placeholder={row.placeholder ?? 'Any'}
-                  value={filters[row.key]}
-                  onChange={(e) => onChange(row.key, e.target.value)}
-                  className="h-10 rounded-lg border-line/90 bg-white text-sm"
-                />
-              )}
-            </div>
-            <label className="mb-1.5 flex min-h-10 max-w-[4.5rem] shrink-0 flex-col items-center justify-center gap-1 text-center text-[9px] font-semibold uppercase leading-tight tracking-wide text-muted">
-              {row.defaultLabel ?? 'Default'}
-              <input
-                type="checkbox"
-                checked={Boolean(defaults[row.key])}
-                onChange={() => toggleDefault(row.key)}
-                className="h-3.5 w-3.5 rounded border-line accent-brand"
-                aria-label={`Save ${row.label} as default`}
-              />
+          <HeroFilterSelect
+            compact
+            label="A-Z Psp's: "
+            placeholder="Ex. (Agent, Architect, Real Estate, etc.,)"
+            optionsByLetter={PSP_BY_LETTER}
+            nestedTrees={PSP_NESTED_TREES}
+            value={selectedPsp}
+            onChange={(next) => setFilterList('pspCategory', next)}
+          />
+
+          {showRepresentation ? (
+            <HeroFilterSelect
+              compact
+              label="Representation (If RE Agent Selected): *"
+              placeholder="Ex. (Buying, Mortgage, etc.,)"
+              tree={REPRESENTATION_TOP_TREE}
+              value={representation}
+              onChange={(next) => setFilterList('representation', next)}
+            />
+          ) : null}
+          {showBuying ? (
+            <HeroFilterSelect
+              compact
+              label="Buying (If Buying, Mortgage get Selected):"
+              placeholder="Ex. (Buying, Mortgage, etc.,)"
+              tree={BUYING_TREE}
+              value={splitCsv(filters.financing)}
+              onChange={(next) => setFilterList('financing', next)}
+            />
+          ) : null}
+          <HeroFilterSelect
+            compact
+            label="Price Demography: "
+            placeholder="Ex. (Affordable, Mid-Range, Luxury etc.,)"
+            options={PRICE_DEMOGRAPHY_OPTIONS}
+            value={splitCsv(filters.priceBand)}
+            onChange={(next) => setFilterList('priceBand', next)}
+          />
+          <HeroFilterSelect
+            compact
+            label="Fields: "
+            placeholder="Ex. (Commercial, Agriculture, etc.,)"
+            tree={FIELD_TREE}
+            value={selectedFields}
+            onChange={(next) => setFilterList('field', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Client Experience:"
+            placeholder="Ex. (Beginner, Intermediate, Expert etc.,)"
+            tree={CLIENT_EXPERIENCE_TREE}
+            value={splitCsv(filters.clientExperience)}
+            onChange={(next) => setFilterList('clientExperience', next)}
+          />
+
+
+
+          <HeroFilterSelect
+            compact
+            label="Property Condition:"
+            placeholder="Ex. (New Construction, Burned down, etc.,)"
+            options={PROPERTY_CONDITION_OPTIONS}
+            value={splitCsv(filters.condition)}
+            onChange={(next) => setFilterList('condition', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Vacancy:"
+            placeholder="Ex. (Vacant, Tenant-Occupied, etc.,)"
+            options={VACANCY_OPTIONS}
+            value={splitCsv(filters.vacancy)}
+            onChange={(next) => setFilterList('vacancy', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Title:"
+            placeholder="Ex. (Partnership, Tenancy, Sole,  etc.,)"
+            options={TITLE_OPTIONS}
+            value={splitCsv(filters.propertyTitle)}
+            onChange={(next) => setFilterList('propertyTitle', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Sale Type:"
+            placeholder="Ex. (Standard, Clear, Lien, etc.,)"
+            tree={SALE_TYPE_TREE}
+            value={splitCsv(filters.saleType)}
+            onChange={(next) => setFilterList('saleType', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Recipient Experience:"
+            placeholder="Ex. (Expert, Intermediate, Beginner, etc.,)"
+            options={YOUR_EXPERIENCE_OPTIONS}
+            value={splitCsv(filters.yourExperience)}
+            onChange={(next) => setFilterList('yourExperience', next)}
+          />
+
+          <HeroFilterSelect
+            compact
+            label="Motive's:"
+            placeholder="Ex. (A.Have to, D.Wasting Time, etc.,)"
+            options={CLIENT_MOTIVE_OPTIONS}
+            value={splitCsv(filters.motive)}
+            onChange={(next) => setFilterList('motive', next)}
+          />
+          <HeroFilterSelect
+            compact
+            label="Languages Spoken:"
+            placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
+            optionsByLetter={LANGUAGE_BY_LETTER}
+            value={splitCsv(filters.language)}
+            onChange={(next) => setFilterList('language', next)}
+          />
+
+          <div className="relative shrink-0 overflow-visible">
+            <label className="block truncate text-xs font-bold leading-4 text-black">
+              [Input] Percentage Share:
             </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={filters.percentageShare}
+              onChange={(e) => onChange('percentageShare', e.target.value)}
+              placeholder="Ex. (25%, 35%, 50%, etc.,)"
+              className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
+            />
           </div>
-        ))}
+
+          <HeroFilterSelect
+            compact
+            label="Form Of Payment:"
+            placeholder="Ex. (Cash, Check, Credit Card etc.,)"
+            tree={FORM_OF_PAYMENT_TREE}
+            value={splitCsv(filters.formOfPayment)}
+            onChange={(next) => setFilterList('formOfPayment', next)}
+          />
+
+          <div className="relative shrink-0 overflow-visible">
+            <label className="block truncate text-xs font-bold leading-4 text-black">
+              Zipcode
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={filters.zip}
+              onChange={(e) => onChange('zip', e.target.value)}
+              placeholder="Zipcode..."
+              className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
+            />
+          </div>
+
+          <div className="relative shrink-0 overflow-visible">
+            <label className="block truncate text-xs font-bold leading-4 text-black">
+              Mile Radius
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={filters.radius}
+              onChange={(e) => onChange('radius', e.target.value)}
+              placeholder="Ex. (10. 20. 50 (Miles)..)"
+              className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="border-t border-line/80 bg-mist/40 p-3.5">
+      <div className="relative z-30 shrink-0 space-y-1 border-t border-ink/15 bg-white/95 px-3 pb-1.5 pt-1.5">
+        <label className="flex cursor-pointer items-center gap-2">
+          <input
+            type="checkbox"
+            checked={saveAsDefault}
+            onChange={(e) => setSaveAsDefault(e.target.checked)}
+            className="h-3.5 w-3.5 rounded-none border-ink/40 accent-brand"
+          />
+          <span className="text-xs font-medium text-black">Save as default</span>
+        </label>
         <Link to={resultsHref} className="block">
-          <Button className="w-full" size="lg" leftIcon={<Search className="h-4 w-4" />}>
-            Search
+          <Button
+            className="h-8 w-full rounded-md text-xs tracking-wide"
+            size="sm"
+            leftIcon={<Search className="h-3.5 w-3.5" />}
+          >
+            SEARCH
           </Button>
         </Link>
       </div>

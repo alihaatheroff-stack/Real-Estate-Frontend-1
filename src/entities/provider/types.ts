@@ -26,10 +26,14 @@ export type Provider = {
   id: string
   name: string
   title: string
+  company?: string
+  licenseNo?: string
+  dreNo?: string
   type: ProviderType
   specialty: string
   city: string
   state: string
+  country?: string
   zip: string
   lat: number
   lng: number

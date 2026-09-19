@@ -8,7 +8,7 @@ export function ResultsPage() {
   const [params] = useSearchParams()
   const { filters, updateFilter, resetFilters, toSearchParams, setFilters } =
     useProviderFilters({ find: 'service' })
-  const [sort, setSort] = useState<ServiceSortKey>('rating')
+  const [sort, setSort] = useState<ServiceSortKey[]>([])
   const q = params.get('q')?.toLowerCase() ?? ''
 
   useEffect(() => {
@@ -22,18 +22,23 @@ export function ResultsPage() {
         'condition',
         'priceBand',
         'subField',
+        'percentageShare',
+        'willingToTrain',
         'motive',
         'language',
         'referral',
         'zip',
         'radius',
-        'datePosted',
-        'responseTime',
-        'deliveryTime',
-        'priceFrom',
-        'priceTo',
+        'clientExperience',
+        'vacancy',
+        'propertyTitle',
+        'saleType',
+        'yourExperience',
         'englishLevel',
-        'region',
+        'paymentPacket',
+        'tierSelection',
+        'paymentMethods',
+        'paymentTerms',
       ] as const
     ).forEach((key) => {
       const value = params.get(key)

@@ -52,7 +52,7 @@ function AdvertiseLink({ className }: { className?: string }) {
     <Link
       to={PATHS.advertise}
       className={cn(
-        'block border-t border-line/60 bg-paper/95 px-2 py-2 text-center text-[10px] font-semibold tracking-wide text-ink transition hover:bg-accent hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
+        'block border-t border-accent/60 bg-accent px-2 py-2 text-center text-[10px] font-semibold tracking-wide text-ink transition hover:bg-brand hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50',
         className,
       )}
     >
@@ -64,23 +64,37 @@ function AdvertiseLink({ className }: { className?: string }) {
 export function HeroAdRails() {
   return (
     <>
-      {/* Left rail — flush to edge */}
-      <aside className="absolute inset-y-0 left-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-1.5 p-0 lg:flex">
-        <div className="flex min-h-0 flex-1 flex-col gap-1.5">
-          {LEFT_ADS.map((ad) => (
-            <AdCard key={ad.id} ad={ad} tall className="min-h-0 flex-1 rounded-none aspect-auto" />
-          ))}
-        </div>
+      {/* Left rail — top/bottom banners with slim middle gap for arrow */}
+      <aside className="absolute inset-y-0 left-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col p-0 lg:flex">
+        <AdCard
+          ad={LEFT_ADS[0]}
+          tall
+          className="min-h-0 flex-1 rounded-none aspect-auto"
+        />
+        <AdvertiseLink className="shrink-0" />
+        <div className="h-9 shrink-0" aria-hidden />
+        <AdCard
+          ad={LEFT_ADS[1]}
+          tall
+          className="min-h-0 flex-1 rounded-none aspect-auto"
+        />
         <AdvertiseLink className="shrink-0" />
       </aside>
 
-      {/* Right rail — two tall ads only (Wix template) */}
-      <aside className="absolute inset-y-0 right-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col gap-1.5 xl:flex">
-        <div className="flex min-h-0 flex-1 flex-col gap-1.5">
-          {RIGHT_STACK_ADS.map((ad) => (
-            <AdCard key={ad.id} ad={ad} tall className="min-h-0 flex-1 rounded-none aspect-auto" />
-          ))}
-        </div>
+      {/* Right rail — top/bottom banners with slim middle gap for arrow */}
+      <aside className="absolute inset-y-0 right-0 z-[6] hidden w-[clamp(7.5rem,11vw,11rem)] flex-col p-0 xl:flex">
+        <AdCard
+          ad={RIGHT_STACK_ADS[0]}
+          tall
+          className="min-h-0 flex-1 rounded-none aspect-auto"
+        />
+        <AdvertiseLink className="shrink-0" />
+        <div className="h-9 shrink-0" aria-hidden />
+        <AdCard
+          ad={RIGHT_STACK_ADS[1]}
+          tall
+          className="min-h-0 flex-1 rounded-none aspect-auto"
+        />
         <AdvertiseLink className="shrink-0" />
       </aside>
 

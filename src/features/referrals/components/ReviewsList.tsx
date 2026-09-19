@@ -121,7 +121,7 @@ export function ReviewsList({ reviews, averageRating, reviewCount }: ReviewsList
   return (
     <div className="space-y-8">
       <div className="grid gap-6 md:grid-cols-[220px_1fr] md:items-start">
-        <div className="rounded-2xl bg-[#fff4e8] px-6 py-8 text-left">
+        <div className="rounded-2xl bg-freeio-review px-6 py-8 text-left">
           <p className="font-display text-5xl font-bold text-accent">
             {formatRating(averageRating)}
           </p>
