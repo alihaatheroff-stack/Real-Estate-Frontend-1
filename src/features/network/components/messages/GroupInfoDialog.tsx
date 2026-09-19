@@ -98,14 +98,6 @@ export function GroupInfoDialog({
     )
   }, [addQuery, candidates])
 
-  if (!open || !chat || !identity) return null
-  const currentChat = chat
-
-  const dirty =
-    name.trim() !== (currentChat.groupName ?? '').trim() ||
-    avatar !== currentChat.groupAvatar ||
-    pendingAdds.length > 0
-
   function handleFile(file?: File | null) {
     if (!file || !file.type.startsWith('image/')) return
     void readFileAsDataUrl(file).then((url) => {
@@ -121,7 +113,8 @@ export function GroupInfoDialog({
   }
 
   function save() {
-    const nextName = name.trim() || currentChat.groupName || 'Group'
+    if (!chat) return
+    const nextName = name.trim() || chat.groupName || 'Group'
     onSave({
       name: nextName,
       avatar: avatar ?? null,
@@ -129,6 +122,13 @@ export function GroupInfoDialog({
     })
     onClose()
   }
+
+  if (!open || !chat || !identity) return null
+
+  const dirty =
+    name.trim() !== (chat.groupName ?? '').trim() ||
+    avatar !== chat.groupAvatar ||
+    pendingAdds.length > 0
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
@@ -356,7 +356,7 @@ export function GroupInfoDialog({
                       onKeyDown={(event) => {
                         if (event.key === 'Enter') setEditingName(false)
                         if (event.key === 'Escape') {
-                          setName(currentChat.groupName ?? '')
+                          setName(chat.groupName ?? '')
                           setEditingName(false)
                         }
                       }}

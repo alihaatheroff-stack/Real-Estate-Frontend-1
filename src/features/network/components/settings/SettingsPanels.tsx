@@ -134,13 +134,14 @@ export function LanguagePanel() {
   const me = getCurrentMember()
   const { saved, save } = useSaveFlash()
   const languageOptions = SETTINGS_LANGUAGES.map((item) => ({ value: item.value, label: item.label }))
-  const defaultLang =
-    SETTINGS_LANGUAGES.find((item) => item.label === me.languages[0])?.value ?? 'en'
-  const [appLanguage, setAppLanguage] = useState(defaultLang)
-  const [spoken, setSpoken] = useState<string[]>(
-    me.languages
-      .map((name) => SETTINGS_LANGUAGES.find((item) => item.label === name)?.value)
-      .filter((value): value is string => Boolean(value)),
+  const [appLanguage, setAppLanguage] = useState<string>(
+    SETTINGS_LANGUAGES.find((item) => item.label === me.languages[0])?.value ?? 'en',
+  )
+  const [spoken, setSpoken] = useState<string[]>(() =>
+    me.languages.flatMap((name) => {
+      const match = SETTINGS_LANGUAGES.find((item) => item.label === name)
+      return match ? [match.value] : []
+    }),
   )
 
   const availableToAdd = languageOptions.filter((item) => !spoken.includes(item.value))
@@ -164,7 +165,7 @@ export function LanguagePanel() {
         hint="Menus, buttons, and system text."
         value={appLanguage}
         options={languageOptions}
-        onChange={setAppLanguage}
+        onChange={(value) => setAppLanguage(value)}
         groupByLetter
       />
 

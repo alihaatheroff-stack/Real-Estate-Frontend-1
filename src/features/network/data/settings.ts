@@ -202,7 +202,7 @@ export const SETTINGS_LANGUAGES: { value: string; label: string }[] = [
   { value: 'yo', label: 'Yoruba' },
   { value: 'za', label: 'Zhuang' },
   { value: 'zu', label: 'Zulu' },
-] as const
+]
 
 export const VISIBILITY_OPTIONS = [
   { value: 'everyone', label: 'Everyone' },
