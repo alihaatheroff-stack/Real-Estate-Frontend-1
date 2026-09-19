@@ -184,20 +184,18 @@ export function AccountCredentialsBlock({
         <Button type="submit" className="w-full" size="lg">
           Create account
         </Button>
-        {import.meta.env.DEV ? (
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full"
-            size="sm"
-            onClick={() => {
-              setAuthenticated(true)
-              navigate(homeHref)
-            }}
-          >
-            Skip (testing)
-          </Button>
-        ) : null}
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full"
+          size="sm"
+          onClick={() => {
+            setAuthenticated(true)
+            navigate(homeHref)
+          }}
+        >
+          Skip (testing)
+        </Button>
       </div>
     </>
   )
