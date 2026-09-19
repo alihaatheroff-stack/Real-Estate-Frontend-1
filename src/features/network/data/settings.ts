@@ -17,7 +17,7 @@ export function parseSettingsTab(value: string | null): SettingsTab {
 }
 
 /** Worldwide languages (ISO 639-1 / common locale codes), A–Z by English label. */
-export const SETTINGS_LANGUAGES = [
+export const SETTINGS_LANGUAGES: { value: string; label: string }[] = [
   { value: 'ab', label: 'Abkhazian' },
   { value: 'aa', label: 'Afar' },
   { value: 'af', label: 'Afrikaans' },

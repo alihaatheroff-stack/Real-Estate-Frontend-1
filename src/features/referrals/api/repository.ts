@@ -39,11 +39,11 @@ export function getProviderById(id: string): Provider | undefined {
 
 export function listProvidersByType(type: ProviderType, limit?: number): Provider[] {
   const list = PROVIDERS.filter((provider) => provider.type === type)
-  return limit == null ? copyList(list) : list.slice(0, limit)
+  return limit == null ? copyList(list) : copyList(list.slice(0, limit))
 }
 
 export function listRelatedProviders(excludeId: string, limit = 4): Provider[] {
-  return PROVIDERS.filter((provider) => provider.id !== excludeId).slice(0, limit)
+  return copyList(PROVIDERS.filter((provider) => provider.id !== excludeId).slice(0, limit))
 }
 
 // —— Services ——
@@ -57,7 +57,7 @@ export function getServiceById(id: string): Service | undefined {
 }
 
 export function getServicesByProvider(providerId: string): Service[] {
-  return SERVICES.filter((service) => service.providerId === providerId)
+  return copyList(SERVICES.filter((service) => service.providerId === providerId))
 }
 
 export function getProviderForService(service: Service): Provider | undefined {
@@ -65,7 +65,7 @@ export function getProviderForService(service: Service): Provider | undefined {
 }
 
 export function listPopularServices(limit = 6): Service[] {
-  return SERVICES.slice(0, limit)
+  return copyList(SERVICES.slice(0, limit))
 }
 
 export function getDefaultServiceFaqs(): ServiceFaq[] {
@@ -80,7 +80,7 @@ export function listReviews(): Review[] {
 
 export function listReviewsForDisplay(limit?: number): Review[] {
   if (limit == null) return listReviews()
-  return REVIEWS.slice(0, Math.max(0, limit))
+  return copyList(REVIEWS.slice(0, Math.max(0, limit)))
 }
 
 // —— Categories ——

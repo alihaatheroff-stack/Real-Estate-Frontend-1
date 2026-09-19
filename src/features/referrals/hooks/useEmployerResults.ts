@@ -6,6 +6,7 @@ import {
 import type { EmployerSortKey } from '@/features/referrals/model/sort'
 import { listEmployers } from '@/features/referrals/api/repository'
 import { getCityCoords, milesBetween } from '@/features/referrals/lib/geo'
+import { shuffledCopy } from '@/shared/lib/array'
 import type { Employer } from '@/entities/employer/types'
 
 export const DEFAULT_EMPLOYER_FILTERS: EmployerFiltersState = {
@@ -89,12 +90,7 @@ export function useEmployerResults({
     )
 
     if (sort === 'random') {
-      const shuffled = [...list]
-      for (let i = shuffled.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1))
-          ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-      }
-      return shuffled
+      return shuffledCopy(list)
     }
 
     list.sort((a, b) => {

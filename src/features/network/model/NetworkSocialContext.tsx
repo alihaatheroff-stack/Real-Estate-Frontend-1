@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { NETWORK_CHATS, NETWORK_POSTS } from '@/features/network/data/feed'
 import { NETWORK_NOTES } from '@/features/network/data/notes'
-import { CURRENT_MEMBER_ID, getMember } from '@/features/network/data/members'
-import type { NetworkChat, NetworkNote, NetworkPost, PostAudience } from '@/features/network/data/types'
+import { CURRENT_MEMBER_ID, getCurrentMember, getMember } from '@/features/network/data/members'
+import type { ChatAttachment, NetworkChat, NetworkNote, NetworkPost, PostAudience } from '@/features/network/data/types'
 import {
   NetworkSocialContext,
   type FriendRequestAction,
@@ -21,6 +21,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
   const [chats, setChats] = useState<NetworkChat[]>(NETWORK_CHATS)
   const [notes, setNotes] = useState<NetworkNote[]>(() => sortNotes(NETWORK_NOTES))
   const [friendResponses, setFriendResponses] = useState<Record<string, FriendRequestAction>>({})
+  const [followingIds, setFollowingIds] = useState<string[]>(() => getCurrentMember().friendIds)
 
   const addPost = useCallback((input: { text: string; audience: PostAudience; image?: string }) => {
     const next: NetworkPost = {
@@ -80,6 +81,39 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       current.map((chat) => (chat.id === chatId && chat.unread > 0 ? { ...chat, unread: 0 } : chat)),
     )
   }, [])
+
+  const sendChatMessage = useCallback(
+    (chatId: string, payload: { text: string; attachments: ChatAttachment[] }) => {
+      const text = payload.text.trim()
+      if (!text && payload.attachments.length === 0) return
+      const next = {
+        id: `local-${Date.now()}`,
+        fromMe: true as const,
+        text,
+        time: 'Now',
+        read: true,
+        attachments: payload.attachments.length ? payload.attachments : undefined,
+      }
+      const preview = text || payload.attachments[0]?.name || 'Attachment'
+      setChats((current) => {
+        const index = current.findIndex((item) => item.id === chatId)
+        if (index < 0) return current
+        const chat = current[index]
+        if (!chat) return current
+        const updated = {
+          ...chat,
+          messages: [...chat.messages, next],
+          preview,
+          timeAgo: 'Now',
+          unread: 0,
+          section: 'recent' as const,
+        }
+        if (index === 0) return [updated, ...current.slice(1)]
+        return [updated, ...current.slice(0, index), ...current.slice(index + 1)]
+      })
+    },
+    [],
+  )
 
   const createGroupChat = useCallback((input: { name: string; memberIds: string[] }) => {
     const name = input.name.trim() || 'New group'
@@ -249,6 +283,15 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
 
   const respondToFriendRequest = useCallback((memberId: string, action: FriendRequestAction) => {
     setFriendResponses((current) => ({ ...current, [memberId]: action }))
+    if (action === 'accepted') {
+      setFollowingIds((current) => (current.includes(memberId) ? current : [...current, memberId]))
+    }
+  }, [])
+
+  const toggleFollow = useCallback((memberId: string) => {
+    setFollowingIds((current) =>
+      current.includes(memberId) ? current.filter((id) => id !== memberId) : [...current, memberId],
+    )
   }, [])
 
   const unreadMessageCount = useMemo(
@@ -263,10 +306,12 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       notes,
       unreadMessageCount,
       friendResponses,
+      followingIds,
       addPost,
       toggleLike,
       addComment,
       markChatRead,
+      sendChatMessage,
       createGroupChat,
       updateGroupChat,
       addNote,
@@ -274,6 +319,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       deleteNote,
       togglePinNote,
       respondToFriendRequest,
+      toggleFollow,
     }),
     [
       posts,
@@ -281,10 +327,12 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       notes,
       unreadMessageCount,
       friendResponses,
+      followingIds,
       addPost,
       toggleLike,
       addComment,
       markChatRead,
+      sendChatMessage,
       createGroupChat,
       updateGroupChat,
       addNote,
@@ -292,6 +340,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       deleteNote,
       togglePinNote,
       respondToFriendRequest,
+      toggleFollow,
     ],
   )
 

@@ -56,7 +56,7 @@ export function ServicesMapView({
     navigate(`${PATHS.results}?${toSearchParams().toString()}`)
   }
 
-  function focusService(id: string) {
+  function focusService(id: string | null) {
     setSelectedId(id)
   }
 

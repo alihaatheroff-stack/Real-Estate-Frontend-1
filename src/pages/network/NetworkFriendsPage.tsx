@@ -1,9 +1,10 @@
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { CommunityPersonCard, type CommunityCardMode } from '@/features/network/components/community/CommunityPersonCard'
 import { NetworkPageFrame } from '@/features/network/components/shell/NetworkPageFrame'
 import { FRIEND_REQUESTS, PEOPLE_YOU_MAY_KNOW } from '@/features/network/data/feed'
-import { NETWORK_MEMBERS, getCurrentMember, getFollowers, getFollowing, getMember } from '@/features/network/data/members'
+import { NETWORK_MEMBERS, getCurrentMember, getFollowers, getMember } from '@/features/network/data/members'
+import { useNetworkSocial } from '@/features/network/model/useNetworkSocial'
 import { cn } from '@/shared/lib/cn'
 import type { NetworkMember } from '@/features/network/data/types'
 
@@ -23,6 +24,7 @@ function parseCommunityTab(value: string | null): CommunityTab {
 
 export function NetworkFriendsPage() {
   const me = getCurrentMember()
+  const { friendResponses, followingIds } = useNetworkSocial()
   const [params, setParams] = useSearchParams()
   const tab = parseCommunityTab(params.get('tab'))
 
@@ -30,20 +32,31 @@ export function NetworkFriendsPage() {
     setParams(next === 'requests' ? {} : { tab: next }, { replace: true })
   }
 
-  const following = useMemo(() => getFollowing(me), [me])
+  const following = useMemo(
+    () =>
+      followingIds
+        .map((id) => getMember(id))
+        .filter((member): member is NetworkMember => member != null),
+    [followingIds],
+  )
 
   const followers = useMemo(() => getFollowers(me.id), [me.id])
 
+  const pendingRequestIds = useMemo(
+    () => FRIEND_REQUESTS.map((item) => item.memberId).filter((id) => !friendResponses[id]),
+    [friendResponses],
+  )
+
   const requests = useMemo(
     () =>
-      FRIEND_REQUESTS.map((request) => getMember(request.memberId)).filter(
-        (member): member is NetworkMember => member != null,
-      ),
-    [],
+      pendingRequestIds
+        .map((id) => getMember(id))
+        .filter((member): member is NetworkMember => member != null),
+    [pendingRequestIds],
   )
 
   const suggested = useMemo(() => {
-    const taken = new Set([me.id, ...me.friendIds, ...FRIEND_REQUESTS.map((item) => item.memberId)])
+    const taken = new Set([me.id, ...followingIds, ...pendingRequestIds])
     const fromHints = PEOPLE_YOU_MAY_KNOW.map((id) => getMember(id)).filter(
       (member): member is NetworkMember => member != null && !taken.has(member.id),
     )
@@ -51,7 +64,7 @@ export function NetworkFriendsPage() {
       (member) => !fromHints.some((item) => item.id === member.id),
     )
     return [...fromHints, ...extras]
-  }, [me.id, me.friendIds])
+  }, [followingIds, me.id, pendingRequestIds])
 
   const tabs: { id: CommunityTab; label: string }[] = [
     { id: 'requests', label: `${formatCount(requests.length)} Friend requests` },

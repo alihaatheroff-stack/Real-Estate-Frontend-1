@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { ListSortKey } from '@/features/referrals/model/sort'
 import { getServicesByProvider } from '@/features/referrals/api/repository'
+import { shuffledCopy } from '@/shared/lib/array'
 import type { Provider, Service } from '@/entities/provider/types'
 
 type UseProviderServicesOptions = {
@@ -24,7 +25,7 @@ export function useProviderServices({
       case 'price-desc':
         return list.sort((a, b) => b.startingPrice - a.startingPrice)
       case 'random':
-        return list.sort(() => Math.random() - 0.5)
+        return shuffledCopy(list)
       default:
         return list
     }

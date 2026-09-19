@@ -10,11 +10,64 @@ const CITY_COORDS: Record<string, [number, number]> = {
   austin: [30.2672, -97.7431],
   'san diego': [32.7157, -117.1611],
   madera: [36.9613, -120.0607],
+  orlando: [28.5383, -81.3792],
+}
+
+/** Mock ZIP centroids aligned with catalog provider locations. */
+const ZIP_COORDS: Record<string, [number, number]> = {
+  '93721': [36.7378, -119.7871],
+  '93728': [36.7378, -119.7871],
+  '93611': [36.8252, -119.7029],
+  '98101': [47.6062, -122.3321],
+  '93710': [36.8229, -119.7677],
+  '33130': [25.7617, -80.1918],
+  '93704': [36.8092, -119.8121],
+  '93619': [36.8485, -119.6856],
+  '78701': [30.2672, -97.7431],
+  '90012': [34.0522, -118.2437],
+  '92101': [32.7157, -117.1611],
+  '93711': [36.8372, -119.8334],
+  '93637': [36.9613, -120.0607],
+  '93230': [36.3275, -119.6457],
+}
+
+type GeoPoint = {
+  lat: number
+  lng: number
+  zip?: string
+  radiusMiles?: number
 }
 
 export function getCityCoords(cityOrSlug: string): [number, number] | null {
   const key = cityOrSlug.trim().toLowerCase().replaceAll('-', ' ')
   return CITY_COORDS[key] ?? null
+}
+
+export function resolveSearchOrigin(zipOrCity: string): [number, number] | null {
+  const trimmed = zipOrCity.trim()
+  if (!trimmed) return null
+  return ZIP_COORDS[trimmed.replace(/\s+/g, '')] ?? getCityCoords(trimmed)
+}
+
+function parseRadiusMiles(radius: string): number | null {
+  const miles = Number(radius)
+  return !Number.isNaN(miles) && miles > 0 ? miles : null
+}
+
+/** True when a catalog point falls inside the ZIP/city search circle (and its own coverage). */
+export function matchesZipRadius(point: GeoPoint, zip: string, radius: string): boolean {
+  const origin = resolveSearchOrigin(zip)
+  const miles = parseRadiusMiles(radius)
+
+  if (origin && miles != null) {
+    const distance = milesBetween(origin, [point.lat, point.lng])
+    if (distance > miles) return false
+    if (point.radiusMiles != null && distance > point.radiusMiles) return false
+    return true
+  }
+
+  const wanted = zip.trim().replace(/\s+/g, '')
+  return Boolean(point.zip && point.zip.replace(/\s+/g, '') === wanted)
 }
 
 /** Approximate distance in miles between two lat/lng points. */

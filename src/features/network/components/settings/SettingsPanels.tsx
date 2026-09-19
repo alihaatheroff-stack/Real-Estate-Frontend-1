@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Camera, Search, X } from 'lucide-react'
 import { networkProfilePath } from '@/app/router/paths'
@@ -20,14 +20,20 @@ import {
 } from '@/features/network/data/settings'
 import { NETWORK_MEMBERS, getCurrentMember, getMember } from '@/features/network/data/members'
 import { cn } from '@/shared/lib/cn'
+import { readFileAsDataUrl } from '@/shared/lib/fileDataUrl'
 
 function useSaveFlash() {
   const [saved, setSaved] = useState(false)
+  const timeoutRef = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(timeoutRef.current), [])
+
   return {
     saved,
     save() {
       setSaved(true)
-      window.setTimeout(() => setSaved(false), 1800)
+      window.clearTimeout(timeoutRef.current)
+      timeoutRef.current = window.setTimeout(() => setSaved(false), 1800)
     },
   }
 }
@@ -71,8 +77,9 @@ export function EditProfilePanel() {
             className="sr-only"
             onChange={(event) => {
               const file = event.target.files?.[0]
+              event.target.value = ''
               if (!file) return
-              setAvatar(URL.createObjectURL(file))
+              void readFileAsDataUrl(file).then(setAvatar)
             }}
           />
         </label>

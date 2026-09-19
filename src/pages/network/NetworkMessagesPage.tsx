@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChatThread } from '@/features/network/components/messages/ChatThread'
 import { ConversationList, type InboxTab } from '@/features/network/components/messages/ConversationList'
 import { GroupInfoDialog } from '@/features/network/components/messages/GroupInfoDialog'
@@ -6,16 +6,15 @@ import { NewGroupDialog } from '@/features/network/components/messages/NewGroupD
 import { matchesChatQuery } from '@/features/network/components/messages/chatIdentity'
 import { useNetworkSocial } from '@/features/network/model/useNetworkSocial'
 import { cn } from '@/shared/lib/cn'
-import type { ChatAttachment, ChatMessage } from '@/features/network/data/types'
+import type { ChatAttachment } from '@/features/network/data/types'
 
 export function NetworkMessagesPage() {
-  const { chats, markChatRead, createGroupChat, updateGroupChat } = useNetworkSocial()
+  const { chats, markChatRead, sendChatMessage, createGroupChat, updateGroupChat } = useNetworkSocial()
   const [activeId, setActiveId] = useState(chats[0]?.id ?? '')
   const [mobileThread, setMobileThread] = useState(false)
   const [listOpen, setListOpen] = useState(true)
   const [newGroupOpen, setNewGroupOpen] = useState(false)
   const [groupInfoOpen, setGroupInfoOpen] = useState(false)
-  const [drafts, setDrafts] = useState<Record<string, ChatMessage[]>>({})
   const [text, setText] = useState('')
   const [filter, setFilter] = useState('')
   const [tab, setTab] = useState<InboxTab>('all')
@@ -40,21 +39,16 @@ export function NetworkMessagesPage() {
     })
   }, [chats, filter, tab])
 
+  useEffect(() => {
+    if (visibleChats.some((chat) => chat.id === activeId)) return
+    setActiveId(visibleChats[0]?.id ?? '')
+  }, [activeId, visibleChats])
+
   const active = chats.find((chat) => chat.id === activeId) ?? visibleChats[0]
-  const extra = active ? (drafts[active.id] ?? []) : []
-  const thread = active ? [...active.messages, ...extra] : []
 
   function send(payload: { text: string; attachments: ChatAttachment[] }) {
     if (!active || (!payload.text && payload.attachments.length === 0)) return
-    const next: ChatMessage = {
-      id: `local-${Date.now()}`,
-      fromMe: true,
-      text: payload.text,
-      time: 'Now',
-      read: true,
-      attachments: payload.attachments.length ? payload.attachments : undefined,
-    }
-    setDrafts((current) => ({ ...current, [active.id]: [...(current[active.id] ?? []), next] }))
+    sendChatMessage(active.id, payload)
     setText('')
   }
 
@@ -110,7 +104,7 @@ export function NetworkMessagesPage() {
         {active ? (
           <ChatThread
             chat={active}
-            messages={thread}
+            messages={active.messages}
             draft={text}
             onDraft={setText}
             onSend={send}

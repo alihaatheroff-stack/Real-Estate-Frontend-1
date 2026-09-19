@@ -5,6 +5,7 @@ import {
   listServices,
 } from '@/features/referrals/api/repository'
 import type { ServiceSortKey } from '@/features/referrals/model/sort'
+import { matchesZipRadius } from '@/features/referrals/lib/geo'
 import { splitCsv, type HeroFiltersState } from '@/features/search'
 
 export type { ServiceSortKey }
@@ -92,14 +93,11 @@ export function useServiceResults({ q, filters, sort }: UseServiceResultsOptions
       })
     }
 
-    if (filters.radius && filters.zip) {
-      const radius = Number(filters.radius)
-      if (!Number.isNaN(radius) && radius > 0) {
-        list = list.filter((s) => {
-          const provider = getProviderForService(s)
-          return provider ? provider.radiusMiles <= radius : true
-        })
-      }
+    if (filters.zip) {
+      list = list.filter((s) => {
+        const provider = getProviderForService(s)
+        return provider ? matchesZipRadius(provider, filters.zip, filters.radius) : false
+      })
     }
 
     if (filters.percentageShare) {
@@ -122,7 +120,7 @@ export function useServiceResults({ q, filters, sort }: UseServiceResultsOptions
         return trainFilters.some((train) => {
           if (train === 'yes') return provider.learningIncluded
           if (train === 'no') return !provider.learningIncluded
-          if (train === 'maybe') return true
+          // Catalog only encodes yes/no. "Maybe" must not match every provider.
           return false
         })
       })

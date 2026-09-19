@@ -27,6 +27,7 @@ type HeroFilterSelectProps = {
   alwaysShowPlaceholder?: boolean
   /** Two-column menu: options left, draggable priority list right (register). */
   showPriorityPanel?: boolean
+  invalid?: boolean
   className?: string
 }
 
@@ -454,6 +455,7 @@ export function HeroFilterSelect({
   openOnHover = false,
   alwaysShowPlaceholder = false,
   showPriorityPanel = false,
+  invalid = false,
   className,
 }: HeroFilterSelectProps) {
   const [open, setOpen] = useState(false)
@@ -548,7 +550,7 @@ export function HeroFilterSelect({
       className={cn(
         'inline-flex max-w-full items-center gap-1 font-bold',
         compact
-          ? 'text-sm leading-snug text-ink'
+          ? cn('text-sm leading-snug', invalid ? 'text-danger' : 'text-ink')
           : 'text-sm text-white',
         labelInsideShell && 'px-2 pt-2',
       )}
@@ -585,7 +587,9 @@ export function HeroFilterSelect({
           labelInsideShell &&
             cn(
               'relative overflow-hidden border-2 bg-white shadow-sm transition',
-              open || value.length > 0
+              invalid
+                ? 'rounded-xl border-danger'
+                : open || value.length > 0
                 ? cn(
                     // Sharp top corners so green never wraps the top curve; L/R/B stay brand.
                     // Top edge stays invisible (no gray/green line).

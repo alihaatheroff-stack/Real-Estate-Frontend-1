@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { networkProfilePath } from '@/app/router/paths'
 import { COMMUNITY_SOCIALS } from '@/features/network/components/community/SocialPlatformIcons'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
 import type { NetworkMember } from '@/features/network/data/types'
+import { useNetworkSocial } from '@/features/network/model/useNetworkSocial'
 import { cn } from '@/shared/lib/cn'
 
 export type CommunityCardMode = 'request' | 'follower' | 'following' | 'suggest'
@@ -15,19 +15,36 @@ export function CommunityPersonCard({
   member: NetworkMember
   mode: CommunityCardMode
 }) {
-  const [status, setStatus] = useState<'idle' | 'ignored' | 'done'>('idle')
+  const { friendResponses, respondToFriendRequest, followingIds, toggleFollow } = useNetworkSocial()
+  const requestStatus = friendResponses[member.id]
+  const following = followingIds.includes(member.id)
 
-  const followingMode = mode === 'following'
-  const connected = followingMode ? status !== 'done' : status === 'done'
-  const primaryLabel =
-    mode === 'request'
-      ? status === 'done'
-        ? 'Friends'
-        : 'Confirm'
-      : connected
-        ? 'Unfollow'
-        : 'Follow'
-  const primaryFilled = !connected && status !== 'ignored'
+  const requestMode = mode === 'request'
+  const declined = requestMode && requestStatus === 'declined'
+  const accepted = requestMode && requestStatus === 'accepted'
+  const connected = requestMode ? accepted : following
+  const primaryLabel = requestMode
+    ? accepted
+      ? 'Friends'
+      : 'Confirm'
+    : connected
+      ? 'Unfollow'
+      : 'Follow'
+  const primaryFilled = !connected && !declined
+
+  function onIgnore() {
+    if (!requestMode || requestStatus) return
+    respondToFriendRequest(member.id, 'declined')
+  }
+
+  function onPrimary() {
+    if (requestMode) {
+      if (requestStatus) return
+      respondToFriendRequest(member.id, 'accepted')
+      return
+    }
+    toggleFollow(member.id)
+  }
 
   return (
     <article className="flex flex-col rounded-2xl bg-white p-4 shadow-[0_8px_24px_rgba(15,31,26,0.06)] ring-1 ring-black/[0.04]">
@@ -53,27 +70,27 @@ export function CommunityPersonCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className={cn('mt-4 grid gap-2', requestMode ? 'grid-cols-2' : 'grid-cols-1')}>
+        {requestMode ? (
+          <button
+            type="button"
+            disabled={Boolean(requestStatus)}
+            onClick={onIgnore}
+            className={cn(
+              'h-10 rounded-full border text-sm font-semibold transition',
+              declined ? 'border-line bg-mist text-muted' : 'border-line bg-white text-ink hover:bg-mist',
+            )}
+          >
+            {declined ? 'Ignored' : 'Ignore'}
+          </button>
+        ) : null}
         <button
           type="button"
-          disabled={status === 'ignored'}
-          onClick={() => setStatus('ignored')}
-          className={cn(
-            'h-10 rounded-full border text-sm font-semibold transition',
-            status === 'ignored'
-              ? 'border-line bg-mist text-muted'
-              : 'border-line bg-white text-ink hover:bg-mist',
-          )}
-        >
-          {status === 'ignored' ? 'Ignored' : 'Ignore'}
-        </button>
-        <button
-          type="button"
-          disabled={status === 'ignored'}
-          onClick={() => setStatus((value) => (value === 'done' ? 'idle' : 'done'))}
+          disabled={declined || accepted}
+          onClick={onPrimary}
           className={cn(
             'h-10 rounded-full text-sm font-semibold transition',
-            status === 'ignored'
+            declined
               ? 'bg-mist text-muted'
               : primaryFilled
                 ? 'bg-brand text-white hover:bg-brand-dark'

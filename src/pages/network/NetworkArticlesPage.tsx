@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { PATHS, networkArticlePath, networkProfilePath } from '@/app/router/paths'
@@ -125,6 +125,9 @@ export function NetworkArticleDetailPage() {
   const [email, setEmail] = useState('')
   const [saveInfo, setSaveInfo] = useState(true)
   const [submitted, setSubmitted] = useState(false)
+  const submittedTimer = useRef(0)
+
+  useEffect(() => () => window.clearTimeout(submittedTimer.current), [])
 
   if (!article || !author) return <Navigate to={PATHS.networkArticles} replace />
 
@@ -151,7 +154,8 @@ export function NetworkArticleDetailPage() {
       setName('')
       setEmail('')
     }
-    window.setTimeout(() => setSubmitted(false), 2200)
+    window.clearTimeout(submittedTimer.current)
+    submittedTimer.current = window.setTimeout(() => setSubmitted(false), 2200)
   }
 
   const mid = Math.ceil(takeaways.length / 2)

@@ -1,20 +1,16 @@
 import { useMemo } from 'react'
 import { listProviders } from '@/features/referrals/api/repository'
+import { matchesZipRadius } from '@/features/referrals/lib/geo'
 import type { ProviderSortKey } from '@/features/referrals/model/sort'
 import {
   FREELANCER_CATEGORY_OPTIONS,
+  splitCsv,
   type HeroFiltersState,
 } from '@/features/search'
+import { shuffledCopy } from '@/shared/lib/array'
 import type { Provider } from '@/entities/provider/types'
 
 export type { ProviderSortKey }
-
-function parseMulti(value: string) {
-  return value
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
 
 function joinedTime(value?: string) {
   if (!value) return 0
@@ -64,7 +60,7 @@ export function useProfileResults({
       )
     }
 
-    const categories = parseMulti(filters.pspCategory)
+    const categories = splitCsv(filters.pspCategory)
     if (categories.length) {
       list = list.filter((p) => {
         const text =
@@ -73,7 +69,11 @@ export function useProfileResults({
       })
     }
 
-    const regions = parseMulti(filters.region)
+    if (filters.zip) {
+      list = list.filter((p) => matchesZipRadius(p, filters.zip, filters.radius))
+    }
+
+    const regions = splitCsv(filters.region)
     if (regions.length) {
       list = list.filter((p) => {
         const city = p.city.toLowerCase()
@@ -96,7 +96,7 @@ export function useProfileResults({
     if (filters.freelancerType === 'agency') {
       list = list.filter((p) => p.type === 'professional' && p.verified)
     } else if (filters.freelancerType === 'independent') {
-      list = list.filter((p) => p.type === 'professional' || p.type === 'trade')
+      list = list.filter((p) => p.type === 'trade' || !p.verified)
     } else if (filters.freelancerType === 'rising') {
       list = list.filter((p) => !p.verified || p.reviewCount < 80)
     }
@@ -109,12 +109,7 @@ export function useProfileResults({
     }
 
     if (sort === 'random') {
-      const shuffled = [...list]
-      for (let i = shuffled.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-      }
-      return shuffled
+      return shuffledCopy(list)
     }
 
     list.sort((a, b) => {
@@ -136,7 +131,9 @@ export function useProfileResults({
     filters.gender,
     filters.language,
     filters.pspCategory,
+    filters.radius,
     filters.region,
+    filters.zip,
     q,
     sort,
   ])

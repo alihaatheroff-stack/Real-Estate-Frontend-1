@@ -109,6 +109,7 @@ export function useRegisterPspForm() {
   ) {
     setProfileFilters((prev) => ({ ...prev, [key]: value }))
     setError('')
+    if (key === 'pspCategory') clearFieldError('pspCategory')
   }
 
   function setProfileFilterList(key: keyof HeroFiltersState, next: string[]) {
@@ -651,7 +652,9 @@ export function useRegisterPspForm() {
       return false
     }
     if (!profileFilters.pspCategory.trim()) {
+      nextErrors.pspCategory = true
       setError('Select a primary PSP category.')
+      setFieldErrors(nextErrors)
       return false
     }
     if (!isManualComplete(data.license, 'license')) {

@@ -15,6 +15,7 @@ import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
 import { CURRENT_MEMBER_ID, NETWORK_MEMBERS, STOCK, getMember } from '@/features/network/data/members'
 import type { NetworkChat, NetworkMember } from '@/features/network/data/types'
 import { cn } from '@/shared/lib/cn'
+import { readFileAsDataUrl } from '@/shared/lib/fileDataUrl'
 
 const GROUP_PHOTO_PRESETS = [
   STOCK.tower,
@@ -98,17 +99,19 @@ export function GroupInfoDialog({
   }, [addQuery, candidates])
 
   if (!open || !chat || !identity) return null
+  const currentChat = chat
 
   const dirty =
-    name.trim() !== (chat.groupName ?? '').trim() ||
-    avatar !== chat.groupAvatar ||
+    name.trim() !== (currentChat.groupName ?? '').trim() ||
+    avatar !== currentChat.groupAvatar ||
     pendingAdds.length > 0
 
   function handleFile(file?: File | null) {
     if (!file || !file.type.startsWith('image/')) return
-    const url = URL.createObjectURL(file)
-    setAvatar(url)
-    setPickingPhoto(false)
+    void readFileAsDataUrl(file).then((url) => {
+      setAvatar(url)
+      setPickingPhoto(false)
+    })
   }
 
   function togglePending(id: string) {
@@ -118,7 +121,7 @@ export function GroupInfoDialog({
   }
 
   function save() {
-    const nextName = name.trim() || chat.groupName || 'Group'
+    const nextName = name.trim() || currentChat.groupName || 'Group'
     onSave({
       name: nextName,
       avatar: avatar ?? null,
@@ -353,7 +356,7 @@ export function GroupInfoDialog({
                       onKeyDown={(event) => {
                         if (event.key === 'Enter') setEditingName(false)
                         if (event.key === 'Escape') {
-                          setName(chat.groupName ?? '')
+                          setName(currentChat.groupName ?? '')
                           setEditingName(false)
                         }
                       }}

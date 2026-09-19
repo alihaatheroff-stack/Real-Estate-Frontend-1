@@ -158,6 +158,7 @@ export function RegisterPspForm() {
           onAddFormOfPaymentMethod={form.addFormOfPaymentMethod}
           onUpdateFormOfPaymentMethod={form.updateFormOfPaymentMethod}
           onRemoveFormOfPaymentMethod={form.removeFormOfPaymentMethod}
+          pspCategoryInvalid={Boolean(form.fieldErrors.pspCategory)}
         />
 
         <FormSection title="Membership" step={6}>

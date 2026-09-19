@@ -336,6 +336,7 @@ export type FieldErrorKey =
   | 'insuranceInfo'
   | 'acceptedPrivacyPolicy'
   | 'acceptedTermsOfService'
+  | 'pspCategory'
   | BusinessFieldKey
   | `employee.${string}.${BusinessEmployeeField}`
 

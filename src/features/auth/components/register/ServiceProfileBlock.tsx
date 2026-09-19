@@ -60,6 +60,7 @@ export function ServiceProfileBlock({
   onAddFormOfPaymentMethod,
   onUpdateFormOfPaymentMethod,
   onRemoveFormOfPaymentMethod,
+  pspCategoryInvalid,
 }: {
   step?: number
   profileFilters: HeroFiltersState
@@ -85,6 +86,7 @@ export function ServiceProfileBlock({
     value: string | boolean,
   ) => void
   onRemoveFormOfPaymentMethod: (id: string) => void
+  pspCategoryInvalid?: boolean
 }) {
   return (
     <FormSection title="Service profile" step={step}>
@@ -105,6 +107,7 @@ export function ServiceProfileBlock({
             nestedTrees={PSP_NESTED_TREES}
             value={selectedPsp}
             onChange={(next) => setProfileFilterList('pspCategory', next)}
+            invalid={pspCategoryInvalid}
           />
 
           {showRepresentation ? (
