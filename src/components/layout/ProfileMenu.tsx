@@ -109,79 +109,22 @@ function MenuRow({
 export function GuestAccountMenu({
   className,
   signInHref,
-  registerHref,
 }: {
   className?: string
   signInHref: string
-  registerHref: string
+  registerHref?: string
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuId = useId()
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!menuOpen) return
-
-    function handlePointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setMenuOpen(false)
-      }
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setMenuOpen(false)
-    }
-
-    document.addEventListener('mousedown', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [menuOpen])
-
   return (
-    <div ref={rootRef} className={cn('relative', className)}>
-      <button
-        type="button"
-        className={cn(
-          'inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
-          menuOpen && 'bg-mist',
-        )}
-        aria-label="Account menu"
-        aria-haspopup="menu"
-        aria-expanded={menuOpen}
-        aria-controls={menuId}
-        onClick={() => setMenuOpen((open) => !open)}
-      >
-        <User className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" aria-hidden />
-      </button>
-
-      {menuOpen ? (
-        <div
-          id={menuId}
-          role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(92vw,14rem)] overflow-hidden rounded-xl border border-line bg-white py-1 shadow-soft"
-        >
-          <Link
-            to={signInHref}
-            role="menuitem"
-            className="flex w-full px-4 py-2.5 text-left text-sm text-ink transition hover:bg-mist"
-            onClick={() => setMenuOpen(false)}
-          >
-            Sign In
-          </Link>
-          <Link
-            to={registerHref}
-            role="menuitem"
-            className="flex w-full px-4 py-2.5 text-left text-sm font-semibold text-ink transition hover:bg-mist"
-            onClick={() => setMenuOpen(false)}
-          >
-            Register
-          </Link>
-        </div>
-      ) : null}
-    </div>
+    <Link
+      to={signInHref}
+      className={cn(
+        'inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
+        className,
+      )}
+      aria-label="Sign in or register"
+    >
+      <User className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" aria-hidden />
+    </Link>
   )
 }
 

@@ -6,6 +6,8 @@ type RangeSliderProps = {
   value: number
   onChange: (value: number) => void
   formatLabel?: (value: number) => string
+  /** `freeio`: thin track + solid round thumb, matching the marketplace distance bar. */
+  variant?: 'brand' | 'freeio'
   className?: string
 }
 
@@ -15,24 +17,38 @@ export function RangeSlider({
   value,
   onChange,
   formatLabel,
+  variant = 'brand',
   className,
 }: RangeSliderProps) {
   const percent = max === min ? 0 : ((value - min) / (max - min)) * 100
+  const isFreeio = variant === 'freeio'
 
   return (
     <div className={cn('space-y-3', className)}>
-      <div className="relative h-2 rounded-full bg-line">
-        <div
-          className="absolute inset-y-0 left-0 rounded-full bg-brand"
-          style={{ width: `${percent}%` }}
-        />
+      <div className={cn('relative', isFreeio ? 'h-5' : 'h-2 rounded-full bg-line')}>
+        {isFreeio ? (
+          <div className="absolute top-1/2 right-0 left-0 h-1 -translate-y-1/2 rounded-full bg-freeio-border">
+            <div
+              className="absolute inset-y-0 left-0 rounded-full bg-freeio-ink"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        ) : (
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-brand"
+            style={{ width: `${percent}%` }}
+          />
+        )}
         <input
           type="range"
           min={min}
           max={max}
           value={value}
           onChange={(event) => onChange(Number(event.target.value))}
-          className="range-slider absolute inset-0 h-2 w-full cursor-pointer appearance-none bg-transparent"
+          className={cn(
+            'range-slider absolute inset-0 w-full cursor-pointer appearance-none bg-transparent',
+            isFreeio ? 'range-slider-freeio h-5' : 'h-2',
+          )}
           aria-valuemin={min}
           aria-valuemax={max}
           aria-valuenow={value}

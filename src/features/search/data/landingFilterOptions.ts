@@ -5,6 +5,8 @@ export type FilterTreeNode = {
   children?: FilterTreeNode[]
   /** When set, renders as an external link instead of a checkbox. */
   href?: string
+  /** Render children grouped under A…, B… letter headings. */
+  groupByLetter?: boolean
 }
 
 /** A–Z PSP list (main rows) */
@@ -281,8 +283,9 @@ export const FIELD_TREE: FilterTreeNode[] = [
   },
   {
     label: 'Industrial',
+    groupByLetter: true,
     children: [
-      { label: 'Factories' },
+      { label: 'Factory' },
       { label: 'Warehouse' },
       { label: 'Land' },
 
@@ -340,7 +343,11 @@ export const SUB_FIELD_BY_FIELD: Record<string, FilterTreeNode[]> = Object.fromE
 /** Flattened sub-field tree for when no field filter is set. */
 export const SUB_FIELD_TREE: FilterTreeNode[] = FIELD_TREE.flatMap((node) =>
   node.children?.length
-    ? [{ label: node.label, children: node.children }]
+    ? [{
+        label: node.label,
+        children: node.children,
+        groupByLetter: node.groupByLetter,
+      }]
     : [],
 )
 
@@ -351,9 +358,14 @@ export function getSubFieldTree(selectedFields: string[]): FilterTreeNode[] {
     return SUB_FIELD_TREE
   }
   return fields.flatMap((field) => {
-    const children = SUB_FIELD_BY_FIELD[field]
+    const match = FIELD_TREE.find((node) => node.label === field)
+    const children = match?.children ?? SUB_FIELD_BY_FIELD[field]
     if (!children?.length) return []
-    return [{ label: field, children }]
+    return [{
+      label: field,
+      children,
+      groupByLetter: match?.groupByLetter,
+    }]
   })
 }
 
@@ -384,10 +396,6 @@ export const CLIENT_EXPERIENCE_TREE: FilterTreeNode[] = [
   },
   { label: 'Repeat Seller-Buyer' },
   { label: 'Vacational' },
-  {
-    label: 'Investment',
-    children: [{ label: "Suggestion PSP's of same zipcode" }],
-  },
   { label: 'All of the above' },
 ]
 

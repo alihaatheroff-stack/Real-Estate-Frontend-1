@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { cn } from '@/shared/lib/cn'
@@ -27,6 +27,8 @@ type HeroFilterSelectProps = {
   alwaysShowPlaceholder?: boolean
   /** Two-column menu: options left, draggable priority list right (register). */
   showPriorityPanel?: boolean
+  /** A–Z section labels: boxed bar (default) or underline only, no borders. */
+  letterHeading?: 'bar' | 'underline'
   invalid?: boolean
   className?: string
 }
@@ -45,6 +47,89 @@ function moveItem(list: string[], from: number, to: number) {
 
 function preferenceLabel(value: string) {
   return value.split(' > ').join(' · ')
+}
+
+function parseExampleList(text: string) {
+  const match = text.match(/^(.*\()(.*?)(\)\s*)$/)
+  if (!match) return null
+  const items = match[2]
+    .replace(/(?:,\s*)?etc\.?,?\s*$/i, '')
+    .replace(/,\s*$/, '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter((item) => item && !/^etc\.?$/i.test(item))
+  if (items.length === 0) return null
+  return { prefix: match[1], items }
+}
+
+function fitVisibleEtc(
+  text: string,
+  maxWidth: number,
+  measure: (value: string) => number,
+) {
+  if (maxWidth <= 0 || measure(text) <= maxWidth) return text
+
+  const parsed = parseExampleList(text)
+  if (parsed) {
+    for (let count = parsed.items.length; count >= 1; count -= 1) {
+      const candidate = `${parsed.prefix}${parsed.items.slice(0, count).join(', ')}, etc.)`
+      if (measure(candidate) <= maxWidth) return candidate
+    }
+    const fallback = `${parsed.prefix}etc.)`
+    if (measure(fallback) <= maxWidth) return fallback
+  }
+
+  const words = text
+    .replace(/\s+etc\.?,?\s*\)?$/i, '')
+    .split(/\s+/)
+    .filter(Boolean)
+  for (let count = words.length; count >= 1; count -= 1) {
+    const candidate = `${words.slice(0, count).join(' ')} etc.`
+    if (measure(candidate) <= maxWidth) return candidate
+  }
+  return 'etc.'
+}
+
+function FittedEtcText({
+  text,
+  className,
+}: {
+  text: string
+  className?: string
+}) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const [fitted, setFitted] = useState(text)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    const ctx = document.createElement('canvas').getContext('2d')
+    if (!el || !ctx) return
+    const node = el
+    const canvas = ctx
+
+    function measure(value: string) {
+      const styles = getComputedStyle(node)
+      canvas.font = `${styles.fontStyle} ${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`
+      return canvas.measureText(value).width
+    }
+
+    function update() {
+      const width = node.clientWidth
+      if (width <= 0) return
+      setFitted(fitVisibleEtc(text, width, measure))
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [text])
+
+  return (
+    <span ref={ref} className={className} title={text}>
+      {fitted}
+    </span>
+  )
 }
 
 function formatPreferenceSummary(values: string[]) {
@@ -224,7 +309,7 @@ function OptionRow({
           onClick={onToggle}
           data-option-key={optionKey ?? item}
           className={cn(
-            'self-start whitespace-nowrap py-2 text-left text-sm leading-snug text-ink',
+            'min-w-0 flex-1 whitespace-normal break-words py-2 pr-2.5 text-left text-sm leading-snug text-ink',
             checked && 'font-medium',
             hovered && 'underline decoration-ink underline-offset-4',
           )}
@@ -267,6 +352,7 @@ function GroupHeadingRow({
   checked,
   onToggle,
   compact = false,
+  dottedLeader = false,
   optionKey,
   hovered = false,
 }: {
@@ -274,6 +360,7 @@ function GroupHeadingRow({
   checked: boolean
   onToggle: () => void
   compact?: boolean
+  dottedLeader?: boolean
   optionKey?: string
   hovered?: boolean
 }) {
@@ -299,20 +386,26 @@ function GroupHeadingRow({
           type="button"
           onClick={onToggle}
           data-option-key={optionKey ?? item}
-          className="flex min-w-0 flex-1 items-center gap-2 py-2 pr-2.5 text-left text-sm font-semibold leading-snug text-ink"
+          className={cn(
+            'flex min-w-0 items-start gap-2 py-2 pr-2.5 text-left text-sm font-semibold leading-snug text-ink',
+            dottedLeader && 'flex-1',
+          )}
         >
           <span
             className={cn(
-              'shrink-0 whitespace-nowrap',
+              'whitespace-normal break-words',
+              dottedLeader ? 'min-w-0 flex-1' : 'shrink-0',
               hovered && 'underline decoration-ink underline-offset-4',
             )}
           >
             {item}
           </span>
-          <span
-            className="mt-1.5 min-w-[2rem] flex-1 border-b border-dotted border-ink/45"
-            aria-hidden
-          />
+          {dottedLeader ? (
+            <span
+              className="mt-2.5 min-w-[2rem] flex-1 border-b border-dotted border-ink/45"
+              aria-hidden
+            />
+          ) : null}
         </button>
       </div>
     )
@@ -339,10 +432,12 @@ function GroupHeadingRow({
         <span className="mt-0.5 shrink-0 whitespace-nowrap text-sm font-semibold leading-snug text-black">
           {item}
         </span>
-        <span
-          className="mt-2 min-w-[2rem] flex-1 border-b border-dotted border-black/40"
-          aria-hidden
-        />
+        {dottedLeader ? (
+          <span
+            className="mt-2 min-w-[2rem] flex-1 border-b border-dotted border-black/40"
+            aria-hidden
+          />
+        ) : null}
       </label>
     </div>
   )
@@ -371,12 +466,76 @@ function LinkRow({ item, href, compact = false }: { item: string; href: string; 
   )
 }
 
+function letterOf(label: string) {
+  const match = label.match(/[A-Za-z]/)
+  return (match?.[0] ?? '#').toUpperCase()
+}
+
+function groupNodesByLetter(nodes: FilterTreeNode[]) {
+  const groups = new Map<string, FilterTreeNode[]>()
+  const sorted = [...nodes].sort((a, b) =>
+    a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }),
+  )
+  for (const node of sorted) {
+    const letter = letterOf(node.label)
+    const list = groups.get(letter) ?? []
+    list.push(node)
+    groups.set(letter, list)
+  }
+  return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b))
+}
+
+function LetterHeading({
+  letter,
+  compact,
+  rule = true,
+  variant = 'bar',
+}: {
+  letter: string
+  compact: boolean
+  rule?: boolean
+  variant?: 'bar' | 'underline'
+}) {
+  if (variant === 'underline') {
+    return (
+      <div
+        className={cn(
+          'px-3 py-1.5 text-xs font-bold uppercase tracking-wide',
+          compact ? 'text-ink' : 'text-black/55',
+        )}
+      >
+        <span className="underline decoration-ink underline-offset-4">
+          {letter}...
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        'sticky top-0 z-10 px-2 py-1.5 text-xs font-bold uppercase tracking-wide',
+        compact
+          ? cn(
+              'bg-white px-3 py-2 text-ink',
+              rule && 'border-b border-line shadow-sm',
+            )
+          : 'bg-white text-black/55',
+      )}
+    >
+      {letter}...
+    </div>
+  )
+}
+
 function TreeNodes({
   nodes,
   value,
   onChange,
   path = '',
   compact = false,
+  dottedLeader = false,
+  groupByLetter = false,
   hoveredKey = null,
 }: {
   nodes: FilterTreeNode[]
@@ -384,58 +543,87 @@ function TreeNodes({
   onChange: (next: string[]) => void
   path?: string
   compact?: boolean
+  dottedLeader?: boolean
+  groupByLetter?: boolean
   hoveredKey?: string | null
 }) {
+  function renderNode(node: FilterTreeNode, index: number) {
+    const nodePath = path ? `${path} > ${node.label}` : node.label
+    const checked = value.includes(nodePath)
+    const hasChildren = Boolean(node.children?.length)
+
+    if (!hasChildren && !node.href) {
+      return (
+        <OptionRow
+          key={`${nodePath}-${index}`}
+          item={node.label}
+          checked={checked}
+          compact={compact}
+          optionKey={nodePath}
+          hovered={hoveredKey === nodePath}
+          onToggle={() => onChange(toggleValue(value, nodePath))}
+        />
+      )
+    }
+
+    return (
+      <div key={`${nodePath}-${index}`}>
+        {node.href ? (
+          <LinkRow item={node.label} href={node.href} compact={compact} />
+        ) : (
+          <GroupHeadingRow
+            item={node.label}
+            checked={checked}
+            compact={compact}
+            dottedLeader={dottedLeader}
+            optionKey={nodePath}
+            hovered={hoveredKey === nodePath}
+            onToggle={() => onChange(toggleValue(value, nodePath))}
+          />
+        )}
+        {hasChildren ? (
+          <NestBlock className={path ? 'ml-4' : 'ml-5'} compact={compact}>
+            <TreeNodes
+              nodes={node.children!}
+              value={value}
+              onChange={onChange}
+              path={nodePath}
+              compact={compact}
+              dottedLeader={dottedLeader}
+              groupByLetter={Boolean(node.groupByLetter)}
+              hoveredKey={hoveredKey}
+            />
+          </NestBlock>
+        ) : null}
+      </div>
+    )
+  }
+
+  if (groupByLetter) {
+    return (
+      <>
+        {groupNodesByLetter(nodes).map(([letter, letterNodes]) => (
+          <div key={letter} className={compact ? 'mb-2 last:mb-0' : 'mb-1'}>
+            <LetterHeading letter={letter} compact={compact} rule={false} />
+            <div
+              className={cn(
+                'ml-2 pl-1',
+                compact ? 'mt-1 pl-2' : 'border-l border-black/20',
+              )}
+            >
+              <OptionsAlignGrid compact={compact}>
+                {letterNodes.map((node, index) => renderNode(node, index))}
+              </OptionsAlignGrid>
+            </div>
+          </div>
+        ))}
+      </>
+    )
+  }
+
   return (
     <OptionsAlignGrid compact={compact}>
-      {nodes.map((node, index) => {
-        const nodePath = path ? `${path} > ${node.label}` : node.label
-        const checked = value.includes(nodePath)
-        const hasChildren = Boolean(node.children?.length)
-
-        if (!hasChildren && !node.href) {
-          return (
-            <OptionRow
-              key={`${nodePath}-${index}`}
-              item={node.label}
-              checked={checked}
-              compact={compact}
-              optionKey={nodePath}
-              hovered={hoveredKey === nodePath}
-              onToggle={() => onChange(toggleValue(value, nodePath))}
-            />
-          )
-        }
-
-        return (
-          <div key={`${nodePath}-${index}`}>
-            {node.href ? (
-              <LinkRow item={node.label} href={node.href} compact={compact} />
-            ) : (
-              <GroupHeadingRow
-                item={node.label}
-                checked={checked}
-                compact={compact}
-                optionKey={nodePath}
-                hovered={hoveredKey === nodePath}
-                onToggle={() => onChange(toggleValue(value, nodePath))}
-              />
-            )}
-            {hasChildren ? (
-              <NestBlock className={path ? 'ml-4' : 'ml-5'} compact={compact}>
-                <TreeNodes
-                  nodes={node.children!}
-                  value={value}
-                  onChange={onChange}
-                  path={nodePath}
-                  compact={compact}
-                  hoveredKey={hoveredKey}
-                />
-              </NestBlock>
-            ) : null}
-          </div>
-        )
-      })}
+      {nodes.map((node, index) => renderNode(node, index))}
     </OptionsAlignGrid>
   )
 }
@@ -455,6 +643,7 @@ export function HeroFilterSelect({
   openOnHover = false,
   alwaysShowPlaceholder = false,
   showPriorityPanel = false,
+  letterHeading = 'bar',
   invalid = false,
   className,
 }: HeroFilterSelectProps) {
@@ -471,9 +660,11 @@ export function HeroFilterSelect({
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
-        setOpen(false)
-      }
+      const target = event.target as Element | null
+      if (!target || rootRef.current?.contains(target)) return
+      // Keep this menu open while the user selects/opens another category.
+      if (target.closest('[data-hero-filter-select]')) return
+      setOpen(false)
     }
     if (open) document.addEventListener('mousedown', onPointerDown)
     return () => document.removeEventListener('mousedown', onPointerDown)
@@ -492,13 +683,16 @@ export function HeroFilterSelect({
   const summary = alwaysShowPlaceholder
     ? placeholder
     : value.length > 0
-      ? formatPreferenceSummary(value)
+      ? showPriorityPanel
+        ? formatPreferenceSummary(value)
+        : value.map(preferenceLabel).join(', ')
       : placeholder
 
   function renderTopItem(item: string) {
     const childTree = nestedTrees[item]
     const checked = value.includes(item)
     const hasNest = Boolean(childTree?.length)
+    const dottedLeader = inlineMenu
 
     if (!hasNest) {
       return (
@@ -520,6 +714,7 @@ export function HeroFilterSelect({
           item={item}
           checked={checked}
           compact={compact}
+          dottedLeader={dottedLeader}
           optionKey={item}
           hovered={hoveredKey === item}
           onToggle={() => onChange(toggleValue(value, item))}
@@ -531,6 +726,7 @@ export function HeroFilterSelect({
             onChange={onChange}
             path={item}
             compact={compact}
+            dottedLeader={dottedLeader}
             hoveredKey={hoveredKey}
           />
         </NestBlock>
@@ -563,11 +759,13 @@ export function HeroFilterSelect({
   return (
     <div
       ref={rootRef}
+      data-hero-filter-select
       className={cn(
         'relative overflow-visible',
         compact
           ? 'w-full shrink-0'
           : 'shrink-0 space-y-1',
+        open && 'z-20',
         className,
       )}
       onMouseEnter={
@@ -619,17 +817,17 @@ export function HeroFilterSelect({
             setOpen((prev) => !prev)
           }}
           className={cn(
-            'flex w-full min-w-0 items-center justify-between border text-left outline-none transition',
+            'flex w-full min-w-0 items-center justify-between text-left outline-none transition',
             compact
               ? cn(
-                'min-h-11 shrink-0 items-start bg-white px-2 py-1.5 text-sm leading-tight',
+                'appearance-none min-h-11 shrink-0 items-center overflow-hidden bg-white px-2 py-1.5 text-sm leading-tight shadow-none',
                 alwaysShowPlaceholder || value.length === 0
                   ? 'text-ink-soft'
                   : 'text-ink',
                 labelInsideShell
-                  ? 'rounded-none border-0 shadow-none ring-0 focus:border-transparent focus:ring-0'
+                  ? 'rounded-none border-0 ring-0 focus:border-transparent focus:ring-0'
                   : cn(
-                    'rounded-xl border-2 border-ink/15 shadow-sm focus:border-brand focus:ring-2 focus:ring-brand/25',
+                    'rounded-xl border-2 border-solid border-ink/15 focus:border-brand focus:ring-2 focus:ring-brand/25',
                     value.length > 0 ? 'border-brand/40' : null,
                     open && 'border-brand ring-2 ring-brand/25',
                   ),
@@ -640,8 +838,17 @@ export function HeroFilterSelect({
               ),
           )}
         >
-          <span className="min-w-0 flex-1 truncate pr-1.5" title={summary}>
-            {summary}
+          <span className="flex min-w-0 flex-1 pr-1.5">
+            {alwaysShowPlaceholder || value.length === 0 ? (
+              <FittedEtcText
+                text={summary}
+                className="block w-full min-w-0 overflow-hidden whitespace-nowrap"
+              />
+            ) : (
+              <span className="min-w-0 flex-1 truncate" title={summary}>
+                {summary}
+              </span>
+            )}
           </span>
           {open ? (
             <ChevronUp
@@ -668,11 +875,9 @@ export function HeroFilterSelect({
                 ? 'relative mt-0 rounded-none border-0 bg-white shadow-none ring-0'
                 : cn(
                   compact
-                    ? 'mt-1.5 rounded-xl border-2 border-ink/40 bg-white shadow-md ring-1 ring-ink/15'
+                    ? 'relative mt-1.5 rounded-xl border-2 border-ink/40 bg-white shadow-md ring-1 ring-ink/15'
                     : 'mt-0.5 rounded-md border border-black bg-white shadow-md',
-                  inlineMenu
-                    ? 'relative'
-                    : 'absolute left-0 right-0 top-full',
+                  !compact && (inlineMenu ? 'relative' : 'absolute left-0 right-0 top-full'),
                 ),
             )}
           >
@@ -682,7 +887,7 @@ export function HeroFilterSelect({
               aria-hidden
             />
           ) : null}
-          {compact && showPriorityPanel ? (
+          {showPriorityPanel ? (
             <div className="grid grid-cols-1 sm:grid-cols-2">
               <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
                 Select in order of preference. First pick is 1.
@@ -697,15 +902,11 @@ export function HeroFilterSelect({
                 </p>
               </div>
             </div>
-          ) : compact ? (
-            <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
-              Select in order of preference. First pick is 1.
-            </p>
           ) : null}
           <div
             ref={menuRef}
             className={cn(
-              'landing-scroll-pane max-h-[20rem] overflow-y-auto',
+              'landing-scroll-pane max-h-[20rem] overflow-x-hidden overflow-y-auto',
               compact ? 'space-y-0.5 p-2' : 'bg-white p-1',
             )}
             onMouseMove={(event) => {
@@ -724,25 +925,22 @@ export function HeroFilterSelect({
                   value={value}
                   onChange={onChange}
                   compact={compact}
+                  dottedLeader={inlineMenu}
                   hoveredKey={hoveredKey}
                 />
               ) : letterEntries ? (
                 letterEntries.map(([letter, items]) => (
-                  <div key={letter} className={compact ? 'mb-2 last:mb-0' : 'mb-1'}>
-                    <div
-                      className={cn(
-                        'sticky top-0 z-10 px-2 py-1.5 text-xs font-bold uppercase tracking-wide',
-                        compact
-                          ? 'border-b border-line bg-white px-3 py-2 text-ink shadow-sm'
-                          : 'bg-white text-black/55',
-                      )}
-                    >
-                      {letter}...
-                    </div>
+                  <div key={letter} className={compact ? 'mb-1 last:mb-0' : 'mb-1'}>
+                    <LetterHeading
+                      letter={letter}
+                      compact={compact}
+                      variant={letterHeading}
+                    />
                     <div
                       className={cn(
                         'ml-2 pl-1',
-                        compact ? 'mt-1 pl-2' : 'border-l border-black/20',
+                        compact ? 'mt-0.5 pl-2' : 'border-l border-black/20',
+                        letterHeading === 'underline' && 'border-0',
                       )}
                     >
                       <OptionsAlignGrid compact={compact}>

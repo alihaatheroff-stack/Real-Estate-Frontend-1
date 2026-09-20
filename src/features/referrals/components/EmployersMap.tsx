@@ -4,6 +4,8 @@ import { MapContainer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { MapPin, Star, X } from 'lucide-react'
 import type { Employer } from '@/entities/employer/types'
+import { AdTopBanner } from '@/features/referrals/components/FeaturedAgentAdCard'
+import type { EmployerResultAd } from '@/features/referrals/data/employerResultAds'
 import {
   createCircleMarkerIcon,
   createInitialsMarkerIcon,
@@ -23,10 +25,12 @@ import { employerPath } from '@/app/router/paths'
 type EmployerMarker = {
   employer: Employer
   position: [number, number]
+  ad?: EmployerResultAd
 }
 
 type EmployersMapProps = {
   employers: Employer[]
+  adsByEmployerId?: Record<string, EmployerResultAd>
   selectedId: string | null
   hoveredId: string | null
   onSelect: (id: string | null) => void
@@ -74,9 +78,10 @@ function EmployerMarkerPin({
   onSelect: (id: string | null) => void
   onHover: (id: string | null) => void
 }) {
-  const { employer, position } = marker
+  const { employer, position, ad } = marker
   const visualState = markerStateFor(employer.id, selectedId, hoveredId)
   const markerRef = useRef<L.Marker | null>(null)
+  const isAd = Boolean(ad)
   const icon = useMemo(() => {
     if (employer.logoUrl) {
       return createCircleMarkerIcon(employer.logoUrl, visualState, PINNED_MARKER_OPTIONS)
@@ -118,14 +123,21 @@ function EmployerMarkerPin({
       }}
     >
       <Popup
-        className="employer-map-card-popup"
+        className={isAd ? 'employer-map-card-popup employer-map-card-popup--ad' : 'employer-map-card-popup'}
         closeButton={false}
         offset={[0, -8]}
         maxWidth={260}
         minWidth={240}
         autoPan={false}
       >
-        <div className="employer-map-popup-card rounded-xl border border-freeio-border-soft bg-white shadow-lg">
+        <div
+          className={
+            isAd
+              ? 'employer-map-popup-card overflow-hidden rounded-xl border border-[#b7d8f0] bg-[#eef7fd] shadow-lg'
+              : 'employer-map-popup-card rounded-xl border border-freeio-border-soft bg-white shadow-lg'
+          }
+        >
+          {isAd ? <AdTopBanner /> : null}
           <div className="relative flex items-center gap-3 border-b border-freeio-border-soft p-3">
             {employer.logoUrl ? (
               <img
@@ -195,6 +207,7 @@ function EmployerMarkerPin({
 
 export function EmployersMap({
   employers,
+  adsByEmployerId,
   selectedId,
   hoveredId,
   onSelect,
@@ -211,8 +224,9 @@ export function EmployersMap({
       employers.map((employer) => ({
         employer,
         position: [employer.lat, employer.lng] as [number, number],
+        ad: adsByEmployerId?.[employer.id],
       })),
-    [employers],
+    [adsByEmployerId, employers],
   )
 
   const flyTarget = useMemo(() => {

@@ -63,18 +63,58 @@ export function Composer() {
       <NetworkCard className="p-3 sm:p-4">
         <div className="flex items-center gap-3">
           <MemberAvatar name={me.name} src={me.avatar} memberId={me.id} />
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="flex h-10 min-w-0 flex-1 items-center rounded-full bg-[#F0F2F5] px-4 text-left text-[15px] text-muted transition hover:bg-mist"
-          >
-            What’s on your mind, {me.firstName}?
-          </button>
+          <input
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                publish()
+              }
+            }}
+            placeholder="What’s happening?"
+            className="h-11 min-w-0 flex-1 rounded-full bg-[#F0F2F5] px-4 text-[15px] text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-brand/20"
+          />
         </div>
-        <div className="mt-3 grid grid-cols-3 border-t border-line/70 pt-1">
-          <ComposerAction icon={<Video className="h-[22px] w-[22px] text-rose-500" />} label="Live video" onClick={() => setOpen(true)} />
-          <ComposerAction icon={<ImageIcon className="h-[22px] w-[22px] text-emerald-600" />} label="Photo / deal" onClick={() => setOpen(true)} />
-          <ComposerAction icon={<Smile className="h-[22px] w-[22px] text-amber-500" />} label="Feeling" onClick={() => setOpen(true)} />
+        {image ? (
+          <div className="relative mt-3 overflow-hidden rounded-xl border border-line">
+            <img src={image} alt="" className="h-28 w-full object-cover" />
+            <button
+              type="button"
+              onClick={() => setImage(undefined)}
+              className="absolute right-2 top-2 rounded-full bg-white/90 p-1 shadow"
+              aria-label="Remove photo"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : null}
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center">
+            <ComposerAction
+              icon={<Video className="h-5 w-5 text-slate-500" />}
+              label="Live"
+              onClick={() => setOpen(true)}
+            />
+            <ComposerAction
+              icon={<ImageIcon className="h-5 w-5 text-slate-500" />}
+              label="Photo"
+              onClick={() => setOpen(true)}
+            />
+            <ComposerAction
+              icon={<Smile className="h-5 w-5 text-slate-500" />}
+              label="Feeling"
+              onClick={() => setOpen(true)}
+            />
+          </div>
+          <Button
+            size="sm"
+            className="h-10 shrink-0 rounded-lg px-6"
+            disabled={!canPost}
+            onClick={publish}
+          >
+            Post
+          </Button>
         </div>
       </NetworkCard>
 
@@ -195,10 +235,10 @@ function ComposerAction({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-muted transition hover:bg-mist"
+      className="inline-flex items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-sm font-medium text-slate-500 transition hover:bg-mist sm:px-3"
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span>{label}</span>
     </button>
   )
 }

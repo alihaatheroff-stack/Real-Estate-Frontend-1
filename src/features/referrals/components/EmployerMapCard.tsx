@@ -14,12 +14,20 @@ import { formatRating } from '@/shared/lib/format'
 import type { Employer } from '@/entities/employer/types'
 import { employerPath } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
+import {
+  AdCornerRibbon,
+  AdWatermark,
+  isCornerRibbonPlacement,
+  type AdBannerPlacement,
+} from '@/features/referrals/components/FeaturedAgentAdCard'
 
 type EmployerMapCardProps = {
   employer: Employer
   active?: boolean
   selected?: boolean
   compact?: boolean
+  advertisement?: boolean
+  bannerPlacement?: AdBannerPlacement
   onSelect: (id: string) => void
   onHover: (id: string | null) => void
 }
@@ -73,12 +81,21 @@ function HiringBadge({ openProjects }: { openProjects: number }) {
 
 export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
   function EmployerMapCard(
-    { employer, active, selected, compact = false, onSelect, onHover },
+      { employer, active, selected, compact = false, advertisement = false, bannerPlacement = 'top-left', onSelect, onHover },
     ref,
   ) {
     const [saved, setSaved] = useState(false)
     const href = employerPath(employer.id)
     const projectLabel = employer.openProjects === 1 ? 'project' : 'projects'
+    const adBanner =
+      advertisement ? (
+        <>
+          {isCornerRibbonPlacement(bannerPlacement) ? (
+            <AdCornerRibbon placement={bannerPlacement} compact={compact} />
+          ) : null}
+          {bannerPlacement === 'watermark' ? <AdWatermark compact={compact} /> : null}
+        </>
+      ) : null
 
     function openEmployer(event?: { stopPropagation?: () => void }) {
       event?.stopPropagation?.()
@@ -98,13 +115,18 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
           ref={ref}
           role="link"
           tabIndex={0}
-          aria-label={`${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`}
+          aria-label={
+            advertisement
+              ? `Sponsored office: ${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
+              : `${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
+          }
           onClick={() => openEmployer()}
           onKeyDown={handleKeyDown}
           onMouseEnter={() => onHover(employer.id)}
           onMouseLeave={() => onHover(null)}
           className={cn(
-            'group relative flex h-full cursor-pointer items-center gap-4 rounded-2xl border bg-white p-4 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
+            'group relative flex h-full cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border p-4 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
+            advertisement ? 'bg-[#eef7fd]' : 'bg-white',
             selected
               ? 'border-freeio shadow-[0_14px_40px_rgba(91,187,123,0.2)] ring-2 ring-freeio/25'
               : active
@@ -112,6 +134,7 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
                 : 'border-freeio-border-soft shadow-[0_8px_28px_rgba(0,0,0,0.04)] hover:border-freeio/40 hover:shadow-[0_14px_36px_rgba(0,0,0,0.09)]',
           )}
         >
+          {adBanner}
           <div
             className="flex h-14 w-14 shrink-0 overflow-hidden rounded-2xl"
             style={{ backgroundColor: employer.logoUrl ? '#f3f4f6' : employer.logoColor }}
@@ -140,7 +163,11 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
               </span>
             </div>
           </div>
-          <span className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white sm:inline-flex">
+          <span
+            className={cn(
+              'hidden h-10 shrink-0 translate-y-8 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] sm:inline-flex',
+            )}
+          >
             View company
             <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
           </span>
@@ -153,13 +180,18 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
         ref={ref}
         role="link"
         tabIndex={0}
-        aria-label={`${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`}
+        aria-label={
+          advertisement
+            ? `Sponsored office: ${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
+            : `${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
+        }
         onClick={() => openEmployer()}
         onKeyDown={handleKeyDown}
         onMouseEnter={() => onHover(employer.id)}
         onMouseLeave={() => onHover(null)}
         className={cn(
-          'group relative flex h-full cursor-pointer flex-col rounded-2xl border bg-white p-5 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
+          'group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
+          advertisement ? 'border-[#b7d8f0] bg-[#eef7fd]' : 'bg-white',
           selected
             ? 'border-freeio shadow-[0_14px_40px_rgba(91,187,123,0.2)] ring-2 ring-freeio/25'
             : active
@@ -167,6 +199,7 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
               : 'border-freeio-border-soft shadow-[0_8px_28px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 hover:border-freeio/40 hover:shadow-[0_14px_36px_rgba(0,0,0,0.09)]',
         )}
       >
+        {adBanner}
         <div className="flex items-start gap-3">
           <Link
             to={href}
@@ -238,11 +271,15 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
           </div>
         </div>
 
-        <div className="mt-4">
-          <span className="inline-flex h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-brand text-sm font-semibold text-white transition group-hover:bg-brand-dark">
+        <div className={cn('mt-auto pt-4', advertisement && 'pr-16 sm:pr-20')}>
+          <Link
+            to={href}
+            onClick={(event) => event.stopPropagation()}
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#eff6ff]"
+          >
             View company
             <ArrowUpRight className="h-4 w-4" aria-hidden />
-          </span>
+          </Link>
         </div>
       </article>
     )

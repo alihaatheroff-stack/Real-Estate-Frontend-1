@@ -1,9 +1,6 @@
 ﻿import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  FeaturedAgentAdCard,
-  adBannerPlacementFor,
-} from '@/features/referrals/components/FeaturedAgentAdCard'
+import { FeaturedAgentAdCard } from '@/features/referrals/components/FeaturedAgentAdCard'
 import { ProviderFiltersDrawer } from '@/features/referrals/components/ProviderFiltersDrawer'
 import { ProviderListCard } from '@/features/referrals/components/ProviderListCard'
 import { ProvidersMap } from '@/features/referrals/components/ProvidersMap'
@@ -14,12 +11,17 @@ import {
   ResultsSplitView,
 } from '@/features/referrals/components/ResultsSplitView'
 import {
-  pickProfileResultAd,
-  profileAdInsertIndex,
+  pickProfileResultAds,
   type ProfileResultAd,
 } from '@/features/referrals/data/profileResultAds'
 import { useMapResultsInteraction } from '@/features/referrals/hooks/useMapResultsInteraction'
 import { useResultsPagination } from '@/features/referrals/hooks/useResultsPagination'
+import {
+  insertAdsIntoFeed,
+  mergePageAds,
+  RESULTS_ADS_PER_PAGE,
+  RESULTS_ORGANIC_PAGE_SIZE,
+} from '@/features/referrals/lib/resultFeedAds'
 import {
   PROVIDER_SORT_OPTIONS,
   type ProviderSortKey,
@@ -28,28 +30,20 @@ import { type HeroFiltersState } from '@/features/search'
 import { PATHS } from '@/app/router/paths'
 import type { Provider } from '@/entities/provider/types'
 
-const PAGE_SIZE = 7
-
 type FeedItem =
   | { kind: 'provider'; provider: Provider }
   | { kind: 'ad'; ad: ProfileResultAd; provider: Provider }
 
-/** Build a page feed that stays even in the 2-col grid (providers + one ad). */
-function buildFeedWithAd(providers: Provider[], page: number): FeedItem[] {
-  const slot = pickProfileResultAd(page)
-  const organic = slot
-    ? providers.filter((provider) => provider.id !== slot.provider.id)
-    : providers
+function buildFeedWithAds(providers: Provider[], page: number): FeedItem[] {
+  const slots = pickProfileResultAds(page, RESULTS_ADS_PER_PAGE)
+  const sponsoredIds = new Set(slots.map((slot) => slot.provider.id))
+  const organic = providers.filter((provider) => !sponsoredIds.has(provider.id))
 
-  const items: FeedItem[] = organic.map((provider) => ({
-    kind: 'provider',
-    provider,
-  }))
-  if (items.length === 0 || !slot) return items
-
-  const insertAt = profileAdInsertIndex(page, items.length)
-  items.splice(insertAt, 0, { kind: 'ad', ad: slot.ad, provider: slot.provider })
-  return items
+  return insertAdsIntoFeed(organic, slots, page).map((item) =>
+    item.kind === 'ad'
+      ? { kind: 'ad', ad: item.ad.ad, provider: item.ad.provider }
+      : { kind: 'provider', provider: item.item },
+  )
 }
 
 export type { ProviderSortKey }
@@ -85,22 +79,19 @@ export function ProvidersMapView({
   const navigate = useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
-    useResultsPagination(providers, PAGE_SIZE)
-  const feedItems = buildFeedWithAd(pagedItems, page)
-  const pageAd = useMemo(() => pickProfileResultAd(page), [page])
+    useResultsPagination(providers, RESULTS_ORGANIC_PAGE_SIZE)
+  const feedItems = useMemo(() => buildFeedWithAds(pagedItems, page), [page, pagedItems])
+  const pageAds = useMemo(() => pickProfileResultAds(page, RESULTS_ADS_PER_PAGE), [page])
 
-  const mapProviders = useMemo(() => {
-    if (!pageAd) return providers
-    if (providers.some((provider) => provider.id === pageAd.provider.id)) {
-      return providers
-    }
-    return [...providers, pageAd.provider]
-  }, [pageAd, providers])
+  const mapProviders = useMemo(
+    () => mergePageAds(providers, pageAds.map((slot) => slot.provider)),
+    [pageAds, providers],
+  )
 
   const adsByProviderId = useMemo(() => {
-    if (!pageAd) return undefined
-    return { [pageAd.provider.id]: pageAd.ad }
-  }, [pageAd])
+    if (pageAds.length === 0) return undefined
+    return Object.fromEntries(pageAds.map((slot) => [slot.provider.id, slot.ad]))
+  }, [pageAds])
 
   const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
     useMapResultsInteraction(mapProviders)
@@ -185,7 +176,7 @@ export function ProvidersMapView({
                   }}
                   ad={item.ad}
                   provider={item.provider}
-                  bannerPlacement={adBannerPlacementFor(item.provider.id)}
+                  bannerPlacement="bottom-right"
                   selected={selectedId === item.provider.id}
                   active={hoveredId === item.provider.id}
                   onSelect={focusProvider}

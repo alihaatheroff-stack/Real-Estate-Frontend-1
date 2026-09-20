@@ -27,7 +27,7 @@ function formatProviderLocation(provider: Provider) {
   return `${provider.city}, ${stateName}, ${region}`
 }
 
-export type AdBannerPlacement = 'top-left' | 'bottom-right' | 'watermark'
+export type AdBannerPlacement = 'top-left' | 'top-right' | 'bottom-right' | 'watermark'
 
 type FeaturedAgentAdCardProps = {
   ad: ProfileResultAd
@@ -44,28 +44,27 @@ export function AdCornerRibbon({
   placement,
   compact = false,
 }: {
-  placement: 'top-left' | 'bottom-right'
+  placement: 'top-left' | 'top-right' | 'bottom-right'
   compact?: boolean
 }) {
-  const bottomRight = placement === 'bottom-right'
   const size = compact ? 'h-[5.25rem] w-[5.25rem]' : 'h-[7.5rem] w-[7.5rem]'
-  const radius = compact
-    ? bottomRight
-      ? 'rounded-br-[0.85rem]'
-      : 'rounded-tl-[0.85rem]'
-    : bottomRight
-      ? 'rounded-br-[0.9rem]'
-      : 'rounded-tl-[0.9rem]'
+  const offset = compact ? 8 : 12
+  const positionClass =
+    placement === 'bottom-right'
+      ? `pointer-events-none absolute bottom-0 right-0 z-10 overflow-hidden ${size} ${compact ? 'rounded-br-[0.85rem]' : 'rounded-br-[0.9rem]'}`
+      : placement === 'top-right'
+        ? `pointer-events-none absolute right-0 top-0 z-10 overflow-hidden ${size} ${compact ? 'rounded-tr-[0.85rem]' : 'rounded-tr-[0.9rem]'}`
+        : `pointer-events-none absolute left-0 top-0 z-10 overflow-hidden ${size} ${compact ? 'rounded-tl-[0.85rem]' : 'rounded-tl-[0.9rem]'}`
+
+  const rotate =
+    placement === 'top-right'
+      ? `translate(-50%, -50%) translate(${offset}px, -${offset}px) rotate(45deg)`
+      : placement === 'bottom-right'
+        ? `translate(-50%, -50%) translate(${offset}px, ${offset}px) rotate(-45deg)`
+        : `translate(-50%, -50%) translate(-${offset}px, -${offset}px) rotate(-45deg)`
 
   return (
-    <div
-      className={
-        bottomRight
-          ? `pointer-events-none absolute bottom-0 right-0 z-10 overflow-hidden ${size} ${radius}`
-          : `pointer-events-none absolute left-0 top-0 z-10 overflow-hidden ${size} ${radius}`
-      }
-      aria-hidden
-    >
+    <div className={positionClass} aria-hidden>
       <span
         className={
           compact
@@ -74,9 +73,7 @@ export function AdCornerRibbon({
         }
         style={{
           width: compact ? '7.75rem' : '10.25rem',
-          transform: bottomRight
-            ? `translate(-50%, -50%) translate(${compact ? 8 : 12}px, ${compact ? 8 : 12}px) rotate(-45deg)`
-            : `translate(-50%, -50%) translate(-${compact ? 8 : 12}px, -${compact ? 8 : 12}px) rotate(-45deg)`,
+          transform: rotate,
         }}
       >
         <Volume2
@@ -108,8 +105,26 @@ export function AdWatermark({ compact = false }: { compact?: boolean } = {}) {
   )
 }
 
-export function adBannerPlacementFor(providerId: string): AdBannerPlacement {
-  return providerId === 'ad-daniel-okada' ? 'bottom-right' : 'watermark'
+export function AdTopBanner() {
+  return (
+    <div
+      className="flex items-center justify-center gap-1.5 bg-[#16a34a] px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-white"
+      aria-hidden
+    >
+      <Volume2 className="h-3 w-3 shrink-0 fill-white" strokeWidth={2.25} />
+      Advertisement
+    </div>
+  )
+}
+
+export function isCornerRibbonPlacement(
+  placement: AdBannerPlacement,
+): placement is 'top-left' | 'top-right' | 'bottom-right' {
+  return placement === 'top-left' || placement === 'top-right' || placement === 'bottom-right'
+}
+
+export function adBannerPlacementFor(_id?: string): AdBannerPlacement {
+  return 'bottom-right'
 }
 
 export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardProps>(
@@ -117,7 +132,7 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
     {
       ad,
       provider,
-      bannerPlacement = 'top-left',
+      bannerPlacement = 'bottom-right',
       active,
       selected,
       onSelect,
@@ -132,8 +147,7 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
 
     const locationLabel = formatProviderLocation(provider)
     const href = providerPath(provider.id)
-    const usesCornerRibbon =
-      bannerPlacement === 'top-left' || bannerPlacement === 'bottom-right'
+    const usesCornerRibbon = isCornerRibbonPlacement(bannerPlacement)
     const contentFlush = bannerPlacement !== 'top-left'
     const interactive = Boolean(onSelect)
     const draft = useMemo(() => referralProviderFavoriteDraft(provider), [provider])

@@ -1,4 +1,5 @@
 import type { Provider } from '@/entities/provider/types'
+import { pickPageAds } from '@/features/referrals/lib/resultFeedAds'
 
 export type ProfileResultAd = {
   id: string
@@ -91,6 +92,86 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
     completedServices: 84,
     inQueueServices: 2,
   },
+  {
+    id: 'ad-lena-vargas',
+    name: 'Lena Vargas',
+    title: 'Listing Photographer',
+    company: 'Vargas Media Studio',
+    licenseNo: '02188340',
+    dreNo: '01955102',
+    type: 'professional',
+    specialty: 'Listing photography & twilight sets',
+    city: 'Clovis',
+    state: 'CA',
+    country: 'United States',
+    zip: '93611',
+    lat: 36.8314,
+    lng: -119.6912,
+    radiusMiles: 35,
+    rating: 4.9,
+    reviewCount: 73,
+    salesVolume: 0,
+    dealsClosed: 0,
+    referralShare: 40,
+    learningIncluded: true,
+    image: '/images/avatars/avatar-12.jpg',
+    verified: true,
+    about:
+      'Turns listings into scroll-stopping stills — interiors, exteriors, and twilight sets that help referral partners win the first showing.',
+    languages: ['English', 'Spanish'],
+    englishLevel: 'Native Or Bilingual',
+    hourlyRateMin: 85,
+    hourlyRateMax: 140,
+    joinedDate: 'Apr 2020',
+    skills: ['Interior Photography', 'Twilight Shots', 'Listing Edits'],
+    gender: 'Female',
+    email: 'lena.vargas@example.com',
+    phone: '(559) 555-0441',
+    projectSuccess: 73,
+    totalServices: 2,
+    completedServices: 68,
+    inQueueServices: 2,
+  },
+  {
+    id: 'ad-marcus-hale',
+    name: 'Marcus Hale',
+    title: 'Home Inspector',
+    company: 'Hale Inspection Group',
+    licenseNo: '02044119',
+    dreNo: '01877230',
+    type: 'trade',
+    specialty: 'Pre-offer inspection recaps',
+    city: 'Fresno',
+    state: 'CA',
+    country: 'United States',
+    zip: '93704',
+    lat: 36.8011,
+    lng: -119.8014,
+    radiusMiles: 50,
+    rating: 4.8,
+    reviewCount: 112,
+    salesVolume: 0,
+    dealsClosed: 0,
+    referralShare: 35,
+    learningIncluded: true,
+    image: '/images/avatars/marcus-hale.png',
+    verified: true,
+    about:
+      'Same-week pre-offer inspections with plain-language recaps — so buyers and referring agents know what is a deal-breaker before they write.',
+    languages: ['English'],
+    englishLevel: 'Native Or Bilingual',
+    hourlyRateMin: 95,
+    hourlyRateMax: 165,
+    joinedDate: 'Jun 2017',
+    skills: ['Residential Inspection', 'Roof & HVAC', 'Repair Estimates'],
+    gender: 'Male',
+    email: 'marcus.hale@example.com',
+    phone: '(559) 555-0618',
+    projectSuccess: 112,
+    totalServices: 2,
+    completedServices: 104,
+    inQueueServices: 3,
+  },
 ]
 
 export const PROFILE_RESULT_ADS: ProfileResultAd[] = [
@@ -104,6 +185,16 @@ export const PROFILE_RESULT_ADS: ProfileResultAd[] = [
     label: 'Featured Agent',
     providerId: 'ad-daniel-okada',
   },
+  {
+    id: 'ad-featured-lena',
+    label: 'Featured Agent',
+    providerId: 'ad-lena-vargas',
+  },
+  {
+    id: 'ad-featured-marcus',
+    label: 'Featured Agent',
+    providerId: 'ad-marcus-hale',
+  },
 ]
 
 export type ProfileResultAdSlot = {
@@ -115,16 +206,9 @@ export function getFeaturedAdProviderById(id: string): Provider | undefined {
   return FEATURED_AD_PROVIDERS.find((provider) => provider.id === id)
 }
 
-export function pickProfileResultAd(page: number): ProfileResultAdSlot | null {
-  const ad = PROFILE_RESULT_ADS[page % PROFILE_RESULT_ADS.length]!
-  const provider = getFeaturedAdProviderById(ad.providerId)
-  if (!provider) return null
-  return { ad, provider }
-}
-
-/** Insert index that shifts slightly per page (YouTube-style in-feed slot). */
-export function profileAdInsertIndex(page: number, itemCount: number): number {
-  if (itemCount <= 0) return 0
-  const preferred = 2 + (page % 3)
-  return Math.min(preferred, itemCount)
+export function pickProfileResultAds(page: number, count = 2): ProfileResultAdSlot[] {
+  return pickPageAds(PROFILE_RESULT_ADS, page, count).flatMap((ad) => {
+    const provider = getFeaturedAdProviderById(ad.providerId)
+    return provider ? [{ ad, provider }] : []
+  })
 }

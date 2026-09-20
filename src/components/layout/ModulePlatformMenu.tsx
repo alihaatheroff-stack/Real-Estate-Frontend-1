@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { ArrowLeft, ChevronRight, LayoutGrid } from 'lucide-react'
+import { ArrowUp, ChevronRight, LayoutGrid } from 'lucide-react'
 import { GuestAuthPopover } from '@/components/layout/GuestAuthPopover'
 import { cn } from '@/shared/lib/cn'
 
@@ -119,8 +119,6 @@ export function ModulePlatformMenu({
         className={className}
         triggerClassName={triggerClassName}
         triggerLabel={triggerLabel}
-        title={triggerLabel}
-        description={`Sign in or register to use ${triggerLabel.toLowerCase()}.`}
         icon={TriggerIcon}
       />
     )
@@ -223,21 +221,31 @@ function UnlockedPlatformMenu({
         >
           {activePlatform ? (
             <>
-              <div className="border-b border-line px-2 py-2.5">
-                <div className="flex items-center gap-1">
+              <div>
+                <div className="flex items-center border-b border-line px-1 py-1">
                   <button
                     type="button"
                     onClick={() => setActivePlatformId(null)}
                     className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-mist"
                     aria-label="Back to platforms"
                   >
-                    <ArrowLeft className="h-4 w-4" />
+                    <ArrowUp className="h-4 w-4" />
                   </button>
-                  <div className="min-w-0 flex-1 pr-2">
-                    <p className="truncate text-sm font-semibold text-ink">{activePlatform.label}</p>
-                    <p className="truncate text-xs text-muted">{activePlatform.summary}</p>
-                  </div>
+                  <p className="min-w-0 flex-1 truncate px-2 text-center text-sm font-semibold text-ink underline underline-offset-4">
+                    {activePlatform.label}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setActivePlatformId(null)}
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-mist"
+                    aria-label="Back to platforms"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </button>
                 </div>
+                <p className="truncate border-b border-line px-4 py-2 text-center text-xs text-muted">
+                  {activePlatform.summary}
+                </p>
               </div>
 
               <div className="max-h-[min(70vh,26rem)] divide-y divide-line overflow-y-auto">

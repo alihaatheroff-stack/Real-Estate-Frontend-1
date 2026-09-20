@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { RangeSlider } from '@/components/ui/RangeSlider'
+import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import { PATHS } from '@/app/router/paths'
 import {
   HeroFilterSelect,
@@ -18,6 +20,9 @@ import {
   PSP_NESTED_TREES,
   REPRESENTATION_TOP_TREE,
   SALE_TYPE_TREE,
+  SERVICE_DISTANCE_DEFAULT,
+  SERVICE_DISTANCE_MAX,
+  SERVICE_DISTANCE_MIN,
   TITLE_OPTIONS,
   VACANCY_OPTIONS,
   YOUR_EXPERIENCE_OPTIONS,
@@ -68,6 +73,7 @@ export function HeroFilterPanel({
   const showBuying = representation.some(
     (value) => value === 'Buying' || value === 'Mortgage',
   )
+  const radiusMiles = Number(filters.radius || SERVICE_DISTANCE_DEFAULT)
 
   function setFilterList(key: keyof HeroFiltersState, next: string[]) {
     if (key === 'find') {
@@ -233,6 +239,7 @@ export function HeroFilterPanel({
           />
           <HeroFilterSelect
             compact
+            letterHeading="underline"
             label="Languages Spoken:"
             placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
             optionsByLetter={LANGUAGE_BY_LETTER}
@@ -240,19 +247,12 @@ export function HeroFilterPanel({
             onChange={(next) => setFilterList('language', next)}
           />
 
-          <div className="relative shrink-0 overflow-visible">
-            <label className="block truncate text-xs font-bold leading-4 text-black">
-              [Input] Percentage Share:
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={filters.percentageShare}
-              onChange={(e) => onChange('percentageShare', e.target.value)}
-              placeholder="Ex. (25%, 35%, 50%, etc.,)"
-              className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
-            />
-          </div>
+          <ReferralShareInput
+            compact
+            label="Referral Share:"
+            value={filters.percentageShare}
+            onChange={(value) => onChange('percentageShare', value)}
+          />
 
           <HeroFilterSelect
             compact
@@ -278,16 +278,21 @@ export function HeroFilterPanel({
           </div>
 
           <div className="relative shrink-0 overflow-visible">
-            <label className="block truncate text-xs font-bold leading-4 text-black">
-              Mile Radius
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={filters.radius}
-              onChange={(e) => onChange('radius', e.target.value)}
-              placeholder="Ex. (10. 20. 50 (Miles)..)"
-              className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
+            <div className="flex items-baseline justify-between gap-2">
+              <label className="block truncate text-xs font-bold leading-4 text-black">
+                Mile Radius
+              </label>
+              <span className="shrink-0 text-[11px] font-medium text-ink/70">
+                {radiusMiles} mi
+              </span>
+            </div>
+            <RangeSlider
+              variant="freeio"
+              min={SERVICE_DISTANCE_MIN}
+              max={SERVICE_DISTANCE_MAX}
+              value={radiusMiles}
+              onChange={(value) => onChange('radius', String(value))}
+              className="mt-1 space-y-0 px-1.5 py-0.5"
             />
           </div>
         </div>

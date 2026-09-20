@@ -5,8 +5,10 @@ import L from 'leaflet'
 import { Star, X } from 'lucide-react'
 import type { Service } from '@/entities/provider/types'
 import { getProviderForService } from '@/features/referrals/api/repository'
+import { AdTopBanner } from '@/features/referrals/components/FeaturedAgentAdCard'
 import { MapMeasureTools } from '@/features/referrals/components/MapMeasureTools'
 import { MapBasemapLayer } from '@/features/referrals/components/MapBasemapLayer'
+import type { ServiceResultAd } from '@/features/referrals/data/serviceResultAds'
 import { createCircleMarkerIcon, PINNED_MARKER_OPTIONS, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
 import {
   LOCATION_ZOOM,
@@ -19,10 +21,12 @@ import { providerPath, servicePath } from '@/app/router/paths'
 type ServiceMarker = {
   service: Service
   position: [number, number]
+  ad?: ServiceResultAd
 }
 
 type ServicesMapProps = {
   services: Service[]
+  adsByServiceId?: Record<string, ServiceResultAd>
   selectedId: string | null
   hoveredId: string | null
   onSelect: (id: string | null) => void
@@ -72,7 +76,7 @@ function ServiceMarkerPin({
   onSelect: (id: string | null) => void
   onHover: (id: string | null) => void
 }) {
-  const { service, position } = marker
+  const { service, position, ad } = marker
   const provider = getProviderForService(service)
   const visualState = markerStateFor(service.id, selectedId, hoveredId)
   const markerRef = useRef<L.Marker | null>(null)
@@ -81,6 +85,7 @@ function ServiceMarkerPin({
     () => createCircleMarkerIcon(service.image, visualState, PINNED_MARKER_OPTIONS),
     [service.image, visualState],
   )
+  const isAd = Boolean(ad)
 
   useEffect(() => {
     const leafletMarker = markerRef.current
@@ -111,14 +116,15 @@ function ServiceMarkerPin({
       }}
     >
       <Popup
-        className="service-map-card-popup"
+        className={isAd ? 'service-map-card-popup service-map-card-popup--ad' : 'service-map-card-popup'}
         closeButton={false}
         offset={[0, -8]}
         maxWidth={260}
         minWidth={240}
         autoPan={false}
       >
-        <div className="service-map-popup-card">
+        <div className={isAd ? 'service-map-popup-card overflow-hidden bg-[#eef7fd]' : 'service-map-popup-card'}>
+          {isAd ? <AdTopBanner /> : null}
           <div className="relative overflow-hidden rounded-t-xl">
             <Link to={servicePath(service.id)} className="block">
               <img
@@ -189,6 +195,7 @@ function ServiceMarkerPin({
 
 export function ServicesMap({
   services,
+  adsByServiceId,
   selectedId,
   hoveredId,
   onSelect,
@@ -205,9 +212,13 @@ export function ServicesMap({
       services.flatMap((service) => {
         const provider = getProviderForService(service)
         if (!provider) return []
-        return [{ service, position: [provider.lat, provider.lng] as [number, number] }]
+        return [{
+          service,
+          position: [provider.lat, provider.lng] as [number, number],
+          ad: adsByServiceId?.[service.id],
+        }]
       }),
-    [services],
+    [adsByServiceId, services],
   )
 
   const flyTarget = useMemo(() => {

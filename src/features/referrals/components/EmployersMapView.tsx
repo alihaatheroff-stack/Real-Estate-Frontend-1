@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Building2,
@@ -13,6 +13,11 @@ import {
 import { EmployerFiltersDrawer } from '@/features/referrals/components/EmployerFiltersDrawer'
 import { EmployerMapCard } from '@/features/referrals/components/EmployerMapCard'
 import { EmployersMap } from '@/features/referrals/components/EmployersMap'
+import { adBannerPlacementFor } from '@/features/referrals/components/FeaturedAgentAdCard'
+import {
+  pickEmployerResultAds,
+  type EmployerResultAd,
+} from '@/features/referrals/data/employerResultAds'
 import type { EmployerFiltersState } from '@/features/referrals/model/employerFilters'
 import {
   ResultsSortMenu,
@@ -21,6 +26,12 @@ import {
 import { useMapResultsInteraction } from '@/features/referrals/hooks/useMapResultsInteraction'
 import { useResultsPagination } from '@/features/referrals/hooks/useResultsPagination'
 import {
+  insertAdsIntoFeed,
+  mergePageAds,
+  RESULTS_ADS_PER_PAGE,
+  RESULTS_ORGANIC_PAGE_SIZE,
+} from '@/features/referrals/lib/resultFeedAds'
+import {
   EMPLOYER_SORT_OPTIONS,
   type EmployerSortKey,
 } from '@/features/referrals/model/sort'
@@ -28,7 +39,21 @@ import type { Employer } from '@/entities/employer/types'
 import { employerPath } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
 
-const PAGE_SIZE = 12
+type FeedItem =
+  | { kind: 'employer'; employer: Employer }
+  | { kind: 'ad'; ad: EmployerResultAd }
+
+function buildFeedWithAds(employers: Employer[], page: number): FeedItem[] {
+  const slots = pickEmployerResultAds(page, RESULTS_ADS_PER_PAGE)
+  const sponsoredIds = new Set(slots.map((slot) => slot.employer.id))
+  const organic = employers.filter((employer) => !sponsoredIds.has(employer.id))
+
+  return insertAdsIntoFeed(organic, slots, page).map((item) =>
+    item.kind === 'ad'
+      ? { kind: 'ad', ad: item.ad }
+      : { kind: 'employer', employer: item.item },
+  )
+}
 
 export type { EmployerSortKey }
 
@@ -196,10 +221,20 @@ export function EmployersMapView({
   const navigate = useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [layout, setLayout] = useState<LayoutMode>('grid')
-  const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
-    useMapResultsInteraction(employers)
   const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
-    useResultsPagination(employers, PAGE_SIZE)
+    useResultsPagination(employers, RESULTS_ORGANIC_PAGE_SIZE)
+  const feedItems = useMemo(() => buildFeedWithAds(pagedItems, page), [page, pagedItems])
+  const pageAds = useMemo(() => pickEmployerResultAds(page, RESULTS_ADS_PER_PAGE), [page])
+  const mapEmployers = useMemo(
+    () => mergePageAds(employers, pageAds.map((slot) => slot.employer)),
+    [employers, pageAds],
+  )
+  const adsByEmployerId = useMemo(() => {
+    if (pageAds.length === 0) return undefined
+    return Object.fromEntries(pageAds.map((slot) => [slot.employer.id, slot]))
+  }, [pageAds])
+  const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
+    useMapResultsInteraction(mapEmployers)
 
   function openEmployer(id: string) {
     navigate(employerPath(id))
@@ -303,28 +338,39 @@ export function EmployersMapView({
                 : 'flex flex-col gap-3',
             )}
           >
-            {pagedItems.map((employer, index) => (
-              <li
-                key={employer.id}
-                className="animate-[section-rise_0.4s_ease-out_both]"
-                style={{ animationDelay: `${Math.min(index, 7) * 35}ms` }}
-              >
-                <EmployerMapCard
-                  ref={(element) => {
-                    itemRefs.current[employer.id] = element
-                  }}
-                  employer={employer}
-                  compact={layout === 'list'}
-                  selected={selectedId === employer.id}
-                  active={hoveredId === employer.id}
-                  onSelect={(id) => {
-                    setSelectedId(id)
-                    openEmployer(id)
-                  }}
-                  onHover={setHoveredId}
-                />
-              </li>
-            ))}
+            {feedItems.map((item, index) => {
+              const employer = item.kind === 'ad' ? item.ad.employer : item.employer
+              return (
+                <li
+                  key={item.kind === 'ad' ? item.ad.id : employer.id}
+                  className="animate-[section-rise_0.4s_ease-out_both]"
+                  style={{ animationDelay: `${Math.min(index, 7) * 35}ms` }}
+                >
+                  <EmployerMapCard
+                    ref={(element) => {
+                      itemRefs.current[employer.id] = element
+                    }}
+                    employer={employer}
+                    compact={layout === 'list'}
+                    advertisement={item.kind === 'ad'}
+                    bannerPlacement={
+                      item.kind === 'ad'
+                        ? layout === 'list'
+                          ? 'top-right'
+                          : adBannerPlacementFor(employer.id)
+                        : undefined
+                    }
+                    selected={selectedId === employer.id}
+                    active={hoveredId === employer.id}
+                    onSelect={(id) => {
+                      setSelectedId(id)
+                      openEmployer(id)
+                    }}
+                    onHover={setHoveredId}
+                  />
+                </li>
+              )
+            })}
           </ul>
         )
       }
@@ -341,7 +387,8 @@ export function EmployersMapView({
       scrollResetKey={`${page}-${layout}`}
       map={
         <EmployersMap
-          employers={employers}
+          employers={mapEmployers}
+          adsByEmployerId={adsByEmployerId}
           selectedId={selectedId}
           hoveredId={hoveredId}
           onSelect={setSelectedId}

@@ -1,5 +1,7 @@
-﻿import { useState } from 'react'
+﻿import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { adBannerPlacementFor } from '@/features/referrals/components/FeaturedAgentAdCard'
+import { FeaturedServiceAdCard } from '@/features/referrals/components/FeaturedServiceAdCard'
 import { ServiceFiltersDrawer } from '@/features/referrals/components/ServiceFiltersDrawer'
 import { ServiceSortSelect } from '@/features/referrals/components/ServiceSortSelect'
 import { ServiceMapCard } from '@/features/referrals/components/ServiceMapCard'
@@ -9,14 +11,38 @@ import {
   ResultsPagination,
   ResultsSplitView,
 } from '@/features/referrals/components/ResultsSplitView'
+import {
+  pickServiceResultAds,
+  type ServiceResultAd,
+} from '@/features/referrals/data/serviceResultAds'
 import { useMapResultsInteraction } from '@/features/referrals/hooks/useMapResultsInteraction'
 import { useResultsPagination } from '@/features/referrals/hooks/useResultsPagination'
+import {
+  insertAdsIntoFeed,
+  mergePageAds,
+  RESULTS_ADS_PER_PAGE,
+  RESULTS_ORGANIC_PAGE_SIZE,
+} from '@/features/referrals/lib/resultFeedAds'
 import type { ServiceSortKey } from '@/features/referrals/model/sort'
 import { type HeroFiltersState } from '@/features/search'
 import { PATHS } from '@/app/router/paths'
 import type { Service } from '@/entities/provider/types'
 
-const PAGE_SIZE = 8
+type FeedItem =
+  | { kind: 'service'; service: Service }
+  | { kind: 'ad'; ad: ServiceResultAd }
+
+function buildFeedWithAds(services: Service[], page: number): FeedItem[] {
+  const slots = pickServiceResultAds(page, RESULTS_ADS_PER_PAGE)
+  const sponsoredIds = new Set(slots.map((slot) => slot.service.id))
+  const organic = services.filter((service) => !sponsoredIds.has(service.id))
+
+  return insertAdsIntoFeed(organic, slots, page).map((item) =>
+    item.kind === 'ad'
+      ? { kind: 'ad', ad: item.ad }
+      : { kind: 'service', service: item.item },
+  )
+}
 
 type ServicesMapViewProps = {
   services: Service[]
@@ -47,10 +73,20 @@ export function ServicesMapView({
 }: ServicesMapViewProps) {
   const navigate = useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
-    useMapResultsInteraction(services)
   const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
-    useResultsPagination(services, PAGE_SIZE)
+    useResultsPagination(services, RESULTS_ORGANIC_PAGE_SIZE)
+  const feedItems = useMemo(() => buildFeedWithAds(pagedItems, page), [page, pagedItems])
+  const pageAds = useMemo(() => pickServiceResultAds(page, RESULTS_ADS_PER_PAGE), [page])
+  const mapServices = useMemo(
+    () => mergePageAds(services, pageAds.map((slot) => slot.service)),
+    [pageAds, services],
+  )
+  const adsByServiceId = useMemo(() => {
+    if (pageAds.length === 0) return undefined
+    return Object.fromEntries(pageAds.map((slot) => [slot.service.id, slot]))
+  }, [pageAds])
+  const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
+    useMapResultsInteraction(mapServices)
 
   function applyFilters() {
     navigate(`${PATHS.results}?${toSearchParams().toString()}`)
@@ -111,19 +147,35 @@ export function ServicesMapView({
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
-            {pagedItems.map((service) => (
-              <ServiceMapCard
-                key={service.id}
-                ref={(el) => {
-                  itemRefs.current[service.id] = el
-                }}
-                service={service}
-                selected={selectedId === service.id}
-                active={hoveredId === service.id}
-                onSelect={focusService}
-                onHover={hoverService}
-              />
-            ))}
+            {feedItems.map((item) =>
+              item.kind === 'ad' ? (
+                <FeaturedServiceAdCard
+                  key={item.ad.id}
+                  ref={(el) => {
+                    itemRefs.current[item.ad.service.id] = el
+                  }}
+                  ad={item.ad}
+                  service={item.ad.service}
+                  bannerPlacement={adBannerPlacementFor(item.ad.service.providerId)}
+                  selected={selectedId === item.ad.service.id}
+                  active={hoveredId === item.ad.service.id}
+                  onSelect={focusService}
+                  onHover={hoverService}
+                />
+              ) : (
+                <ServiceMapCard
+                  key={item.service.id}
+                  ref={(el) => {
+                    itemRefs.current[item.service.id] = el
+                  }}
+                  service={item.service}
+                  selected={selectedId === item.service.id}
+                  active={hoveredId === item.service.id}
+                  onSelect={focusService}
+                  onHover={hoverService}
+                />
+              ),
+            )}
           </div>
         )
       }
@@ -133,7 +185,8 @@ export function ServicesMapView({
       scrollResetKey={page}
       map={
         <ServicesMap
-          services={services}
+          services={mapServices}
+          adsByServiceId={adsByServiceId}
           selectedId={selectedId}
           hoveredId={hoveredId}
           onSelect={focusService}

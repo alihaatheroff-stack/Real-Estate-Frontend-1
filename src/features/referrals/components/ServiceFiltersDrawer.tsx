@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { RangeSlider } from '@/components/ui/RangeSlider'
+import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import {
   HeroFilterSelect,
   ENGLISH_LEVEL_OPTIONS,
@@ -436,14 +437,12 @@ export function ServiceFiltersDrawer({
             />
           </FilterSection>
 
-          <FilterSection title="[Input] Percentage Share:">
-            <input
-              type="text"
-              inputMode="numeric"
+          <FilterSection title="Referral Share:">
+            <ReferralShareInput
+              compact
+              hideLabel
               value={filters.percentageShare}
-              onChange={(e) => onChange('percentageShare', e.target.value)}
-              placeholder="Ex. (25%, 35%, 50%, etc.,)"
-              className="h-7 w-full rounded-md border border-black bg-white px-2.5 text-[13px] text-ink outline-none placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
+              onChange={(value) => onChange('percentageShare', value)}
             />
           </FilterSection>
 

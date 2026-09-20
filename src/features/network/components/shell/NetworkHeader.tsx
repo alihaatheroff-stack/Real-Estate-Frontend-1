@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { GraduationCap, Menu, Search } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { ABOUT_MENU, CROWDFUNDING_MENU, MARKETING_NAV, REFERRALS_MENU } from '@/app/config/nav'
+import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
 import { CallsMenu } from '@/components/layout/CallsMenu'
 import { FavoritesMenu } from '@/components/layout/FavoritesMenu'
 import { GuestAuthPopover } from '@/components/layout/GuestAuthPopover'
@@ -85,15 +86,15 @@ export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
             ) : (
               <GuestAuthPopover
                 triggerLabel="Learn"
-                title="Learn"
-                description="Sign in or register to use learn."
                 icon={GraduationCap}
+                href={PATHS.signIn}
               />
             )}
             <MessagesMenu locked={!isAuthenticated} />
             <NotificationsMenu locked={!isAuthenticated} />
             <FavoritesMenu locked={!isAuthenticated} />
             <OrdersMenu locked={!isAuthenticated} />
+            <AdvertiseMenu />
           </div>
           {isAuthenticated ? (
             <ProfileMenu homeHref={PATHS.networkFeed} onSignOut={signOut} />

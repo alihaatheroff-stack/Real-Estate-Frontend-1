@@ -24,13 +24,13 @@ export function NetworkLayout() {
       <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
         <NetworkHeader onOpenMenu={() => setMenuOpen(true)} />
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <aside className="hidden h-full w-[260px] shrink-0 overflow-y-auto border-r border-black/5 bg-white lg:flex">
+          <aside className="network-shell-scroll hidden h-full w-[260px] shrink-0 overflow-y-auto border-r border-black/5 bg-white lg:flex">
             <NetworkLeftNav />
           </aside>
           <main
             ref={mainRef}
             className={cn(
-              'flex h-full min-h-0 min-w-0 flex-1 flex-col',
+              'network-shell-scroll flex h-full min-h-0 min-w-0 flex-1 flex-col',
               lockScroll ? 'overflow-hidden' : 'overflow-y-auto pb-16 lg:pb-0',
             )}
           >

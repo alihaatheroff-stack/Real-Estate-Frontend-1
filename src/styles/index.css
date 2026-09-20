@@ -190,6 +190,27 @@
     box-shadow: 0 2px 8px rgb(15 31 26 / 0.18);
     cursor: pointer;
   }
+
+  .range-slider-freeio::-webkit-slider-thumb {
+    appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    border: 0;
+    background: var(--color-freeio-ink);
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .range-slider-freeio::-moz-range-thumb {
+    height: 18px;
+    width: 18px;
+    border-radius: 9999px;
+    border: 0;
+    background: var(--color-freeio-ink);
+    box-shadow: none;
+    cursor: pointer;
+  }
 }
 
 /* Register / crowdfunding checkbox: white box + black check (not filled accent). */
@@ -489,24 +510,44 @@
 
 .network-hide-scroll {
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .network-hide-scroll::-webkit-scrollbar {
   display: none;
+  width: 0;
+  height: 0;
 }
 
 .network-thin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(27 107 79 / 0.28) transparent;
+  scrollbar-color: rgb(27 107 79 / 0.22) transparent;
 }
 
 .network-thin-scroll::-webkit-scrollbar {
   width: 6px;
+  background: transparent;
+}
+
+.network-thin-scroll::-webkit-scrollbar-track,
+.network-thin-scroll::-webkit-scrollbar-track-piece {
+  background: transparent;
 }
 
 .network-thin-scroll::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgb(27 107 79 / 0.28);
+  background: rgb(27 107 79 / 0.22);
+}
+
+.network-shell-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.network-shell-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .settings-paste {

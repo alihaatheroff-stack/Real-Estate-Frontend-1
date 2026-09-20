@@ -1,47 +1,85 @@
 import { Link } from 'react-router-dom'
-import { Search } from 'lucide-react'
+import { ChevronRight, Search } from 'lucide-react'
 import { PATHS, networkProfilePath } from '@/app/router/paths'
+import { AdvertiseSlot, FeedAdCard } from '@/features/network/components/feed/FeedAdCard'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
-import { NETWORK_MEMBERS, getCurrentMember } from '@/features/network/data/members'
 import { NETWORK_LISTINGS } from '@/features/network/data/community'
+import { FEED_RIGHT_ADS } from '@/features/network/data/feedAds'
+import { PEOPLE_YOU_MAY_KNOW } from '@/features/network/data/feed'
+import { NETWORK_MEMBERS, getCurrentMember, getMember } from '@/features/network/data/members'
 
 export function NetworkRightRail() {
   const me = getCurrentMember()
-  const contacts = NETWORK_MEMBERS.filter((member) => member.id !== me.id).slice(0, 10)
+  const contacts = NETWORK_MEMBERS.filter((member) => member.id !== me.id).slice(0, 8)
   const sponsored = NETWORK_LISTINGS.slice(0, 2)
+  const suggested = PEOPLE_YOU_MAY_KNOW.map((id) => getMember(id)).filter(
+    (member) => member && member.id !== me.id,
+  ).slice(0, 3)
 
   return (
-    <div className="network-thin-scroll flex max-h-[calc(100vh-5.5rem)] flex-col gap-4 overflow-y-auto pb-8 pl-1">
+    <>
+      {FEED_RIGHT_ADS[0] ? <FeedAdCard ad={FEED_RIGHT_ADS[0]} /> : null}
+
       <NetworkCard>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-[17px] font-semibold text-muted">Sponsored deals</h2>
+          <h2 className="text-[15px] font-semibold text-ink">Sponsored</h2>
           <Link to={PATHS.networkMarketplace} className="text-xs font-semibold text-brand hover:underline">
             See all
           </Link>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {sponsored.map((listing) => (
-            <Link
+            <FeedAdCard
               key={listing.id}
-              to={PATHS.networkMarketplace}
-              className="flex gap-3 rounded-lg p-1 hover:bg-mist"
-            >
-              <img src={listing.image} alt="" className="h-24 w-28 shrink-0 rounded-lg object-cover" />
-              <span className="min-w-0">
-                <span className="block text-sm font-semibold leading-snug text-ink">{listing.title}</span>
-                <span className="mt-1 block text-xs text-muted">
-                  {listing.price} · {listing.location}
-                </span>
-              </span>
-            </Link>
+              variant="row"
+              ad={{
+                id: listing.id,
+                title: listing.title,
+                subtitle: `${listing.price} · ${listing.location}`,
+                image: listing.image,
+                href: PATHS.networkMarketplace,
+                sponsor: listing.category,
+              }}
+            />
           ))}
         </div>
       </NetworkCard>
 
+      {FEED_RIGHT_ADS[1] ? <FeedAdCard ad={FEED_RIGHT_ADS[1]} /> : null}
+
+      {suggested.length > 0 ? (
+        <NetworkCard>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-[15px] font-semibold text-ink">People you may know</h2>
+            <Link
+              to={`${PATHS.networkFriends}?tab=suggest`}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-mist"
+              aria-label="See more people"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="flex items-start justify-between gap-2">
+            {suggested.map((member) =>
+              member ? (
+                <Link
+                  key={member.id}
+                  to={networkProfilePath(member.id)}
+                  className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center"
+                >
+                  <MemberAvatar name={member.name} src={member.avatar} />
+                  <span className="w-full truncate text-xs font-semibold text-ink">{member.firstName}</span>
+                </Link>
+              ) : null,
+            )}
+          </div>
+        </NetworkCard>
+      ) : null}
+
       <div>
         <div className="mb-2 flex items-center justify-between px-1">
-          <h2 className="text-[17px] font-semibold text-muted">Contacts</h2>
+          <h2 className="text-[15px] font-semibold text-muted">Friends</h2>
           <Search className="h-4 w-4 text-muted" />
         </div>
         <ul className="space-y-0.5">
@@ -57,12 +95,21 @@ export function NetworkRightRail() {
                   size="sm"
                   online={member.online}
                 />
-                <span className="truncate text-sm font-semibold text-ink">{member.name}</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-ink">
+                  {member.name}
+                </span>
+                {member.online ? (
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500" />
+                ) : (
+                  <span className="text-[11px] text-muted">2h</span>
+                )}
               </Link>
             </li>
           ))}
         </ul>
       </div>
-    </div>
+
+      <AdvertiseSlot />
+    </>
   )
 }

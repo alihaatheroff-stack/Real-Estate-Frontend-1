@@ -13,7 +13,9 @@ import {
   getEmployerById as findEmployerById,
   categoryLabel,
 } from '@/features/referrals/data/employers'
+import { getFeaturedAdEmployerById } from '@/features/referrals/data/employerResultAds'
 import { getFeaturedAdProviderById } from '@/features/referrals/data/profileResultAds'
+import { getFeaturedAdServiceById, FEATURED_AD_SERVICES } from '@/features/referrals/data/serviceResultAds'
 import { PROVIDERS } from '@/features/referrals/data/providers'
 import { REVIEWS } from '@/features/referrals/data/reviews'
 import { SERVICE_FAQS, SERVICES } from '@/features/referrals/data/services'
@@ -53,11 +55,13 @@ export function listServices(): Service[] {
 }
 
 export function getServiceById(id: string): Service | undefined {
-  return SERVICES.find((service) => service.id === id)
+  return SERVICES.find((service) => service.id === id) ?? getFeaturedAdServiceById(id)
 }
 
 export function getServicesByProvider(providerId: string): Service[] {
-  return copyList(SERVICES.filter((service) => service.providerId === providerId))
+  const organic = SERVICES.filter((service) => service.providerId === providerId)
+  const sponsored = FEATURED_AD_SERVICES.filter((service) => service.providerId === providerId)
+  return copyList(sponsored.length === 0 ? organic : [...organic, ...sponsored])
 }
 
 export function getProviderForService(service: Service): Provider | undefined {
@@ -96,7 +100,7 @@ export function listEmployers(): Employer[] {
 }
 
 export function getEmployerById(id: string): Employer | undefined {
-  return findEmployerById(id)
+  return findEmployerById(id) ?? getFeaturedAdEmployerById(id)
 }
 
 export function getEmployerLocationOptions() {

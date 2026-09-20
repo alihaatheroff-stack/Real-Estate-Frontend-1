@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { ChevronDown, GraduationCap, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/layout/Container'
+import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
 import { CallsMenu } from '@/components/layout/CallsMenu'
 import { FavoritesMenu } from '@/components/layout/FavoritesMenu'
 import { MessagesMenu } from '@/components/layout/MessagesMenu'
@@ -107,15 +108,15 @@ export function SiteHeader({
             ) : (
               <GuestAuthPopover
                 triggerLabel="Learn"
-                title="Learn"
-                description="Sign in or register to use learn."
                 icon={GraduationCap}
+                href={signInHref}
               />
             )}
             <MessagesMenu locked={!isAuthenticated} />
             <NotificationsMenu locked={!isAuthenticated} />
             <FavoritesMenu locked={!isAuthenticated} />
             <OrdersMenu locked={!isAuthenticated} />
+            <AdvertiseMenu />
           </div>
           {isAuthenticated ? (
             <ProfileMenu
@@ -232,15 +233,15 @@ export function SiteHeader({
               ) : (
                 <GuestAuthPopover
                   triggerLabel="Learn"
-                  title="Learn"
-                  description="Sign in or register to use learn."
                   icon={GraduationCap}
+                  href={signInHref}
                 />
               )}
               <MessagesMenu locked={!isAuthenticated} />
               <NotificationsMenu locked={!isAuthenticated} />
               <FavoritesMenu locked={!isAuthenticated} />
               <OrdersMenu locked={!isAuthenticated} />
+              <AdvertiseMenu />
               {isAuthenticated ? null : (
                 <GuestAccountMenu signInHref={signInHref} registerHref={registerHref} />
               )}

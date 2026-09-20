@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MapContainer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { MapPin, Star, Volume2, X } from 'lucide-react'
+import { MapPin, Star, X } from 'lucide-react'
 import type { Provider } from '@/entities/provider/types'
 import type { ProfileResultAd } from '@/features/referrals/data/profileResultAds'
+import { AdTopBanner } from '@/features/referrals/components/FeaturedAgentAdCard'
 import { createCircleMarkerIcon, PINNED_MARKER_OPTIONS, type MarkerVisualState } from '@/features/referrals/lib/mapIcons'
 import { MapMeasureTools } from '@/features/referrals/components/MapMeasureTools'
 import { MapBasemapLayer } from '@/features/referrals/components/MapBasemapLayer'
@@ -65,18 +66,6 @@ function rateLabel(provider: Provider) {
     return `$${provider.hourlyRateMin} - $${provider.hourlyRateMax} / hr`
   }
   return 'Rate on request'
-}
-
-function AdTopBanner() {
-  return (
-    <div
-      className="flex items-center justify-center gap-1.5 bg-[#16a34a] px-2 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-white"
-      aria-hidden
-    >
-      <Volume2 className="h-3 w-3 shrink-0 fill-white" strokeWidth={2.25} />
-      Advertisement
-    </div>
-  )
 }
 
 function ProviderMarkerPin({

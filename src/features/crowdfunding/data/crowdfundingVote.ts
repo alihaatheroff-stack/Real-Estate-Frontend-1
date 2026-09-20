@@ -1,4 +1,5 @@
 import { countryToVoteRegion } from '@/features/crowdfunding/data/countriesByLetter'
+import { getFeaturedAdVenueLocation } from '@/features/crowdfunding/data/voteResultAds'
 
 export type VoteVertical =
   | 'water'
@@ -508,7 +509,9 @@ const FALLBACK_VENUE_LOCATION: VoteVenueLocation = {
 }
 
 export function getVoteVenueLocation(id: string): VoteVenueLocation {
-  return VOTE_VENUE_LOCATIONS[id] ?? FALLBACK_VENUE_LOCATION
+  return (
+    VOTE_VENUE_LOCATIONS[id] ?? getFeaturedAdVenueLocation(id) ?? FALLBACK_VENUE_LOCATION
+  )
 }
 
 const VOTE_VENUE_COUNTS: Record<string, number> = {

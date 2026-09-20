@@ -1,5 +1,5 @@
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
-import { NumberStepperInput } from '@/components/ui/NumberStepperInput'
+import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import { RangeSlider } from '@/components/ui/RangeSlider'
 import { REGISTER_FIND_OPTIONS } from '@/features/auth/model/registerPsp'
 import type {
@@ -222,16 +222,12 @@ export function ServiceProfileBlock({
             onChange={(next) => setProfileFilterList('englishLevel', next)}
           />
 
-          <NumberStepperInput
+          <ReferralShareInput
             showQaMark
-            label="[Input] Percentage Share:"
+            label="Referral Share:"
             name="percentageShare"
-            placeholder="Ex. (25%, 35%, 50%, etc.,)"
             value={profileFilters.percentageShare}
             onChange={(value) => setProfileFilter('percentageShare', value)}
-            min={0}
-            max={100}
-            step={1}
           />
 
           <WillingToTrainSelect

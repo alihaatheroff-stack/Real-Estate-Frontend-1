@@ -7,6 +7,10 @@ import { Input } from '@/components/ui/Input'
 import { AuthRequiredDialog, useIsAuthenticated } from '@/features/auth'
 import { CrowdfundingVenuesMap } from '@/features/crowdfunding/components/CrowdfundingVenuesMap'
 import {
+  pickCrowdfundingResultAds,
+  type CrowdfundingResultAd,
+} from '@/features/crowdfunding/data/voteResultAds'
+import {
   filterVoteVenues,
   getVoteVenueCount,
   getVoteVenueLocation,
@@ -30,14 +34,44 @@ import {
 } from '@/features/crowdfunding/data/geoHierarchy'
 import {
   ResultsFilterButton,
+  ResultsPagination,
   ResultsSplitView,
 } from '@/features/referrals/components/ResultsSplitView'
+import {
+  AdCornerRibbon,
+  AdWatermark,
+  isCornerRibbonPlacement,
+  type AdBannerPlacement,
+} from '@/features/referrals/components/FeaturedAgentAdCard'
 import { useMapResultsInteraction } from '@/features/referrals/hooks/useMapResultsInteraction'
+import { useResultsPagination } from '@/features/referrals/hooks/useResultsPagination'
+import {
+  insertAdsIntoFeed,
+  mergePageAds,
+  RESULTS_ADS_PER_PAGE,
+  RESULTS_ORGANIC_PAGE_SIZE,
+} from '@/features/referrals/lib/resultFeedAds'
 import { SaveToFolderDialog } from '@/features/favorites/SaveToFolderDialog'
 import { removeFavoriteItem, useFavorites } from '@/features/favorites/store'
 import { cn } from '@/shared/lib/cn'
 
 type FilterOption = { value: string; label: string; icon?: 'price' | 'date' }
+
+type FeedItem =
+  | { kind: 'venue'; venue: VoteVenue }
+  | { kind: 'ad'; ad: CrowdfundingResultAd }
+
+function buildFeedWithAds(venues: VoteVenue[], page: number): FeedItem[] {
+  const slots = pickCrowdfundingResultAds(page, RESULTS_ADS_PER_PAGE)
+  const sponsoredIds = new Set(slots.map((slot) => slot.venue.id))
+  const organic = venues.filter((venue) => !sponsoredIds.has(venue.id))
+
+  return insertAdsIntoFeed(organic, slots, page).map((item) =>
+    item.kind === 'ad'
+      ? { kind: 'ad', ad: item.ad }
+      : { kind: 'venue', venue: item.item },
+  )
+}
 
 function SortPriceIcon() {
   return (
@@ -782,6 +816,9 @@ function VoteVenueCard({
   voted,
   focused,
   hovered,
+  advertisement = false,
+  bannerPlacement = 'top-left',
+  sponsoredLabel,
   onFocus,
   onHover,
   onToggleVote,
@@ -791,6 +828,9 @@ function VoteVenueCard({
   voted: boolean
   focused: boolean
   hovered: boolean
+  advertisement?: boolean
+  bannerPlacement?: AdBannerPlacement
+  sponsoredLabel?: string
   onFocus: () => void
   onHover: (id: string | null) => void
   onToggleVote: () => void
@@ -827,13 +867,17 @@ function VoteVenueCard({
   return (
     <article
       className={cn(
-        'rounded-xl border-2 border-ink/35 bg-paper p-1.5 transition hover:border-brand hover:ring-2 hover:ring-brand/30',
+        'relative flex h-full flex-col overflow-hidden rounded-xl border-2 p-1.5 transition',
+        advertisement
+          ? 'border-[#b7d8f0] bg-[#eef7fd]'
+          : 'border-ink/35 bg-paper hover:border-brand hover:ring-2 hover:ring-brand/30',
         (voted || focused || hovered) && 'border-brand ring-2 ring-brand/30',
       )}
       onMouseEnter={() => onHover(venue.id)}
       onMouseLeave={() => onHover(null)}
     >
-      <div className="relative">
+      {advertisement && bannerPlacement === 'watermark' ? <AdWatermark compact /> : null}
+      <div className="relative z-[1] shrink-0 overflow-hidden rounded-lg">
         <button
           ref={cardRef}
           type="button"
@@ -847,6 +891,15 @@ function VoteVenueCard({
             className="absolute inset-0 h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.04]"
             loading="lazy"
           />
+          {advertisement && isCornerRibbonPlacement(bannerPlacement) ? (
+            <AdCornerRibbon placement={bannerPlacement} compact />
+          ) : null}
+          {advertisement ? (
+            <p className="absolute bottom-2 left-2 z-10 max-w-[calc(100%-1rem)] truncate rounded bg-white/95 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#2563eb]">
+              <span className="underline">Sponsored</span>
+              {sponsoredLabel ? ` · ${sponsoredLabel}` : null}
+            </p>
+          ) : null}
         </button>
         <button
           type="button"
@@ -865,7 +918,7 @@ function VoteVenueCard({
         </button>
       </div>
 
-      <div className="space-y-1.5 px-1 pb-1.5 pt-2.5">
+      <div className="relative z-[1] flex min-h-0 flex-1 flex-col space-y-1.5 px-1 pb-1.5 pt-2.5">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
           <label className="flex cursor-pointer items-center gap-2 text-xs text-ink">
             <input
@@ -888,10 +941,10 @@ function VoteVenueCard({
         </div>
 
         <div className="space-y-0.5">
-          <p className="text-xs font-semibold leading-snug text-ink sm:text-sm">
+          <p className="truncate text-xs font-semibold leading-snug text-ink sm:text-sm">
             <span className="font-medium text-muted">Role:</span> {venue.role}
           </p>
-          <p className="text-xs leading-snug text-muted sm:text-sm">{location.city}</p>
+          <p className="truncate text-xs leading-snug text-muted sm:text-sm">{location.city}</p>
           <p className="text-xs leading-snug text-ink sm:text-sm">
             <span className="font-medium text-muted">Raise:</span>{' '}
             <span className="font-semibold">{venue.raise}</span>
@@ -902,7 +955,7 @@ function VoteVenueCard({
           </p>
         </div>
 
-        <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-1">
           <p className="text-xs font-medium leading-none text-muted underline decoration-ink/35 underline-offset-2 sm:text-sm">
             Votes: {getVoteVenueCount(venue.id) + (voted ? 1 : 0)}
           </p>
@@ -969,8 +1022,16 @@ export function LoggedInCrowdfundingVote() {
       }),
     [geography, states, regions, counties, cities, vertical, venueId, sort],
   )
+  const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
+    useResultsPagination(venues, RESULTS_ORGANIC_PAGE_SIZE)
+  const feedItems = useMemo(() => buildFeedWithAds(pagedItems, page), [page, pagedItems])
+  const pageAds = useMemo(() => pickCrowdfundingResultAds(page, RESULTS_ADS_PER_PAGE), [page])
+  const mapVenues = useMemo(
+    () => mergePageAds(venues, pageAds.map((slot) => slot.venue)),
+    [pageAds, venues],
+  )
   const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
-    useMapResultsInteraction(venues)
+    useMapResultsInteraction(mapVenues)
   const [mapOpen, setMapOpen] = useState(true)
 
   function registerToVote() {
@@ -1054,7 +1115,11 @@ export function LoggedInCrowdfundingVote() {
                   'No venues'
                 ) : (
                   <>
-                    Showing <span className="font-semibold text-ink">{venues.length}</span>{' '}
+                    Showing{' '}
+                    <span className="font-semibold text-ink">
+                      {pageStart} – {pageEnd}
+                    </span>{' '}
+                    of <span className="font-semibold text-ink">{venues.length}</span>{' '}
                     {venues.length === 1 ? 'venue' : 'venues'}
                   </>
                 )}
@@ -1083,23 +1148,27 @@ export function LoggedInCrowdfundingVote() {
           ) : (
             <ul
               className={cn(
-                'grid gap-3 sm:gap-3.5',
+                'grid items-stretch gap-3 sm:gap-3.5',
                 mapOpen
                   ? 'grid-cols-2 sm:grid-cols-3'
                   : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6',
               )}
             >
-              {venues.map((venue) => {
+              {feedItems.map((item) => {
+                const venue = item.kind === 'ad' ? item.ad.venue : item.venue
                 const voted = votedIds.includes(venue.id)
                 const focused = selectedId === venue.id
                 const hovered = hoveredId === venue.id
                 return (
-                  <li key={venue.id}>
+                  <li key={item.kind === 'ad' ? item.ad.id : venue.id} className="h-full min-h-0">
                     <VoteVenueCard
                       venue={venue}
                       voted={voted}
                       focused={focused}
                       hovered={hovered}
+                      advertisement={item.kind === 'ad'}
+                      bannerPlacement="top-left"
+                      sponsoredLabel={item.kind === 'ad' ? item.ad.label : undefined}
                       onFocus={() => focusVenue(venue.id)}
                       onHover={hoverVenue}
                       onToggleVote={() => toggleVote(venue.id)}
@@ -1113,9 +1182,13 @@ export function LoggedInCrowdfundingVote() {
             </ul>
           )
         }
+        pagination={
+          <ResultsPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        }
+        scrollResetKey={page}
         map={
           <CrowdfundingVenuesMap
-            venues={venues}
+            venues={mapVenues}
             selectedId={selectedId}
             hoveredId={hoveredId}
             onSelect={focusVenue}

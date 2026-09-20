@@ -2,25 +2,76 @@ import type { ReactNode } from 'react'
 import { cn } from '@/shared/lib/cn'
 import { NetworkRightRail } from '@/features/network/components/shell/NetworkRightRail'
 
+function RailStack({
+  children,
+  align,
+}: {
+  children: ReactNode
+  align: 'left' | 'right'
+}) {
+  return (
+    <div
+      className={cn(
+        'network-shell-scroll flex h-full flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain [&>*]:shrink-0',
+        align === 'right' ? 'pl-2 pr-2' : 'pr-2',
+      )}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function NetworkPageFrame({
   children,
+  left,
   right,
   hideRight,
   className,
 }: {
   children: ReactNode
+  left?: ReactNode
   right?: ReactNode
   hideRight?: boolean
   className?: string
 }) {
   const showRight = !hideRight
+  const showLeft = Boolean(left)
 
   return (
-    <div className={cn('w-full px-3 py-4 sm:px-4 lg:px-5', className)}>
-      {showRight ? (
-        <div className="grid w-full gap-4 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div
+      className={cn(
+        'w-full py-4',
+        showLeft && showRight ? 'px-3 sm:px-4 lg:pr-0' : 'px-3 sm:px-4 lg:px-5',
+        className,
+      )}
+    >
+      {showLeft || showRight ? (
+        <div
+          className={cn(
+            'grid w-full items-start gap-5',
+            showLeft && showRight
+              ? 'lg:grid-cols-[minmax(0,1fr)_minmax(240px,270px)] xl:grid-cols-[minmax(230px,260px)_minmax(0,1fr)_minmax(240px,270px)]'
+              : showRight
+                ? 'xl:grid-cols-[minmax(0,1fr)_260px]'
+                : 'xl:grid-cols-[260px_minmax(0,1fr)]',
+          )}
+        >
+          {showLeft ? (
+            <aside className="sticky top-4 hidden h-[calc(100dvh-6.25rem)] min-w-0 xl:block">
+              <RailStack align="left">{left}</RailStack>
+            </aside>
+          ) : null}
           <div className="min-w-0">{children}</div>
-          <aside className="hidden min-w-0 xl:block">{right ?? <NetworkRightRail />}</aside>
+          {showRight ? (
+            <aside
+              className={cn(
+                'sticky top-4 h-[calc(100dvh-6.25rem)] min-w-0',
+                showLeft ? 'hidden lg:block' : 'hidden xl:block',
+              )}
+            >
+              <RailStack align="right">{right ?? <NetworkRightRail />}</RailStack>
+            </aside>
+          ) : null}
         </div>
       ) : (
         <div className="min-w-0 w-full">{children}</div>
