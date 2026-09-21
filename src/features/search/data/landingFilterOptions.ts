@@ -17,8 +17,7 @@ export const PSP_BY_LETTER: Record<string, string[]> = {
     'Appraiser',
     'Architect',
     "Asbesto's",
-    "Attorney",
-    "Worker's Comp",
+    'Attorney',
   ],
   B: ['Broker', 'Bookkeeper', 'Builder'],
   C: [
@@ -39,6 +38,7 @@ export const PSP_BY_LETTER: Record<string, string[]> = {
   J: ['Janitorial'],
   L: [
     'Landscaper',
+    'Lawyer',
     'Lawn [See; Yard]',
     'Loan',
     'Loan Executive',
@@ -59,6 +59,9 @@ export const PSP_BY_LETTER: Record<string, string[]> = {
   S: ['Sand-Blasting', 'Solar', 'Squat-Removal'],
   T: ['Taxes', 'Transaction Coordinator', 'Trash Bin Cleaner'],
   W: ['Wholesaler', 'Welder', 'Window Cleaner'],
+  X: [],
+  Y: [],
+  Z: [],
 }
 
 /** Nested under Agent */
@@ -82,8 +85,19 @@ export const BROKER_TYPE_TREE: FilterTreeNode[] = [
   { label: 'Insurance' },
 ]
 
+export const ATTORNEY_TYPE_TREE: FilterTreeNode[] = [
+  { label: 'Insurance' },
+  { label: 'Title' },
+  { label: 'Workers Compensation' },
+]
+
+export const LAWYER_TYPE_TREE: FilterTreeNode[] = [
+  { label: 'Insurance' },
+  { label: 'Title' },
+  { label: 'Workers Compensation' },
+]
+
 export const CROWDFUNDING_TYPE_TREE: FilterTreeNode[] = [
-  { label: 'Accreditation' },
   { label: 'Accredited' },
   { label: 'Non Accredited' },
 ]
@@ -135,10 +149,12 @@ export const INVESTOR_TYPE_TREE: FilterTreeNode[] = [
 /** Parent PSP label → nested tree */
 export const PSP_NESTED_TREES: Record<string, FilterTreeNode[]> = {
   Agent: AGENT_TYPE_TREE,
+  Attorney: ATTORNEY_TYPE_TREE,
   Broker: BROKER_TYPE_TREE,
   Crowdfunding: CROWDFUNDING_TYPE_TREE,
   Flooring: FLOORING_TYPE_TREE,
   Investor: INVESTOR_TYPE_TREE,
+  Lawyer: LAWYER_TYPE_TREE,
   'Lawn [See; Yard]': LAWN_TYPE_TREE,
 }
 
@@ -493,6 +509,7 @@ export const LANGUAGE_BY_LETTER: Record<string, string[]> = {
   F: ['French'],
   G: ['German', 'Gujarati'],
   H: ['Hindi'],
+  I: ['Italiano'],
   J: ['Japanese'],
   K: ['Korean'],
   M: ['Mandarin'],

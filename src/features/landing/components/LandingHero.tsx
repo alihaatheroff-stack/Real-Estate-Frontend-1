@@ -18,7 +18,7 @@ export function LandingHero() {
           filters={filters}
           onChange={updateFilter}
           toSearchParams={toSearchParams}
-          className="h-auto max-h-full w-full max-w-[16.2rem] sm:max-w-[18rem]"
+          className="h-auto max-h-full w-full max-w-[17.5rem] sm:max-w-[19.5rem]"
         />
       </div>
     </section>

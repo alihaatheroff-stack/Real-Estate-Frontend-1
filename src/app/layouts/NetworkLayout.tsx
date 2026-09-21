@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { NetworkHeader } from '@/features/network/components/shell/NetworkHeader'
 import { NetworkLeftNav } from '@/features/network/components/shell/NetworkLeftNav'
@@ -8,8 +8,24 @@ import { NetworkMobileNav } from '@/features/network/components/shell/NetworkMob
 import { NetworkSocialProvider } from '@/features/network/model/NetworkSocialContext'
 import { cn } from '@/shared/lib/cn'
 
+const SIDEBAR_KEY = 're-network-sidebar-open'
+const SIDEBAR_WIDTH = 260
+/** Half of the 32px toggle — parks the full button on-screen when the sidebar is closed. */
+const TOGGLE_HALF = 16
+
+function readSidebarOpen() {
+  try {
+    const raw = localStorage.getItem(SIDEBAR_KEY)
+    if (raw === null) return true
+    return raw === '1'
+  } catch {
+    return true
+  }
+}
+
 export function NetworkLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(readSidebarOpen)
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
   const lockScroll =
@@ -19,14 +35,50 @@ export function NetworkLayout() {
     mainRef.current?.scrollTo({ top: 0, left: 0 })
   }, [location.pathname])
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_KEY, sidebarOpen ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [sidebarOpen])
+
   return (
     <NetworkSocialProvider>
       <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
         <NetworkHeader onOpenMenu={() => setMenuOpen(true)} />
-        <div className="flex min-h-0 flex-1 overflow-hidden">
-          <aside className="network-shell-scroll hidden h-full w-[260px] shrink-0 overflow-y-auto border-r border-black/5 bg-white lg:flex">
-            <NetworkLeftNav />
-          </aside>
+
+        <div className="relative flex min-h-0 flex-1 overflow-hidden">
+          {/* Width-only clip for nav; toggle is a sibling so it stays fully visible when closed. */}
+          <div
+            className="hidden h-full shrink-0 overflow-hidden transition-[width] duration-200 ease-out lg:block"
+            style={{ width: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
+            aria-hidden={!sidebarOpen}
+          >
+            <div
+              className="network-shell-scroll h-full overflow-y-auto border-r border-black/5 bg-white"
+              style={{ width: SIDEBAR_WIDTH }}
+            >
+              <NetworkLeftNav />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((open) => !open)}
+            className="absolute top-1/2 z-30 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-ink/70 shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-[left,color,border-color] duration-200 ease-out hover:border-brand/25 hover:text-brand lg:flex"
+            style={{ left: sidebarOpen ? SIDEBAR_WIDTH : TOGGLE_HALF }}
+            aria-label={sidebarOpen ? 'Hide menu' : 'Show menu'}
+            aria-expanded={sidebarOpen}
+            title={sidebarOpen ? 'Hide menu' : 'Show menu'}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="h-4 w-4" strokeWidth={2.25} />
+            ) : (
+              <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
+            )}
+          </button>
+
           <main
             ref={mainRef}
             className={cn(
@@ -37,6 +89,7 @@ export function NetworkLayout() {
             <Outlet />
           </main>
         </div>
+
         <NetworkMobileNav onOpenMenu={() => setMenuOpen(true)} />
 
         {menuOpen ? (

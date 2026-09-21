@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { ChevronDown, GraduationCap, LogOut, Menu, X } from 'lucide-react'
+import { ChevronDown, GraduationCap, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/layout/Container'
 import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
@@ -96,6 +96,7 @@ export function SiteHeader({
 
         <div className="flex items-center gap-0.5 sm:gap-1">
           <div className="hidden items-center gap-0.5 sm:flex">
+            <AdvertiseMenu />
             <CallsMenu locked={!isAuthenticated} />
             {isAuthenticated ? (
               <button
@@ -116,7 +117,21 @@ export function SiteHeader({
             <NotificationsMenu locked={!isAuthenticated} />
             <FavoritesMenu locked={!isAuthenticated} />
             <OrdersMenu locked={!isAuthenticated} />
-            <AdvertiseMenu />
+            {isAuthenticated ? (
+              <Link
+                to={PATHS.dashboard}
+                className="inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist"
+                aria-label="Dashboard"
+              >
+                <LayoutDashboard className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" />
+              </Link>
+            ) : (
+              <GuestAuthPopover
+                triggerLabel="Dashboard"
+                icon={LayoutDashboard}
+                href={signInHref}
+              />
+            )}
           </div>
           {isAuthenticated ? (
             <ProfileMenu
@@ -221,6 +236,7 @@ export function SiteHeader({
               ),
             )}
             <div className="mt-2 flex items-center justify-center gap-1 border-t border-line pt-3">
+              <AdvertiseMenu />
               <CallsMenu locked={!isAuthenticated} />
               {isAuthenticated ? (
                 <button
@@ -241,7 +257,22 @@ export function SiteHeader({
               <NotificationsMenu locked={!isAuthenticated} />
               <FavoritesMenu locked={!isAuthenticated} />
               <OrdersMenu locked={!isAuthenticated} />
-              <AdvertiseMenu />
+              {isAuthenticated ? (
+                <Link
+                  to={PATHS.dashboard}
+                  onClick={() => setOpen(false)}
+                  className="inline-flex items-center justify-center rounded-lg p-2.5 text-ink transition hover:bg-mist"
+                  aria-label="Dashboard"
+                >
+                  <LayoutDashboard className="h-5 w-5 stroke-[1.5]" />
+                </Link>
+              ) : (
+                <GuestAuthPopover
+                  triggerLabel="Dashboard"
+                  icon={LayoutDashboard}
+                  href={signInHref}
+                />
+              )}
               {isAuthenticated ? null : (
                 <GuestAccountMenu signInHref={signInHref} registerHref={registerHref} />
               )}

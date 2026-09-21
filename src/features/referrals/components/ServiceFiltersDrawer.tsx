@@ -259,6 +259,7 @@ export function ServiceFiltersDrawer({
               placeholder="Ex. (Agent, Architect, Real Estate, etc.,)"
               optionsByLetter={PSP_BY_LETTER}
               nestedTrees={PSP_NESTED_TREES}
+              showLetterSuggest
               value={selectedPsp}
               onChange={(next) => setFilterList('pspCategory', next)}
             />

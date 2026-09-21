@@ -30,7 +30,7 @@ import {
   NetworkSearchPage,
   NetworkSettingsPage,
 } from '@/pages/network'
-import { NetworkEducationPage, NetworkDashboardPage } from '@/pages/network/NetworkSectionPages'
+import { NetworkEducationPage } from '@/pages/network/NetworkSectionPages'
 import { NetworkNotesPage } from '@/pages/network/NetworkNotesPage'
 import { ResultsPage } from '@/pages/referrals/ResultsPage'
 import { ProfileResultsPage } from '@/pages/referrals/ProfileResultsPage'
@@ -47,6 +47,30 @@ import { SignInPage } from '@/pages/auth/SignInPage'
 import { RegisterPspPage } from '@/pages/auth/RegisterPspPage'
 import { NotFoundPage } from '@/pages/errors/NotFoundPage'
 import { PlaceholderPage } from '@/pages/errors/PlaceholderPage'
+import { AdvertisePage } from '@/pages/advertise/AdvertisePage'
+import { DashboardLayout } from '@/app/layouts/DashboardLayout'
+import {
+  DashboardAboutPage,
+  DashboardAcceptedHiredPage,
+  DashboardAdvertisementPage,
+  DashboardAlertsPage,
+  DashboardAllPostsPage,
+  DashboardApplicationNonCompletePage,
+  DashboardApplicationRejectedPage,
+  DashboardApplicationsReceivedPage,
+  DashboardFavoritesPage,
+  DashboardFeeStructurePage,
+  DashboardJobsPage,
+  DashboardMeetingsPage,
+  DashboardPage,
+  DashboardPayoutsPage,
+  DashboardProposalsPage,
+  DashboardReferralsSentPage,
+  DashboardServiceAddonPage,
+  DashboardServicesPage,
+  DashboardStatementsPage,
+  DashboardSubmissionServicePage,
+} from '@/pages/dashboard/DashboardPage'
 
 export const router = createBrowserRouter([
   {
@@ -82,12 +106,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PATHS.advertise,
-            element: (
-              <PlaceholderPage
-                title="Advertise"
-                description="Advertiser targeting and placements — coming soon."
-              />
-            ),
+            element: <AdvertisePage />,
           },
           {
             path: PATHS.shop,
@@ -118,7 +137,7 @@ export const router = createBrowserRouter([
           { path: PATHS.networkSaved, element: <NetworkSavedPage /> },
           { path: PATHS.networkNotes, element: <NetworkNotesPage /> },
           { path: PATHS.networkEducation, element: <NetworkEducationPage /> },
-          { path: PATHS.networkDashboard, element: <NetworkDashboardPage /> },
+          { path: PATHS.networkDashboard, element: <Navigate to={PATHS.dashboard} replace /> },
           { path: PATHS.networkNotifications, element: <NetworkNotificationsPage /> },
           { path: PATHS.networkSearch, element: <NetworkSearchPage /> },
           { path: PATHS.networkSettings, element: <NetworkSettingsPage /> },
@@ -157,7 +176,31 @@ export const router = createBrowserRouter([
         ],
       },
       { path: PATHS.referrals, element: <Navigate to={PATHS.home} replace /> },
-      { path: PATHS.dashboard, element: <Navigate to={PATHS.home} replace /> },
+      {
+        element: <DashboardLayout />,
+        children: [
+          { path: PATHS.dashboard, element: <DashboardPage /> },
+          { path: PATHS.dashboardFeeStructure, element: <DashboardFeeStructurePage /> },
+          { path: PATHS.dashboardServices, element: <DashboardServicesPage /> },
+          { path: PATHS.dashboardFavorites, element: <DashboardFavoritesPage /> },
+          { path: PATHS.dashboardAbout, element: <DashboardAboutPage /> },
+          { path: PATHS.dashboardStatements, element: <DashboardStatementsPage /> },
+          { path: PATHS.dashboardPayouts, element: <DashboardPayoutsPage /> },
+          { path: PATHS.dashboardProposals, element: <DashboardProposalsPage /> },
+          { path: PATHS.dashboardAdvertisement, element: <DashboardAdvertisementPage /> },
+          { path: PATHS.dashboardAlerts, element: <DashboardAlertsPage /> },
+          { path: PATHS.dashboardJobs, element: <DashboardJobsPage /> },
+          { path: PATHS.dashboardMeetings, element: <DashboardMeetingsPage /> },
+          { path: PATHS.dashboardSubmissionService, element: <DashboardSubmissionServicePage /> },
+          { path: PATHS.dashboardServiceAddon, element: <DashboardServiceAddonPage /> },
+          { path: PATHS.dashboardAllPosts, element: <DashboardAllPostsPage /> },
+          { path: PATHS.dashboardAcceptedHired, element: <DashboardAcceptedHiredPage /> },
+          { path: PATHS.dashboardApplicationsReceived, element: <DashboardApplicationsReceivedPage /> },
+          { path: PATHS.dashboardApplicationRejected, element: <DashboardApplicationRejectedPage /> },
+          { path: PATHS.dashboardApplicationNonComplete, element: <DashboardApplicationNonCompletePage /> },
+          { path: PATHS.dashboardReferralsSent, element: <DashboardReferralsSentPage /> },
+        ],
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

@@ -66,6 +66,34 @@ export type NetworkGroup = {
   memberIds: string[]
 }
 
+export type NetworkForumThreadFilters = {
+  community?: string
+  role?: string
+  field?: string
+  /** Nested path, e.g. Recreational > Water Park or Lifestyle > Health > Clinic */
+  subField?: string
+  priceDemography?: string
+  representation?: string
+  condition?: string
+  deedLienNote?: string
+  ownership?: string
+  tools?: string
+  language?: string
+  motives?: string
+}
+
+export type NetworkForumReply = {
+  id: string
+  threadId: string
+  authorId: string
+  body: string
+  createdAt: string
+  /** Milliseconds for sorting */
+  createdAtMs: number
+  likes: number
+  parentId?: string
+}
+
 export type NetworkForumThread = {
   id: string
   title: string
@@ -73,9 +101,17 @@ export type NetworkForumThread = {
   replies: number
   views: number
   lastPost: string
+  /** Milliseconds for sorting “latest” */
+  lastPostAt: number
   authorId: string
   excerpt: string
   body: string
+  likes?: number
+  pinned?: boolean
+  recommended?: boolean
+  winner?: boolean
+  /** Commercial-forum facet tags used by search filters. */
+  filters?: NetworkForumThreadFilters
 }
 
 export type NetworkArticle = {

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, GripVertical } from 'lucide-react'
+import { ChevronDown, ChevronUp, GripVertical, Plus, Send, X } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { cn } from '@/shared/lib/cn'
 import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
@@ -17,6 +17,8 @@ type HeroFilterSelectProps = {
   nestedTrees?: Record<string, FilterTreeNode[]>
   /** Tighter spacing so all landing fields fit without panel scroll. */
   compact?: boolean
+  /** Shorter trigger height + tighter label (side rails / forums). */
+  dense?: boolean
   /** Render the menu in-flow (for scrollable drawers that clip absolute menus). */
   inlineMenu?: boolean
   /** Show trailing info icon for QA / why-this-question help. */
@@ -29,12 +31,22 @@ type HeroFilterSelectProps = {
   showPriorityPanel?: boolean
   /** A–Z section labels: boxed bar (default) or underline only, no borders. */
   letterHeading?: 'bar' | 'underline'
+  /** After each A–Z letter group, show Suggest + E-Mail suggestion row (PSPs). */
+  showLetterSuggest?: boolean
+  /** Allow long labels to wrap instead of truncating with ellipsis. */
+  wrapLabel?: boolean
+  /** Only one option can be selected at a time (radio behavior). */
+  singleSelect?: boolean
   invalid?: boolean
   className?: string
 }
 
 function toggleValue(list: string[], item: string) {
   return list.includes(item) ? list.filter((v) => v !== item) : [...list, item]
+}
+
+function selectSingleValue(list: string[], item: string) {
+  return list.includes(item) ? [] : [item]
 }
 
 function moveItem(list: string[], from: number, to: number) {
@@ -278,6 +290,7 @@ function OptionRow({
   compact = false,
   optionKey,
   hovered = false,
+  singleSelect = false,
 }: {
   item: string
   checked: boolean
@@ -285,6 +298,7 @@ function OptionRow({
   compact?: boolean
   optionKey?: string
   hovered?: boolean
+  singleSelect?: boolean
 }) {
   if (compact) {
     return (
@@ -295,7 +309,17 @@ function OptionRow({
           className="inline-flex items-center justify-center self-start py-2 pl-2.5"
           aria-label={checked ? `Unselect ${item}` : `Select ${item}`}
         >
-          {checked ? (
+          {singleSelect ? (
+            <span
+              className={cn(
+                'inline-flex h-3.5 w-3.5 items-center justify-center rounded-full border-[1.55px]',
+                checked ? 'border-ink' : 'border-ink/40 bg-white',
+              )}
+              aria-hidden
+            >
+              {checked ? <span className="h-2 w-2 rounded-full bg-ink" /> : null}
+            </span>
+          ) : checked ? (
             <CheckedBallotIcon className="h-4 w-4 text-ink" />
           ) : (
             <span
@@ -332,10 +356,10 @@ function OptionRow({
       <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-2">
         <span className="relative mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center">
           <input
-            type="checkbox"
+            type={singleSelect ? 'radio' : 'checkbox'}
             checked={checked}
             onChange={onToggle}
-            className="register-check"
+            className={singleSelect ? undefined : 'register-check'}
           />
         </span>
         <span className="mt-0.5 min-w-0 flex-1 whitespace-normal break-words text-sm leading-snug text-black">
@@ -488,12 +512,10 @@ function groupNodesByLetter(nodes: FilterTreeNode[]) {
 function LetterHeading({
   letter,
   compact,
-  rule = true,
   variant = 'bar',
 }: {
   letter: string
   compact: boolean
-  rule?: boolean
   variant?: 'bar' | 'underline'
 }) {
   if (variant === 'underline') {
@@ -514,16 +536,126 @@ function LetterHeading({
   return (
     <div
       className={cn(
-        'sticky top-0 z-10 px-2 py-1.5 text-xs font-bold uppercase tracking-wide',
+        'px-2 py-1.5 text-xs font-bold uppercase tracking-wide',
         compact
-          ? cn(
-              'bg-white px-3 py-2 text-ink',
-              rule && 'border-b border-line shadow-sm',
-            )
+          ? 'bg-white px-3 py-1.5 text-ink'
           : 'bg-white text-black/55',
       )}
     >
       {letter}...
+    </div>
+  )
+}
+
+function LetterSuggestRow({
+  letter,
+  compact = false,
+}: {
+  letter: string
+  compact?: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [suggest, setSuggest] = useState('')
+  const [email, setEmail] = useState('')
+
+  useEffect(() => {
+    if (!sent) return
+    const timer = window.setTimeout(() => {
+      setSent(false)
+      setExpanded(false)
+      setSuggest('')
+      setEmail('')
+    }, 4000)
+    return () => window.clearTimeout(timer)
+  }, [sent])
+
+  function handleClose() {
+    setExpanded(false)
+    setSuggest('')
+    setEmail('')
+  }
+
+  function handleSend() {
+    if (!suggest.trim() || !email.trim()) return
+    setExpanded(false)
+    setSent(true)
+  }
+
+  const inputClass =
+    'h-5 min-w-0 flex-1 border-0 border-b border-ink/40 bg-transparent px-0 py-0 text-[13px] leading-none text-ink outline-none'
+
+  return (
+    <div
+      className={cn('flex w-full flex-col gap-1', compact ? 'px-2 py-1' : 'px-2 py-1')}
+      onMouseDown={(event) => event.stopPropagation()}
+    >
+      {sent ? (
+        <p className="px-1 py-0.5 text-[13px] font-semibold text-brand">
+          Well; Appreciated!
+        </p>
+      ) : !expanded ? (
+        <button
+          type="button"
+          onClick={() => {
+            setSuggest('')
+            setEmail('')
+            setExpanded(true)
+          }}
+          className="inline-flex items-center gap-1.5 self-start rounded-md px-1 py-0.5 text-[13px] font-semibold text-ink transition hover:bg-mist"
+          aria-label={`Add suggestion under ${letter}`}
+        >
+          <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] border-brand">
+            <Plus className="h-2.5 w-2.5 text-brand" strokeWidth={3} />
+          </span>
+          <span>Suggest</span>
+        </button>
+      ) : (
+        <div className="flex w-full flex-col gap-1.5">
+          <div className="flex w-full items-start gap-x-2.5">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-[1.5px] border-brand"
+              aria-label="Close suggestion"
+            >
+              <X className="h-2.5 w-2.5 text-brand" strokeWidth={3} />
+            </button>
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-[13px] leading-tight text-ink">
+              <span className="shrink-0 font-semibold">Suggest:</span>
+              <input
+                type="text"
+                value={suggest}
+                onChange={(event) => setSuggest(event.target.value)}
+                className={inputClass}
+                aria-label={`Suggest PSP under ${letter}`}
+                autoFocus
+              />
+            </div>
+          </div>
+          <div className="flex w-full flex-col gap-0.5 pl-[1.65rem] text-[13px] leading-tight text-ink">
+            <span className="shrink-0 font-semibold">E-Mail:</span>
+            <div className="flex w-full items-end gap-1">
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className={inputClass}
+                aria-label={`E-mail for suggestion under ${letter}`}
+              />
+              <button
+                type="button"
+                onClick={handleSend}
+                disabled={!suggest.trim() || !email.trim()}
+                className="mb-px inline-flex h-5 w-5 shrink-0 items-center justify-center text-brand transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Send suggestion email"
+              >
+                <Send className="h-3.5 w-3.5" strokeWidth={1.75} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -604,7 +736,7 @@ function TreeNodes({
       <>
         {groupNodesByLetter(nodes).map(([letter, letterNodes]) => (
           <div key={letter} className={compact ? 'mb-2 last:mb-0' : 'mb-1'}>
-            <LetterHeading letter={letter} compact={compact} rule={false} />
+            <LetterHeading letter={letter} compact={compact} />
             <div
               className={cn(
                 'ml-2 pl-1',
@@ -638,12 +770,16 @@ export function HeroFilterSelect({
   optionsByLetter,
   nestedTrees = {},
   compact = false,
+  dense = false,
   inlineMenu = false,
   showQaMark = false,
   openOnHover = false,
   alwaysShowPlaceholder = false,
   showPriorityPanel = false,
   letterHeading = 'bar',
+  showLetterSuggest = false,
+  wrapLabel = false,
+  singleSelect = false,
   invalid = false,
   className,
 }: HeroFilterSelectProps) {
@@ -688,6 +824,10 @@ export function HeroFilterSelect({
         : value.map(preferenceLabel).join(', ')
       : placeholder
 
+  function pickOption(item: string) {
+    onChange(singleSelect ? selectSingleValue(value, item) : toggleValue(value, item))
+  }
+
   function renderTopItem(item: string) {
     const childTree = nestedTrees[item]
     const checked = value.includes(item)
@@ -703,7 +843,8 @@ export function HeroFilterSelect({
           compact={compact}
           optionKey={item}
           hovered={hoveredKey === item}
-          onToggle={() => onChange(toggleValue(value, item))}
+          singleSelect={singleSelect}
+          onToggle={() => pickOption(item)}
         />
       )
     }
@@ -717,7 +858,7 @@ export function HeroFilterSelect({
           dottedLeader={dottedLeader}
           optionKey={item}
           hovered={hoveredKey === item}
-          onToggle={() => onChange(toggleValue(value, item))}
+          onToggle={() => pickOption(item)}
         />
         <NestBlock className="ml-5" compact={compact}>
           <TreeNodes
@@ -740,18 +881,25 @@ export function HeroFilterSelect({
 
   // Register fields keep the title inside the same bordered shell as the trigger.
   const labelInsideShell = compact && inlineMenu
+  // Landing + register: one visible box for placeholder and open options.
+  const unifiedShell = compact
 
   const labelNode = (
     <label
       className={cn(
-        'inline-flex max-w-full items-center gap-1 font-bold',
+        'inline-flex max-w-full items-start gap-1 font-bold',
         compact
-          ? cn('text-sm leading-snug', invalid ? 'text-danger' : 'text-ink')
+          ? cn(
+              dense ? 'text-[11px] leading-tight' : 'text-sm leading-snug',
+              invalid ? 'text-danger' : 'text-ink',
+            )
           : 'text-sm text-white',
-        labelInsideShell && 'px-2 pt-2',
+        labelInsideShell && (dense ? 'px-2 pt-1' : 'px-2 pt-2'),
       )}
     >
-      <span className={compact ? 'truncate' : undefined}>{label}</span>
+      <span className={cn(compact && !wrapLabel && 'truncate', wrapLabel && 'whitespace-normal')}>
+        {label}
+      </span>
       {showQaMark ? <FieldQaMark field={label} /> : null}
     </label>
   )
@@ -780,23 +928,38 @@ export function HeroFilterSelect({
       {labelInsideShell ? null : labelNode}
       <div
         className={cn(
-          labelInsideShell ? undefined : 'mt-1',
-          // Register (compact + inline): one shared shell for label + trigger + menu
-          labelInsideShell &&
+          labelInsideShell ? undefined : dense ? 'mt-0' : 'mt-0.5',
+          unifiedShell &&
             cn(
-              'relative overflow-hidden border-2 bg-white shadow-sm transition',
-              invalid
-                ? 'rounded-xl border-danger'
-                : open || value.length > 0
-                ? cn(
-                    // Sharp top corners so green never wraps the top curve; L/R/B stay brand.
-                    // Top edge stays invisible (no gray/green line).
-                    'rounded-b-xl rounded-t-none border-t-transparent',
-                    open
-                      ? 'border-b-brand border-l-brand border-r-brand'
-                      : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
-                  )
-                : 'rounded-xl border-ink/15',
+              'relative overflow-hidden border bg-white shadow-sm transition',
+              dense ? 'border' : 'border-2',
+              labelInsideShell
+                ? invalid
+                  ? dense ? 'rounded-lg border-danger' : 'rounded-xl border-danger'
+                  : open || value.length > 0
+                    ? cn(
+                        // Sharp top corners so green never wraps the top curve; L/R/B stay brand.
+                        // Top edge stays invisible (no gray/green line).
+                        dense
+                          ? 'rounded-b-lg rounded-t-none border-t-transparent'
+                          : 'rounded-b-xl rounded-t-none border-t-transparent',
+                        open
+                          ? 'border-b-brand border-l-brand border-r-brand'
+                          : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
+                      )
+                    : dense
+                      ? 'rounded-lg border-ink/15'
+                      : 'rounded-xl border-ink/15'
+                : cn(
+                    dense ? 'rounded-lg' : 'rounded-xl',
+                    invalid
+                      ? 'border-danger'
+                      : open
+                        ? 'border-brand'
+                        : value.length > 0
+                          ? 'border-brand/40'
+                          : 'border-ink/15',
+                  ),
             ),
         )}
       >
@@ -820,16 +983,27 @@ export function HeroFilterSelect({
             'flex w-full min-w-0 items-center justify-between text-left outline-none transition',
             compact
               ? cn(
-                'appearance-none min-h-11 shrink-0 items-center overflow-hidden bg-white px-2 py-1.5 text-sm leading-tight shadow-none',
+                'appearance-none shrink-0 bg-white px-2 leading-tight shadow-none',
+                dense ? 'text-[11px]' : 'text-sm',
+                // Empty "Ex." placeholders stay one line; only grow when a wrapped value is shown.
+                value.length > 0 && wrapLabel && !alwaysShowPlaceholder
+                  ? dense
+                    ? 'min-h-7 items-start py-1'
+                    : 'min-h-9 items-start py-1.5'
+                  : dense
+                    ? 'h-7 items-center overflow-hidden py-0'
+                    : 'h-9 items-center overflow-hidden py-0',
                 alwaysShowPlaceholder || value.length === 0
                   ? 'text-ink-soft'
                   : 'text-ink',
-                labelInsideShell
+                unifiedShell
                   ? 'rounded-none border-0 ring-0 focus:border-transparent focus:ring-0'
                   : cn(
-                    'rounded-xl border-2 border-solid border-ink/15 focus:border-brand focus:ring-2 focus:ring-brand/25',
+                    dense
+                      ? 'rounded-lg border border-solid border-ink/15 focus:border-brand focus:ring-1 focus:ring-brand/25'
+                      : 'rounded-xl border-2 border-solid border-ink/15 focus:border-brand focus:ring-2 focus:ring-brand/25',
                     value.length > 0 ? 'border-brand/40' : null,
-                    open && 'border-brand ring-2 ring-brand/25',
+                    open && (dense ? 'border-brand ring-1 ring-brand/25' : 'border-brand ring-2 ring-brand/25'),
                   ),
               )
               : cn(
@@ -838,12 +1012,16 @@ export function HeroFilterSelect({
               ),
           )}
         >
-          <span className="flex min-w-0 flex-1 pr-1.5">
+          <span className="flex min-w-0 flex-1 items-center overflow-hidden pr-1.5">
             {alwaysShowPlaceholder || value.length === 0 ? (
               <FittedEtcText
                 text={summary}
-                className="block w-full min-w-0 overflow-hidden whitespace-nowrap"
+                className="block w-full min-w-0 overflow-hidden whitespace-nowrap leading-none"
               />
+            ) : wrapLabel ? (
+              <span className="min-w-0 flex-1 whitespace-normal break-words">
+                {summary}
+              </span>
             ) : (
               <span className="min-w-0 flex-1 truncate" title={summary}>
                 {summary}
@@ -854,14 +1032,20 @@ export function HeroFilterSelect({
             <ChevronUp
               className={cn(
                 'shrink-0',
-                compact ? 'h-3.5 w-3.5 text-brand' : 'h-4 w-4 opacity-70',
+                value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
+                compact
+                  ? cn(dense ? 'h-3 w-3' : 'h-3.5 w-3.5', 'text-brand')
+                  : 'h-4 w-4 opacity-70',
               )}
             />
           ) : (
             <ChevronDown
               className={cn(
                 'shrink-0',
-                compact ? 'h-3.5 w-3.5 text-ink-soft' : 'h-4 w-4 opacity-70',
+                value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
+                compact
+                  ? cn(dense ? 'h-3 w-3' : 'h-3.5 w-3.5', 'text-ink-soft')
+                  : 'h-4 w-4 opacity-70',
               )}
             />
           )}
@@ -871,22 +1055,14 @@ export function HeroFilterSelect({
           <div
             className={cn(
               'z-[60] overflow-hidden animate-slide-in',
-              labelInsideShell
+              unifiedShell
                 ? 'relative mt-0 rounded-none border-0 bg-white shadow-none ring-0'
                 : cn(
-                  compact
-                    ? 'relative mt-1.5 rounded-xl border-2 border-ink/40 bg-white shadow-md ring-1 ring-ink/15'
-                    : 'mt-0.5 rounded-md border border-black bg-white shadow-md',
-                  !compact && (inlineMenu ? 'relative' : 'absolute left-0 right-0 top-full'),
+                  'mt-0.5 rounded-md border border-black bg-white shadow-md',
+                  inlineMenu ? 'relative' : 'absolute left-0 right-0 top-full',
                 ),
             )}
           >
-          {labelInsideShell ? (
-            <div
-              className="mx-auto h-px w-[90%] bg-line"
-              aria-hidden
-            />
-          ) : null}
           {showPriorityPanel ? (
             <div className="grid grid-cols-1 sm:grid-cols-2">
               <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
@@ -907,7 +1083,7 @@ export function HeroFilterSelect({
             ref={menuRef}
             className={cn(
               'landing-scroll-pane max-h-[20rem] overflow-x-hidden overflow-y-auto',
-              compact ? 'space-y-0.5 p-2' : 'bg-white p-1',
+              compact ? 'space-y-0.5 px-1.5 py-1' : 'bg-white p-1',
             )}
             onMouseMove={(event) => {
               lastPointRef.current = { x: event.clientX, y: event.clientY }
@@ -946,6 +1122,9 @@ export function HeroFilterSelect({
                       <OptionsAlignGrid compact={compact}>
                         {items.map((item) => renderTopItem(item))}
                       </OptionsAlignGrid>
+                      {showLetterSuggest ? (
+                        <LetterSuggestRow letter={letter} compact={compact} />
+                      ) : null}
                     </div>
                   </div>
                 ))

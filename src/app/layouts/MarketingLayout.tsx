@@ -15,13 +15,17 @@ import { cn } from '@/shared/lib/cn'
 export function MarketingLayout() {
   const { pathname } = useLocation()
   const isAuthenticated = useIsAuthenticated()
-  const fillViewport = pathname === PATHS.crowdfunding || pathname === `${PATHS.crowdfunding}/`
+  const fillViewport =
+    pathname === PATHS.crowdfunding ||
+    pathname === `${PATHS.crowdfunding}/` ||
+    pathname === PATHS.advertise ||
+    pathname === `${PATHS.advertise}/`
 
   return (
     <div
       className={cn(
         'flex flex-col',
-        fillViewport ? 'h-full max-h-dvh overflow-hidden' : 'min-h-screen',
+        fillViewport ? 'h-dvh max-h-dvh overflow-hidden' : 'min-h-screen',
       )}
     >
       <SiteHeader
@@ -38,7 +42,7 @@ export function MarketingLayout() {
       <main
         className={cn(
           'flex min-h-0 flex-1 flex-col',
-          fillViewport && 'h-full overflow-hidden',
+          fillViewport && 'min-h-0 overflow-hidden',
         )}
       >
         <Outlet />

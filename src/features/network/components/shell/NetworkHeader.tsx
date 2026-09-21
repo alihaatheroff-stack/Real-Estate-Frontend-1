@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, Menu, Search } from 'lucide-react'
+import { GraduationCap, LayoutDashboard, Menu, Search } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { ABOUT_MENU, CROWDFUNDING_MENU, MARKETING_NAV, REFERRALS_MENU } from '@/app/config/nav'
 import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
@@ -74,6 +74,7 @@ export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
             <Menu className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" />
           </button>
           <div className="hidden items-center gap-0.5 sm:flex">
+            <AdvertiseMenu />
             <CallsMenu locked={!isAuthenticated} />
             {isAuthenticated ? (
               <button
@@ -94,7 +95,21 @@ export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
             <NotificationsMenu locked={!isAuthenticated} />
             <FavoritesMenu locked={!isAuthenticated} />
             <OrdersMenu locked={!isAuthenticated} />
-            <AdvertiseMenu />
+            {isAuthenticated ? (
+              <Link
+                to={PATHS.dashboard}
+                className="inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist"
+                aria-label="Dashboard"
+              >
+                <LayoutDashboard className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" />
+              </Link>
+            ) : (
+              <GuestAuthPopover
+                triggerLabel="Dashboard"
+                icon={LayoutDashboard}
+                href={PATHS.signIn}
+              />
+            )}
           </div>
           {isAuthenticated ? (
             <ProfileMenu homeHref={PATHS.networkFeed} onSignOut={signOut} />

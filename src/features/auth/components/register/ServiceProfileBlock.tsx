@@ -105,6 +105,7 @@ export function ServiceProfileBlock({
             placeholder="Ex. (Agent, Architect, Real Estate, etc.,)"
             optionsByLetter={PSP_BY_LETTER}
             nestedTrees={PSP_NESTED_TREES}
+            showLetterSuggest
             value={selectedPsp}
             onChange={(next) => setProfileFilterList('pspCategory', next)}
             invalid={pspCategoryInvalid}

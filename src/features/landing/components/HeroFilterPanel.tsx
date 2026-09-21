@@ -115,7 +115,7 @@ export function HeroFilterPanel({
         className,
       )}
     >
-      <div className="landing-scroll-pane max-h-[28.5rem] overflow-x-hidden overflow-y-auto px-3 pt-1 pb-1.5">
+      <div className="landing-scroll-pane max-h-[28.5rem] overflow-x-hidden overflow-y-auto px-1.5 pt-1 pb-1.5">
         <div className="flex flex-col gap-1">
           <HeroFilterSelect
             compact
@@ -132,6 +132,7 @@ export function HeroFilterPanel({
             placeholder="Ex. (Agent, Architect, Real Estate, etc.,)"
             optionsByLetter={PSP_BY_LETTER}
             nestedTrees={PSP_NESTED_TREES}
+            showLetterSuggest
             value={selectedPsp}
             onChange={(next) => setFilterList('pspCategory', next)}
           />
@@ -156,14 +157,6 @@ export function HeroFilterPanel({
               onChange={(next) => setFilterList('financing', next)}
             />
           ) : null}
-          <HeroFilterSelect
-            compact
-            label="Price Demography: "
-            placeholder="Ex. (Affordable, Mid-Range, Luxury etc.,)"
-            options={PRICE_DEMOGRAPHY_OPTIONS}
-            value={splitCsv(filters.priceBand)}
-            onChange={(next) => setFilterList('priceBand', next)}
-          />
           <HeroFilterSelect
             compact
             label="Fields: "
@@ -263,6 +256,15 @@ export function HeroFilterPanel({
             onChange={(next) => setFilterList('formOfPayment', next)}
           />
 
+          <HeroFilterSelect
+            compact
+            label="Price Demography: "
+            placeholder="Ex. (Affordable, Mid-Range, Luxury etc.,)"
+            options={PRICE_DEMOGRAPHY_OPTIONS}
+            value={splitCsv(filters.priceBand)}
+            onChange={(next) => setFilterList('priceBand', next)}
+          />
+
           <div className="relative shrink-0 overflow-visible">
             <label className="block truncate text-xs font-bold leading-4 text-black">
               Zipcode
@@ -298,7 +300,7 @@ export function HeroFilterPanel({
         </div>
       </div>
 
-      <div className="relative z-30 shrink-0 space-y-1 border-t border-ink/15 bg-white/95 px-3 pb-1.5 pt-1.5">
+      <div className="relative z-30 shrink-0 space-y-1 border-t border-ink/15 bg-white/95 px-1.5 pb-1.5 pt-1.5">
         <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"

@@ -45,25 +45,3 @@ export function NetworkEducationPage() {
     </NetworkSimpleSectionPage>
   )
 }
-
-export function NetworkDashboardPage() {
-  return (
-    <NetworkSimpleSectionPage
-      title="Dashboard"
-      description="A snapshot of your activity across feed, community, and messages."
-    >
-      <div className="grid gap-3 sm:grid-cols-3">
-        {[
-          { label: 'Unread messages', value: '3' },
-          { label: 'Friend requests', value: '3' },
-          { label: 'Saved items', value: '6' },
-        ].map((item) => (
-          <div key={item.label} className="rounded-xl border border-line bg-mist/50 px-4 py-4">
-            <p className="text-2xl font-semibold text-ink">{item.value}</p>
-            <p className="mt-1 text-sm text-muted">{item.label}</p>
-          </div>
-        ))}
-      </div>
-    </NetworkSimpleSectionPage>
-  )
-}

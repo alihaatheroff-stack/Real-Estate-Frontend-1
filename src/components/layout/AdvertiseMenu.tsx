@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Megaphone } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
 
@@ -8,12 +8,13 @@ export function AdvertiseMenu({ className }: { className?: string }) {
     <Link
       to={PATHS.advertise}
       className={cn(
-        'inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
+        'relative inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
         className,
       )}
       aria-label="Advertise"
     >
-      <Megaphone className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" aria-hidden />
+      <Star className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" aria-hidden />
+      <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-brand ring-2 ring-paper" />
     </Link>
   )
 }

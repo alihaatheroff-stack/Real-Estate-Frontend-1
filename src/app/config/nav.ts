@@ -17,6 +17,7 @@ export const CROWDFUNDING_MENU = [
 
 /** About dropdown — Contact lives under About, not as its own top-level nav item */
 export const ABOUT_MENU = [
+  { label: 'Advertisement', href: PATHS.advertise },
   { label: 'About', href: PATHS.about },
   { label: 'Contact', href: PATHS.contact },
 ] as const

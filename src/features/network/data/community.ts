@@ -2,10 +2,18 @@ import { STOCK } from '@/features/network/data/members'
 import type {
   NetworkArticle,
   NetworkEvent,
-  NetworkForumThread,
   NetworkGroup,
   NetworkListing,
 } from '@/features/network/data/types'
+
+export {
+  FORUM_REPLIES,
+  NETWORK_FORUMS,
+  getForum,
+  getForumReplies,
+  sortForumThreads,
+  type ForumSortId,
+} from '@/features/network/data/forums'
 
 export const NETWORK_GROUPS: NetworkGroup[] = [
   {
@@ -77,63 +85,6 @@ export const NETWORK_GROUPS: NetworkGroup[] = [
   },
 ]
 
-export const NETWORK_FORUMS: NetworkForumThread[] = [
-  {
-    id: 'f1',
-    title: 'What cap rate are you actually underwriting grocery-adjacent retail at right now?',
-    category: 'Markets',
-    replies: 34,
-    views: 1280,
-    lastPost: '12m ago',
-    authorId: 'maya',
-    excerpt: 'I keep seeing 6.2 on broker decks and 7.4 in real LOIs. What’s clearing in the Valley?',
-    body: 'Broker decks in my inbox are still printing 6-caps on grocery-adjacent retail as if 2021 never ended. Live conversations are closer to 7.25–7.75 depending on tenant credit and roof age. If you’ve closed in the last 90 days, drop the real number — strategy, not theater.',
-  },
-  {
-    id: 'f2',
-    title: 'DSCR gotcha list for 2–4 units in Fresno County',
-    category: 'Lending',
-    replies: 19,
-    views: 640,
-    lastPost: '41m ago',
-    authorId: 'jordan',
-    excerpt: 'Insurance, short-term rental income, and how underwriters treat accessory units.',
-    body: 'Three files died last month for the same reasons: landlord insurance quotes 40% higher than the pro forma, STR income ignored unless it has 12 months of statements, and ADUs counted as rooms not units. Let’s keep a living list so new members don’t learn this the expensive way.',
-  },
-  {
-    id: 'f3',
-    title: 'Heavy rehab: cost-plus vs bid when lumber is moving weekly',
-    category: 'Execution',
-    replies: 27,
-    views: 890,
-    lastPost: '2h ago',
-    authorId: 'noah',
-    excerpt: 'When do you lock a bid, and when is cost-plus the only honest structure?',
-    body: 'If the scope is walls-open, I won’t bid it tight. Investors still want a number. How are you structuring draws so nobody feels cheated when a panel or a slab surprises you?',
-  },
-  {
-    id: 'f4',
-    title: 'Anonymous: how do you verify a “private lender” who appeared in the feed?',
-    category: 'Trust',
-    replies: 42,
-    views: 2104,
-    lastPost: '5h ago',
-    authorId: 'nina',
-    excerpt: 'State ID, proof of funds, and the difference between a closer and a talker.',
-    body: 'The product promise here is deals — which means verification. Share the checks you run before you send an OM or wire instructions. Community content is user-generated; treat counterparties like you would anywhere else.',
-  },
-  {
-    id: 'f5',
-    title: 'Hospitality / recreational: what comps are you using for indoor parks?',
-    category: 'Crowdfunding',
-    replies: 11,
-    views: 330,
-    lastPost: '1d ago',
-    authorId: 'olivia',
-    excerpt: 'Attendance, membership, and how to talk to investors who only speak doors and units.',
-    body: 'If you only underwrite doors, recreational assets look like toys. Let’s translate attendance and membership into a language multifamily people will fund.',
-  },
-]
 
 export const NETWORK_ARTICLES: NetworkArticle[] = [
   {
@@ -417,10 +368,6 @@ export const NETWORK_LISTINGS: NetworkListing[] = [
 
 export function getGroup(id: string) {
   return NETWORK_GROUPS.find((group) => group.id === id)
-}
-
-export function getForum(id: string) {
-  return NETWORK_FORUMS.find((thread) => thread.id === id)
 }
 
 export function getArticle(id: string) {
