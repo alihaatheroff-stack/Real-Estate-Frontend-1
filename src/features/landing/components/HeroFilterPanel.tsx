@@ -73,8 +73,16 @@ export function HeroFilterPanel({
     key: K,
     next: LandingFilterValues[K],
   ) {
-    if (key === 'percentageShare' || key === 'zip' || key === 'radius') {
-      onChange(key, next as HeroFiltersState[typeof key])
+    if (key === 'percentageShare') {
+      onChange('percentageShare', next as string)
+      return
+    }
+    if (key === 'zip') {
+      onChange('zip', next as string)
+      return
+    }
+    if (key === 'radius') {
+      onChange('radius', next as string)
       return
     }
 
