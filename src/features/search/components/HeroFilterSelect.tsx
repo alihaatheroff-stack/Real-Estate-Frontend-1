@@ -39,6 +39,10 @@ type HeroFilterSelectProps = {
   singleSelect?: boolean
   invalid?: boolean
   className?: string
+  /** Width/layout classes for the bordered trigger shell (not the label). */
+  controlClassName?: string
+  /** Prefix shown before selected values in the trigger (e.g. "Selected: "). */
+  selectedPrefix?: string
 }
 
 function toggleValue(list: string[], item: string) {
@@ -765,7 +769,7 @@ export function HeroFilterSelect({
   placeholder,
   options = [],
   tree,
-  value,
+  value = [],
   onChange,
   optionsByLetter,
   nestedTrees = {},
@@ -782,6 +786,8 @@ export function HeroFilterSelect({
   singleSelect = false,
   invalid = false,
   className,
+  controlClassName,
+  selectedPrefix,
 }: HeroFilterSelectProps) {
   const [open, setOpen] = useState(false)
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
@@ -816,12 +822,15 @@ export function HeroFilterSelect({
     setHoveredKey(row?.dataset.optionKey ?? null)
   }
 
+  const selectedText = showPriorityPanel
+    ? formatPreferenceSummary(value)
+    : value.map(preferenceLabel).join(', ')
   const summary = alwaysShowPlaceholder
     ? placeholder
     : value.length > 0
-      ? showPriorityPanel
-        ? formatPreferenceSummary(value)
-        : value.map(preferenceLabel).join(', ')
+      ? selectedPrefix
+        ? `${selectedPrefix}${selectedText}`
+        : selectedText
       : placeholder
 
   function pickOption(item: string) {
@@ -887,11 +896,15 @@ export function HeroFilterSelect({
   const labelNode = (
     <label
       className={cn(
-        'inline-flex max-w-full items-start gap-1 font-bold',
+        'inline-flex max-w-full items-start gap-1 font-bold transition-colors duration-150',
         compact
           ? cn(
               dense ? 'text-[11px] leading-tight' : 'text-sm leading-snug',
-              invalid ? 'text-danger' : 'text-ink',
+              invalid
+                ? 'text-danger'
+                : value.length > 0
+                  ? 'text-[#6495ED]'
+                  : 'text-ink',
             )
           : 'text-sm text-white',
         labelInsideShell && (dense ? 'px-2 pt-1' : 'px-2 pt-2'),
@@ -931,8 +944,13 @@ export function HeroFilterSelect({
           labelInsideShell ? undefined : dense ? 'mt-0' : 'mt-0.5',
           unifiedShell &&
             cn(
-              'relative overflow-hidden border bg-white shadow-sm transition',
+              'relative overflow-hidden border shadow-sm transition duration-150',
               dense ? 'border' : 'border-2',
+              // Selected: soft cornflower wash + lightly highlighted border (text carries the blue).
+              !invalid &&
+                value.length > 0 &&
+                'bg-[rgba(100,149,237,0.08)] shadow-[inset_0_0_0_1px_rgba(100,149,237,0.14)]',
+              (invalid || value.length === 0) && 'bg-white',
               labelInsideShell
                 ? invalid
                   ? dense ? 'rounded-lg border-danger' : 'rounded-xl border-danger'
@@ -944,8 +962,12 @@ export function HeroFilterSelect({
                           ? 'rounded-b-lg rounded-t-none border-t-transparent'
                           : 'rounded-b-xl rounded-t-none border-t-transparent',
                         open
-                          ? 'border-b-brand border-l-brand border-r-brand'
-                          : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
+                          ? value.length > 0
+                            ? 'border-b-[rgba(100,149,237,0.7)] border-l-[rgba(100,149,237,0.7)] border-r-[rgba(100,149,237,0.7)]'
+                            : 'border-b-brand border-l-brand border-r-brand'
+                          : value.length > 0
+                            ? 'border-b-[rgba(100,149,237,0.45)] border-l-[rgba(100,149,237,0.45)] border-r-[rgba(100,149,237,0.45)]'
+                            : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
                       )
                     : dense
                       ? 'rounded-lg border-ink/15'
@@ -955,12 +977,15 @@ export function HeroFilterSelect({
                     invalid
                       ? 'border-danger'
                       : open
-                        ? 'border-brand'
+                        ? value.length > 0
+                          ? 'border-[rgba(100,149,237,0.65)]'
+                          : 'border-brand'
                         : value.length > 0
-                          ? 'border-brand/40'
+                          ? 'border-[rgba(100,149,237,0.45)]'
                           : 'border-ink/15',
                   ),
             ),
+          controlClassName,
         )}
       >
         {labelInsideShell ? labelNode : null}
@@ -980,11 +1005,12 @@ export function HeroFilterSelect({
             setOpen((prev) => !prev)
           }}
           className={cn(
-            'flex w-full min-w-0 items-center justify-between text-left outline-none transition',
+            'flex w-full min-w-0 items-center justify-between text-left outline-none transition duration-150',
             compact
               ? cn(
-                'appearance-none shrink-0 bg-white px-2 leading-tight shadow-none',
+                'appearance-none shrink-0 px-2 leading-tight shadow-none',
                 dense ? 'text-[11px]' : 'text-sm',
+                value.length > 0 && !invalid ? 'bg-transparent' : 'bg-white',
                 // Empty "Ex." placeholders stay one line; only grow when a wrapped value is shown.
                 value.length > 0 && wrapLabel && !alwaysShowPlaceholder
                   ? dense
@@ -995,15 +1021,28 @@ export function HeroFilterSelect({
                     : 'h-9 items-center overflow-hidden py-0',
                 alwaysShowPlaceholder || value.length === 0
                   ? 'text-ink-soft'
-                  : 'text-ink',
+                  : value.length > 0 && !invalid
+                    ? 'font-medium text-[#6495ED]'
+                    : 'text-ink',
                 unifiedShell
                   ? 'rounded-none border-0 ring-0 focus:border-transparent focus:ring-0'
                   : cn(
                     dense
                       ? 'rounded-lg border border-solid border-ink/15 focus:border-brand focus:ring-1 focus:ring-brand/25'
                       : 'rounded-xl border-2 border-solid border-ink/15 focus:border-brand focus:ring-2 focus:ring-brand/25',
-                    value.length > 0 ? 'border-brand/40' : null,
-                    open && (dense ? 'border-brand ring-1 ring-brand/25' : 'border-brand ring-2 ring-brand/25'),
+                    value.length > 0
+                      ? 'border-[rgba(100,149,237,0.45)] bg-[rgba(100,149,237,0.08)] font-medium text-[#6495ED]'
+                      : null,
+                    open &&
+                      value.length === 0 &&
+                      (dense
+                        ? 'border-brand ring-1 ring-brand/25'
+                        : 'border-brand ring-2 ring-brand/25'),
+                    open &&
+                      value.length > 0 &&
+                      (dense
+                        ? 'border-[rgba(100,149,237,0.65)] ring-1 ring-[rgba(100,149,237,0.2)]'
+                        : 'border-[rgba(100,149,237,0.65)] ring-2 ring-[rgba(100,149,237,0.2)]'),
                   ),
               )
               : cn(
@@ -1034,7 +1073,12 @@ export function HeroFilterSelect({
                 'shrink-0',
                 value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
                 compact
-                  ? cn(dense ? 'h-3 w-3' : 'h-3.5 w-3.5', 'text-brand')
+                  ? cn(
+                      dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
+                      value.length > 0 && !invalid
+                        ? 'text-[#6495ED]/75'
+                        : 'text-brand',
+                    )
                   : 'h-4 w-4 opacity-70',
               )}
             />
@@ -1044,7 +1088,12 @@ export function HeroFilterSelect({
                 'shrink-0',
                 value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
                 compact
-                  ? cn(dense ? 'h-3 w-3' : 'h-3.5 w-3.5', 'text-ink-soft')
+                  ? cn(
+                      dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
+                      value.length > 0 && !invalid
+                        ? 'text-[#6495ED]/65'
+                        : 'text-ink-soft',
+                    )
                   : 'h-4 w-4 opacity-70',
               )}
             />

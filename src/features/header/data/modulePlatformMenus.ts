@@ -251,6 +251,64 @@ export function buildOrdersPlatforms(demo = false): ModulePlatformRow[] {
   })
 }
 
+export function buildWritingPlatforms(demo = false): ModulePlatformRow[] {
+  const drafts = [
+    {
+      title: 'Referral update',
+      subtitle: 'Share a new intro, match, or market tip with your referral circle.',
+      avatarSrc: '/images/profile/F_1.jpg',
+    },
+    {
+      title: 'Crowdfund update',
+      subtitle: 'Post a project milestone, vote reminder, or investor note.',
+      avatarSrc: '/images/stock/photo-1560518883-ce09059eeffa.jpg',
+    },
+    {
+      title: 'Network post',
+      subtitle: 'Write to your news feed — photo, feeling, or quick update.',
+      avatarSrc: '/images/profile/m3.jpg',
+    },
+    {
+      title: 'Shop listing note',
+      subtitle: 'Announce a service, promo, or marketplace listing update.',
+      avatarSrc: '/images/stock/photo-1450101499163-c8848c66ca85.jpg',
+    },
+  ] as const
+
+  return MODULES.map((label, index) => {
+    const draft = drafts[index]!
+    return {
+      id: label.toLowerCase(),
+      label,
+      summary: withDemoSummary(
+        demo ? `Example ${label} post preview` : `Ready to post in ${label}`,
+        demo,
+      ),
+      timeAgo: 'Now',
+      unreadCount: demo ? 0 : 1,
+      items: [
+        {
+          id: `${label}-write-1`,
+          title: demo ? `Demo: ${draft.title}` : draft.title,
+          subtitle: demo
+            ? `Example ${label} draft — sign in to publish your post.`
+            : draft.subtitle,
+          timeAgo: 'Now',
+          avatarSrc: draft.avatarSrc,
+        },
+        {
+          id: `${label}-write-2`,
+          title: demo ? `Sample ${label} draft` : `New ${label} post`,
+          subtitle: demo
+            ? `Guest preview of writing a ${label} post.`
+            : `Start a blank post for ${label}.`,
+          timeAgo: 'Draft',
+        },
+      ],
+    }
+  })
+}
+
 export function platformUnreadTotal(platforms: ModulePlatformRow[]) {
   return platforms.reduce((sum, p) => sum + p.unreadCount, 0)
 }

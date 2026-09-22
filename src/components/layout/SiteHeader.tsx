@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/layout/Container'
 import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
 import { CallsMenu } from '@/components/layout/CallsMenu'
+import { WritingMenu } from '@/components/layout/WritingMenu'
 import { FavoritesMenu } from '@/components/layout/FavoritesMenu'
 import { MessagesMenu } from '@/components/layout/MessagesMenu'
 import { NotificationsMenu } from '@/components/layout/NotificationsMenu'
@@ -96,6 +97,7 @@ export function SiteHeader({
 
         <div className="flex items-center gap-0.5 sm:gap-1">
           <div className="hidden items-center gap-0.5 sm:flex">
+            <WritingMenu locked={!isAuthenticated} />
             <AdvertiseMenu />
             <CallsMenu locked={!isAuthenticated} />
             {isAuthenticated ? (
@@ -236,6 +238,7 @@ export function SiteHeader({
               ),
             )}
             <div className="mt-2 flex items-center justify-center gap-1 border-t border-line pt-3">
+              <WritingMenu locked={!isAuthenticated} />
               <AdvertiseMenu />
               <CallsMenu locked={!isAuthenticated} />
               {isAuthenticated ? (

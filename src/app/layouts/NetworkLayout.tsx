@@ -49,14 +49,17 @@ export function NetworkLayout() {
         <NetworkHeader onOpenMenu={() => setMenuOpen(true)} />
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden">
-          {/* Width-only clip for nav; toggle is a sibling so it stays fully visible when closed. */}
+          {/* Overlay sidebar — inset from header like Forums card, floats over content. */}
           <div
-            className="hidden h-full shrink-0 overflow-hidden transition-[width] duration-200 ease-out lg:block"
+            className={cn(
+              'absolute bottom-4 left-0 top-4 z-20 hidden overflow-hidden rounded-r-xl transition-[width,box-shadow] duration-200 ease-out lg:block',
+              sidebarOpen && 'shadow-[4px_0_24px_rgba(0,0,0,0.08)]',
+            )}
             style={{ width: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
             aria-hidden={!sidebarOpen}
           >
             <div
-              className="network-shell-scroll h-full overflow-y-auto border-r border-black/5 bg-white"
+              className="network-shell-scroll h-full overflow-y-auto border border-black/5 border-l-0 bg-white"
               style={{ width: SIDEBAR_WIDTH }}
             >
               <NetworkLeftNav />

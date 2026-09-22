@@ -360,10 +360,10 @@ export const SUB_FIELD_BY_FIELD: Record<string, FilterTreeNode[]> = Object.fromE
 export const SUB_FIELD_TREE: FilterTreeNode[] = FIELD_TREE.flatMap((node) =>
   node.children?.length
     ? [{
-        label: node.label,
-        children: node.children,
-        groupByLetter: node.groupByLetter,
-      }]
+      label: node.label,
+      children: node.children,
+      groupByLetter: node.groupByLetter,
+    }]
     : [],
 )
 
@@ -386,6 +386,15 @@ export function getSubFieldTree(selectedFields: string[]): FilterTreeNode[] {
 }
 
 export const CLIENT_EXPERIENCE_TREE: FilterTreeNode[] = [
+  { label: 'All' },
+  { label: "Expert experience based of sale's closed" },
+  { label: 'Mature' },
+  { label: 'Seasonal' },
+  { label: 'New' },
+  {
+    label: 'Seller',
+    children: [{ label: 'Repeat Seller-Buyer' }],
+  },
   {
     label: 'First-time Buyer',
     children: [
@@ -410,28 +419,27 @@ export const CLIENT_EXPERIENCE_TREE: FilterTreeNode[] = [
       },
     ],
   },
-  { label: 'Repeat Seller-Buyer' },
   { label: 'Vacational' },
-  { label: 'All of the above' },
 ]
 
 export const PROPERTY_CONDITION_OPTIONS = [
+  'All',
   'New Construction',
   'Renovations',
   'TLC Distressed Properties',
   'Run down',
   'Burned',
-  'All of the above',
 ]
 
 export const VACANCY_OPTIONS = [
+  'All',
   'Tenant Occupied',
   'Owner Occupied',
   'Vacant',
-  'All of the above',
 ]
 
 export const TITLE_OPTIONS = [
+  'All',
   'Partnership ownership',
   'Joint tenancy',
   'Tenancy in common',
@@ -439,11 +447,10 @@ export const TITLE_OPTIONS = [
   'Tenancy by the entirety',
   'Community property with right of survivorship',
   'Corporate ownership',
-
-  'All of the above',
 ]
 
 export const SALE_TYPE_TREE: FilterTreeNode[] = [
+  { label: 'All' },
   { label: 'Standard, Free, Clear, Traditional' },
   { label: 'Loan; deed, note remaining' },
   {
@@ -477,7 +484,6 @@ export const SALE_TYPE_TREE: FilterTreeNode[] = [
       { label: 'Other' },
     ],
   },
-  { label: 'All of the above.' },
 ]
 
 export const GOV_AGENCIES_OPTIONS = [
@@ -496,6 +502,7 @@ export const YOUR_EXPERIENCE_OPTIONS = [
 ]
 
 export const CLIENT_MOTIVE_OPTIONS = [
+  'All',
   'A. Have too',
   'B. Eventually ',
   'C. Undecisive',

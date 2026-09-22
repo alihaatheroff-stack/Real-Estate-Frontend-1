@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Globe2,
   ImageIcon,
@@ -28,6 +29,7 @@ const QUICK_PHOTOS = [STOCK.house1, STOCK.tower, STOCK.build, STOCK.interior, ST
 export function Composer() {
   const me = getCurrentMember()
   const { addPost } = useNetworkSocial()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [open, setOpen] = useState(false)
   const [text, setText] = useState('')
   const [audience, setAudience] = useState<PostAudience>('Public')
@@ -35,13 +37,22 @@ export function Composer() {
 
   const canPost = text.trim().length > 0
 
+  function closeComposer() {
+    setOpen(false)
+    if (searchParams.get('compose') === '1') {
+      const next = new URLSearchParams(searchParams)
+      next.delete('compose')
+      setSearchParams(next, { replace: true })
+    }
+  }
+
   function publish() {
     if (!canPost) return
     addPost({ text: text.trim(), audience, image })
     setText('')
     setImage(undefined)
     setAudience('Public')
-    setOpen(false)
+    closeComposer()
   }
 
   const AudienceIcon = useMemo(
@@ -50,13 +61,17 @@ export function Composer() {
   )
 
   useEffect(() => {
+    if (searchParams.get('compose') === '1') setOpen(true)
+  }, [searchParams])
+
+  useEffect(() => {
     if (!open) return
     function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key === 'Escape') closeComposer()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  }, [open, searchParams])
 
   return (
     <>
@@ -125,7 +140,7 @@ export function Composer() {
               <h2 className="font-display text-xl font-semibold text-ink">Create post</h2>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeComposer}
                 className="absolute right-3 top-2.5 flex h-9 w-9 items-center justify-center rounded-full bg-mist text-muted hover:bg-line"
                 aria-label="Close composer"
               >

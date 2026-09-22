@@ -67,6 +67,8 @@ export type NetworkGroup = {
 }
 
 export type NetworkForumThreadFilters = {
+  /** A–Z PSP category (falls back to role when unset). */
+  psp?: string
   community?: string
   role?: string
   field?: string
@@ -82,6 +84,10 @@ export type NetworkForumThreadFilters = {
   motives?: string
 }
 
+export type ForumReactionId = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry'
+
+export type ForumReactionCounts = Partial<Record<ForumReactionId, number>>
+
 export type NetworkForumReply = {
   id: string
   threadId: string
@@ -92,6 +98,8 @@ export type NetworkForumReply = {
   createdAtMs: number
   likes: number
   parentId?: string
+  attachments?: ChatAttachment[]
+  reactions?: ForumReactionCounts
 }
 
 export type NetworkForumThread = {
@@ -107,6 +115,7 @@ export type NetworkForumThread = {
   excerpt: string
   body: string
   likes?: number
+  reactions?: ForumReactionCounts
   pinned?: boolean
   recommended?: boolean
   winner?: boolean

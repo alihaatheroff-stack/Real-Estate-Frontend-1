@@ -1,68 +1,114 @@
 import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
 import {
-  CLIENT_MOTIVE_OPTIONS,
-  FIELD_TOP_OPTIONS,
-  LANGUAGE_BY_LETTER,
-  PSP_BY_LETTER,
+  PRICE_DEMOGRAPHY_OPTIONS,
+  PROPERTY_CONDITION_OPTIONS,
 } from '@/features/search/data/landingFilterOptions'
+import { SERVICE_DISTANCE_DEFAULT } from '@/features/search/data/categories'
 import type { NetworkForumThread } from '@/features/network/data/types'
+import type { LandingFilterValues } from '@/features/search/components/LandingFilterFields'
 
 /**
- * Commercial agent forum filters — order from commercial-forum-s:
- * Communitie's → ROLE; → Field → Sub-Field (nested tree) →
- * Price Demography → Representation → Condition → DEED, LIEN, NOTE →
- * Ownership → Tool's → LANGUAGE → Motive's
+ * Forums left-rail filter state = landing filter values
+ * + taxonomy-only facets used by ForumTaxonomyPanel.
  */
-
-export type ForumFiltersState = {
-  community: string[]
-  role: string[]
-  field: string[]
+export type ForumFiltersState = LandingFilterValues & {
+  /** Platform module context for this forum rail. */
+  module: string[]
+  /** Taxonomy Sub-Field paths (commercial tree). */
   subField: string[]
-  priceDemography: string[]
-  representation: string[]
-  condition: string[]
   deedLienNote: string[]
   ownership: string[]
   tools: string[]
-  language: string[]
-  motives: string[]
+  /** Forums-only Experience Level (1–10). */
+  experienceLevel: string[]
+  /** Service-results tail filters (Willing to Train → Payment Terms). */
+  willingToTrain: string[]
+  educationArchive: string[]
+  arMeasurementTools: string[]
+  paymentMethods: string[]
+  paymentPacket: string[]
+  tierSelection: string[]
+  paymentTerms: string[]
 }
 
+/** Default A–Z PSP for this commercial RE agents forum. */
+export const DEFAULT_FORUM_PSP = ['Agent > Real Estate'] as const
+
+/** Default Fields selection for this commercial RE agents forum. */
+export const DEFAULT_FORUM_FIELD = ['Commercial'] as const
+
+/** Default Experience selection for this commercial RE agents forum. */
+export const DEFAULT_FORUM_EXPERIENCE = ['All'] as const
+
+/** Default Experience Level (1–10 scale) for forums. */
+export const DEFAULT_FORUM_EXPERIENCE_LEVEL = ['5'] as const
+
+/** Default module for forums left rail. */
+export const DEFAULT_FORUM_MODULE = ['Network'] as const
+
+/** Module choices shown above Fields. */
+export const FORUM_MODULE_OPTIONS = [
+  'Home',
+  'Referrals',
+  'Crowdfund',
+  'Network',
+  'Shop',
+] as const
+
+/** Shared "All" default for several forums dropdowns. */
+export const DEFAULT_FORUM_ALL = ['All'] as const
+
 export const EMPTY_FORUM_FILTERS: ForumFiltersState = {
-  community: [],
-  role: [],
-  field: [],
-  subField: [],
-  priceDemography: [],
+  find: [],
+  psp: [],
   representation: [],
+  financing: [],
+  field: [],
+  clientExperience: [],
   condition: [],
+  vacancy: [],
+  propertyTitle: [],
+  saleType: [],
+  yourExperience: [],
+  motive: [],
+  language: [],
+  percentageShare: '',
+  formOfPayment: [],
+  priceBand: [],
+  zip: '',
+  radius: String(SERVICE_DISTANCE_DEFAULT),
+  module: [...DEFAULT_FORUM_MODULE],
+  subField: [],
   deedLienNote: [],
   ownership: [],
   tools: [],
-  language: [],
-  motives: [],
+  experienceLevel: [],
+  willingToTrain: [],
+  educationArchive: [],
+  arMeasurementTools: [],
+  paymentMethods: [],
+  paymentPacket: [],
+  tierSelection: [],
+  paymentTerms: [],
 }
 
-/** Communitie's Based On Your Search Result's */
-export const FORUM_COMMUNITY_OPTIONS = [
-  'County',
-  'City',
-  'State',
-  'Zip',
-  'Nationwide',
-] as const
-
-/** ROLE; — PSP roles (Agent selected on source page) */
-export const FORUM_ROLE_OPTIONS = Object.values(PSP_BY_LETTER)
-  .flat()
-  .filter(Boolean)
-
-/** Field * */
-export const FORUM_FIELD_OPTIONS = [...FIELD_TOP_OPTIONS] as const
+/** Initial forums filter state with commercial defaults pre-selected. */
+export const DEFAULT_FORUM_FILTERS: ForumFiltersState = {
+  ...EMPTY_FORUM_FILTERS,
+  module: [...DEFAULT_FORUM_MODULE],
+  psp: [...DEFAULT_FORUM_PSP],
+  field: [...DEFAULT_FORUM_FIELD],
+  clientExperience: [...DEFAULT_FORUM_EXPERIENCE],
+  experienceLevel: [...DEFAULT_FORUM_EXPERIENCE_LEVEL],
+  condition: [...DEFAULT_FORUM_ALL],
+  vacancy: [...DEFAULT_FORUM_ALL],
+  propertyTitle: [...DEFAULT_FORUM_ALL],
+  saleType: [...DEFAULT_FORUM_ALL],
+  motive: [...DEFAULT_FORUM_ALL],
+}
 
 /**
- * Commercial Sub-Field nested tree — one dropdown with full hierarchy.
+ * Commercial Sub-Field tree for the right-side taxonomy panel.
  * Living Complex and Single's are separate branches.
  */
 export const FORUM_COMMERCIAL_SUB_FIELD_TREE: FilterTreeNode[] = [
@@ -112,10 +158,7 @@ export const FORUM_COMMERCIAL_SUB_FIELD_TREE: FilterTreeNode[] = [
   },
   {
     label: 'Living Complex',
-    children: [
-      { label: 'Apartment' },
-      { label: 'Town House' },
-    ],
+    children: [{ label: 'Apartment' }, { label: 'Town House' }],
   },
   {
     label: "Single's",
@@ -150,71 +193,7 @@ export const FORUM_COMMERCIAL_SUB_FIELD_TREE: FilterTreeNode[] = [
   },
 ]
 
-/** Fallback Sub-Field trees for non-commercial Field selections */
-const MULTI_UNIT_SUB: FilterTreeNode[] = [
-  { label: "Sky-Scraper's" },
-  { label: 'Office' },
-  { label: 'Living' },
-  { label: 'Hospitality' },
-  { label: "Hotel's" },
-  { label: "Motel's" },
-  { label: 'Mobile Home Park' },
-  { label: 'Land' },
-  { label: 'Other' },
-]
-
-const INDUSTRIAL_SUB: FilterTreeNode[] = [
-  { label: 'Factory' },
-  { label: 'Warehouse' },
-  { label: 'Land' },
-  { label: 'Distribution' },
-  { label: 'Junk Yards' },
-  { label: 'Other' },
-]
-
-const AGRICULTURE_SUB: FilterTreeNode[] = [
-  { label: "Crop's" },
-  { label: 'Livestock' },
-  { label: 'Land' },
-  { label: 'Other' },
-]
-
-const RESIDENTIAL_SUB: FilterTreeNode[] = [
-  { label: 'House' },
-  { label: "4 Unit's Or Less (If More; See Multi-Unit)" },
-  { label: "Condo's" },
-  { label: 'Land' },
-  { label: 'Other' },
-]
-
-const OTHER_SUB: FilterTreeNode[] = [
-  { label: 'Land' },
-  { label: 'Mixed-Use' },
-  { label: 'Water-Front' },
-  { label: "Hills-Mountrain's" },
-  { label: 'Acreage' },
-  { label: 'Land Developement' },
-  { label: 'All Of The Above' },
-]
-
-const SUB_FIELD_BY_FIELD: Record<string, FilterTreeNode[]> = {
-  Commercial: FORUM_COMMERCIAL_SUB_FIELD_TREE,
-  'Multi-Unit': MULTI_UNIT_SUB,
-  Industrial: INDUSTRIAL_SUB,
-  Agriculture: AGRICULTURE_SUB,
-  Residential: RESIDENTIAL_SUB,
-  Other: OTHER_SUB,
-}
-
-export const FORUM_PRICE_DEMOGRAPHY_OPTIONS = [
-  'Luxury',
-  'Mid High',
-  'Mid Mid',
-  'Mid Low',
-  'Economic',
-] as const
-
-export const FORUM_REPRESENTATION_OPTIONS = [
+const FORUM_REPRESENTATION_OPTIONS = [
   'Selling',
   'Sell-To-Buy',
   'Retainer Consulting',
@@ -223,15 +202,7 @@ export const FORUM_REPRESENTATION_OPTIONS = [
   'Referral Agent',
 ] as const
 
-export const FORUM_CONDITION_OPTIONS = [
-  "Passe's Inspection",
-  'TLC',
-  'Run-Down',
-  'Burned',
-  'New Construction',
-] as const
-
-export const FORUM_DEED_LIEN_NOTE_OPTIONS = [
+const FORUM_DEED_LIEN_NOTE_OPTIONS = [
   'Free And Clear',
   'Deed Or Note Remaining.',
   'Lien',
@@ -241,7 +212,7 @@ export const FORUM_DEED_LIEN_NOTE_OPTIONS = [
   'HUD',
 ] as const
 
-export const FORUM_OWNERSHIP_OPTIONS = [
+const FORUM_OWNERSHIP_OPTIONS = [
   'Mom And Pop',
   'JV',
   'Franchisee',
@@ -250,96 +221,172 @@ export const FORUM_OWNERSHIP_OPTIONS = [
   'Corporate',
 ] as const
 
-/** Tool's — App's / Book's / Software / CRM / Shop */
-export const FORUM_TOOLS_OPTIONS = [
-  "App's",
-  "Book's",
-  'Software',
-  'CRM',
-  'Shop',
+const FORUM_TOOLS_TAXONOMY_OPTIONS = ["App's", "Book's", 'Software', 'CRM'] as const
+
+/**
+ * Right-side DEMOGRAPHIC columns.
+ * Deed/Lien/Note is shown as the first OWNERSHIP column under DEMOGRAPHIC.
+ */
+export const FORUM_DEMOGRAPHIC_COLUMNS = [
+  {
+    id: 'representation',
+    title: 'Representation',
+    filterKey: 'representation' as const,
+    options: [...FORUM_REPRESENTATION_OPTIONS],
+  },
+  {
+    id: 'priceBand',
+    title: 'Price Demographic',
+    filterKey: 'priceBand' as const,
+    options: [...PRICE_DEMOGRAPHY_OPTIONS],
+  },
+  {
+    id: 'condition',
+    title: 'Condition',
+    filterKey: 'condition' as const,
+    options: [...PROPERTY_CONDITION_OPTIONS],
+  },
+  {
+    id: 'deedLienNote',
+    title: 'Ownership',
+    filterKey: 'deedLienNote' as const,
+    options: [...FORUM_DEED_LIEN_NOTE_OPTIONS],
+  },
+  {
+    id: 'ownership',
+    title: 'Ownership',
+    filterKey: 'ownership' as const,
+    options: [...FORUM_OWNERSHIP_OPTIONS],
+  },
+  {
+    id: 'tools',
+    title: "Tool's",
+    filterKey: 'tools' as const,
+    options: [...FORUM_TOOLS_TAXONOMY_OPTIONS],
+  },
+  {
+    id: 'shop',
+    title: 'Shop',
+    filterKey: 'tools' as const,
+    options: ['Shop'] as string[],
+  },
+  {
+    id: 'extras',
+    title: "Extra's",
+    filterKey: null,
+    options: [] as string[],
+  },
 ] as const
 
-export const FORUM_MOTIVE_OPTIONS = CLIENT_MOTIVE_OPTIONS
-
-export const FORUM_LANGUAGE_BY_LETTER = LANGUAGE_BY_LETTER
-
-export const FORUM_SUGGESTED_TOPIC_GROUPS = [
-  {
-    id: 'latest',
-    label: 'Latest',
-    topics: ['Why Recreational Crowdfunding Is Crucial'],
-  },
-  {
-    id: 'most-comments',
-    label: "Most Comment's",
-    topics: ['Why Recreational Crowdfunding Is Crucial'],
-  },
-  {
-    id: 'most-recommended',
-    label: 'Most Recommended',
-    topics: ['Why Recreational Crowdfunding Is Crucial'],
-  },
-  {
-    id: 'other-suggestive',
-    label: 'Other Suggestive Field',
-    topics: ['Why Recreational Crowdfunding Is Crucial'],
-  },
-  {
-    id: 'winners',
-    label: "Winner's",
-    topics: ['Why Recreational Crowdfunding Is Crucial'],
-  },
-] as const
-
-function collectTreePaths(nodes: FilterTreeNode[], prefix = ''): string[] {
-  return nodes.flatMap((node) => {
-    const path = prefix ? `${prefix} > ${node.label}` : node.label
-    return [path, ...(node.children?.length ? collectTreePaths(node.children, path) : [])]
-  })
+function sameStringList(a: string[] | undefined, b: readonly string[]): boolean {
+  if (!a) return b.length === 0
+  return a.length === b.length && b.every((value) => a.includes(value))
 }
 
-/** Nested Sub-Field tree for the currently selected Field(s). */
-export function getForumSubFieldTree(selectedFields: string[]): FilterTreeNode[] {
-  const selected = selectedFields.filter((f) => f !== 'All of the above')
-  if (selected.length === 0 || selectedFields.includes('All of the above')) {
-    return Object.entries(SUB_FIELD_BY_FIELD).map(([label, children]) => ({
-      label,
-      children,
-    }))
+/** Left-rail dropdown keys that must be filled before posting a new topic. */
+const FORUM_COMPOSE_REQUIRED_ARRAYS: {
+  key: keyof ForumFiltersState
+  label: string
+}[] = [
+  { key: 'field', label: 'Fields' },
+  { key: 'psp', label: "A–Z PSP's" },
+  { key: 'find', label: 'Search By' },
+  { key: 'clientExperience', label: 'Experience' },
+  { key: 'experienceLevel', label: 'Experience Level' },
+  { key: 'condition', label: 'Property Condition' },
+  { key: 'vacancy', label: 'Vacancy' },
+  { key: 'propertyTitle', label: 'Title' },
+  { key: 'saleType', label: 'Sale Type' },
+  { key: 'motive', label: "Motive's" },
+  { key: 'language', label: 'Languages Spoken' },
+  { key: 'formOfPayment', label: 'Form Of Payment' },
+  { key: 'priceBand', label: 'Price Demography' },
+  { key: 'willingToTrain', label: 'Willing to Train' },
+  { key: 'educationArchive', label: 'Education / Archive' },
+  { key: 'arMeasurementTools', label: 'AR Measurement Tools' },
+  { key: 'paymentMethods', label: 'Payment Methods' },
+  { key: 'paymentPacket', label: 'Payment Packet' },
+  { key: 'tierSelection', label: 'Tier Selection' },
+  { key: 'paymentTerms', label: 'Payment Terms' },
+]
+
+/** Labels for vertical dropdowns still missing when composing a topic. */
+export function missingForumComposeFilters(filters: ForumFiltersState): string[] {
+  const missing: string[] = []
+
+  for (const { key, label } of FORUM_COMPOSE_REQUIRED_ARRAYS) {
+    const value = filters[key]
+    if (!Array.isArray(value) || value.length === 0) missing.push(label)
   }
-  return selected.flatMap((field) => SUB_FIELD_BY_FIELD[field] ?? [])
+
+  if (!filters.percentageShare.trim()) missing.push('Referral Share')
+  if (!filters.zip.trim()) missing.push('Zipcode')
+  if (!String(filters.radius ?? '').trim()) missing.push('Mile Radius')
+
+  return missing
 }
 
-/** All valid Sub-Field path values for cascade pruning when Field changes. */
-export function getForumSubFieldPaths(selectedFields: string[]): string[] {
-  return collectTreePaths(getForumSubFieldTree(selectedFields))
+/** True when every forums left-rail filter required to post a topic is set. */
+export function forumComposeFiltersComplete(filters: ForumFiltersState): boolean {
+  return missingForumComposeFilters(filters).length === 0
 }
 
+/** True when forums filters differ from the built-in commercial defaults. */
 export function forumFiltersActive(filters: ForumFiltersState): boolean {
-  return Object.values(filters).some((value) => value.length > 0)
+  const baseline = DEFAULT_FORUM_FILTERS
+
+  for (const key of Object.keys(baseline) as (keyof ForumFiltersState)[]) {
+    const current = filters[key]
+    const expected = baseline[key]
+
+    if (typeof expected === 'string') {
+      if ((current as string | undefined) !== expected) return true
+      continue
+    }
+
+    if (Array.isArray(expected)) {
+      if (!sameStringList(current as string[] | undefined, expected)) return true
+    }
+  }
+
+  return false
 }
 
 function matchesFacet(
-  selected: string[],
+  selected: string[] | undefined,
   threadValue: string | undefined,
 ): boolean {
-  if (selected.length === 0) return true
+  if (!selected || selected.length === 0) return true
+  // "All" means no constraint for this facet.
+  if (selected.some((value) => value === 'All' || value.toLowerCase() === 'all')) {
+    return true
+  }
   if (!threadValue) return false
-  return selected.includes(threadValue)
+  return selected.some(
+    (value) =>
+      value === threadValue ||
+      value.startsWith(`${threadValue} > `) ||
+      threadValue.startsWith(`${value} > `) ||
+      value.split(' > ')[0] === threadValue ||
+      threadValue.split(' > ')[0] === value.split(' > ')[0],
+  )
 }
 
-/** Parent selection matches its nested children (e.g. Recreational matches Recreational > Water Park). */
+/** Parent selection matches nested children (e.g. Recreational matches Recreational > Water Park). */
 function matchesSubField(
-  selected: string[],
+  selected: string[] | undefined,
   threadValue: string | undefined,
 ): boolean {
-  if (selected.length === 0) return true
+  if (!selected || selected.length === 0) return true
   if (!threadValue) return false
   return selected.some(
     (value) =>
       threadValue === value ||
       threadValue.startsWith(`${value} > `) ||
-      value.startsWith(`${threadValue} > `),
+      value.startsWith(`${threadValue} > `) ||
+      // Leaf-only selection still matches full path tags.
+      threadValue.endsWith(` > ${value}`) ||
+      threadValue.split(' > ').includes(value),
   )
 }
 
@@ -349,22 +396,32 @@ export function filterForumThreads(
 ): NetworkForumThread[] {
   if (!forumFiltersActive(filters)) return threads
 
+  const hasSubField = filters.subField.length > 0
+
   return threads.filter((thread) => {
     const f = thread.filters
     if (!f) return false
+
+    // Fields taxonomy is the primary browse control — when a Fields
+    // category is selected, match on that path (and commercial field).
+    if (hasSubField) {
+      return (
+        matchesFacet(filters.field, f.field) &&
+        matchesSubField(filters.subField, f.subField)
+      )
+    }
+
     return (
-      matchesFacet(filters.community, f.community) &&
-      matchesFacet(filters.role, f.role) &&
+      matchesFacet(filters.psp, f.psp ?? f.role) &&
       matchesFacet(filters.field, f.field) &&
-      matchesSubField(filters.subField, f.subField) &&
-      matchesFacet(filters.priceDemography, f.priceDemography) &&
+      matchesFacet(filters.priceBand, f.priceDemography) &&
       matchesFacet(filters.representation, f.representation) &&
       matchesFacet(filters.condition, f.condition) &&
       matchesFacet(filters.deedLienNote, f.deedLienNote) &&
       matchesFacet(filters.ownership, f.ownership) &&
       matchesFacet(filters.tools, f.tools) &&
       matchesFacet(filters.language, f.language) &&
-      matchesFacet(filters.motives, f.motives)
+      matchesFacet(filters.motive, f.motives)
     )
   })
 }

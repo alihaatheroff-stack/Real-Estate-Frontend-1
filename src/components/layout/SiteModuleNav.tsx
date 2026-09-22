@@ -71,7 +71,7 @@ export function SiteModuleNav({
   }
 
   return (
-    <nav className={cn('items-center', compact ? 'gap-0' : 'gap-0.5', className)}>
+    <nav className={cn('items-center', compact ? 'gap-16' : 'gap-4', className)}>
       {items.map((item, index) => {
         const active = isModuleNavActive(pathname, item)
         const open = openDropdown === item.href

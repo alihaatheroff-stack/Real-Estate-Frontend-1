@@ -1,10 +1,10 @@
-import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { GraduationCap, LayoutDashboard, Menu, Search } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { GraduationCap, LayoutDashboard, Menu } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { ABOUT_MENU, CROWDFUNDING_MENU, MARKETING_NAV, REFERRALS_MENU } from '@/app/config/nav'
 import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
 import { CallsMenu } from '@/components/layout/CallsMenu'
+import { WritingMenu } from '@/components/layout/WritingMenu'
 import { FavoritesMenu } from '@/components/layout/FavoritesMenu'
 import { GuestAuthPopover } from '@/components/layout/GuestAuthPopover'
 import { MessagesMenu } from '@/components/layout/MessagesMenu'
@@ -16,20 +16,12 @@ import { SITE } from '@/shared/config/site'
 import { signOut, useIsAuthenticated } from '@/features/auth'
 
 export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
-  const navigate = useNavigate()
   const isAuthenticated = useIsAuthenticated()
-  const [query, setQuery] = useState('')
-
-  function onSearch(event: FormEvent) {
-    event.preventDefault()
-    const q = query.trim()
-    navigate(q ? `${PATHS.networkSearch}?q=${encodeURIComponent(q)}` : PATHS.networkSearch)
-  }
 
   return (
     <header className="relative sticky top-0 z-50 border-b border-black/5 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-      <div className="grid h-[4.75rem] w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 px-3 sm:h-[5.5rem] sm:px-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex h-[4.75rem] w-full items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4">
+        <div className="flex min-w-0 items-center gap-8 lg:gap-12">
           <Link to={PATHS.networkFeed} className="flex min-w-0 shrink-0 items-center gap-2.5">
             <span
               aria-hidden
@@ -44,27 +36,18 @@ export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
               </span>
             </span>
           </Link>
-          <form onSubmit={onSearch} className="relative min-w-0 max-w-md flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search RE Network"
-              className="h-10 w-full rounded-full bg-[#F0F2F5] pl-9 pr-3 text-sm text-ink outline-none placeholder:text-muted focus:ring-2 focus:ring-brand/25"
-            />
-          </form>
+
+          <SiteModuleNav
+            compact
+            className="hidden lg:flex"
+            items={MARKETING_NAV}
+            referralsMenu={REFERRALS_MENU}
+            crowdfundingMenu={CROWDFUNDING_MENU}
+            aboutMenu={ABOUT_MENU}
+          />
         </div>
 
-        <SiteModuleNav
-          compact
-          className="hidden lg:flex"
-          items={MARKETING_NAV}
-          referralsMenu={REFERRALS_MENU}
-          crowdfundingMenu={CROWDFUNDING_MENU}
-          aboutMenu={ABOUT_MENU}
-        />
-
-        <div className="flex items-center justify-end gap-0.5 sm:gap-1">
+        <div className="flex shrink-0 items-center justify-end gap-0.5 sm:gap-1">
           <button
             type="button"
             className="inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist lg:hidden"
@@ -74,6 +57,7 @@ export function NetworkHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
             <Menu className="h-[1.35rem] w-[1.35rem] stroke-[1.5]" />
           </button>
           <div className="hidden items-center gap-0.5 sm:flex">
+            <WritingMenu locked={!isAuthenticated} />
             <AdvertiseMenu />
             <CallsMenu locked={!isAuthenticated} />
             {isAuthenticated ? (
