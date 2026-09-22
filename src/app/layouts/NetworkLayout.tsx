@@ -28,6 +28,8 @@ export function NetworkLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(readSidebarOpen)
   const location = useLocation()
   const mainRef = useRef<HTMLElement>(null)
+  const sidebarRef = useRef<HTMLDivElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
   const lockScroll =
     location.pathname === PATHS.networkMessages || location.pathname === PATHS.networkNotes
 
@@ -43,6 +45,21 @@ export function NetworkLayout() {
     }
   }, [sidebarOpen])
 
+  useEffect(() => {
+    if (!sidebarOpen) return
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target as Node | null
+      if (!target) return
+      if (sidebarRef.current?.contains(target)) return
+      if (toggleRef.current?.contains(target)) return
+      setSidebarOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [sidebarOpen])
+
   return (
     <NetworkSocialProvider>
       <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
@@ -51,6 +68,7 @@ export function NetworkLayout() {
         <div className="relative flex min-h-0 flex-1 overflow-hidden">
           {/* Overlay sidebar — inset from header like Forums card, floats over content. */}
           <div
+            ref={sidebarRef}
             className={cn(
               'absolute bottom-4 left-0 top-4 z-20 hidden overflow-hidden rounded-r-xl transition-[width,box-shadow] duration-200 ease-out lg:block',
               sidebarOpen && 'shadow-[4px_0_24px_rgba(0,0,0,0.08)]',
@@ -67,6 +85,7 @@ export function NetworkLayout() {
           </div>
 
           <button
+            ref={toggleRef}
             type="button"
             onClick={() => setSidebarOpen((open) => !open)}
             className="absolute top-1/2 z-30 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-ink/70 shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-[left,color,border-color] duration-200 ease-out hover:border-brand/25 hover:text-brand lg:flex"
