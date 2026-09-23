@@ -35,7 +35,7 @@ export function NetworkHeader({
       <div className="flex h-[4.75rem] w-full items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4">
         <div className="flex min-w-0 items-center gap-8 lg:gap-12">
           <Link
-            to={isAuthenticated ? PATHS.networkFeed : PATHS.network}
+            to={PATHS.home}
             className="flex min-w-0 shrink-0 items-center gap-2.5"
           >
             <span

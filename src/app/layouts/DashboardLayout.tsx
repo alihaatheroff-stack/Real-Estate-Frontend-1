@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Menu, PanelLeft, X } from 'lucide-react'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import {
@@ -45,6 +45,16 @@ export function DashboardLayout() {
       /* ignore */
     }
   }, [sidebarOpen])
+
+  if (!isAuthenticated) {
+    return (
+      <Navigate
+        to={PATHS.signIn}
+        replace
+        state={{ from: `${location.pathname}${location.search}` }}
+      />
+    )
+  }
 
   return (
     <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F4F6F5]">

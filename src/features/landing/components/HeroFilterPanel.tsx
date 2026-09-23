@@ -2,13 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { RangeSlider } from '@/components/ui/RangeSlider'
 import { PATHS } from '@/app/router/paths'
 import {
   LandingFilterFields,
-  SERVICE_DISTANCE_MAX,
-  SERVICE_DISTANCE_MIN,
   joinCsv,
   splitCsv,
   type HeroFiltersState,
@@ -157,7 +153,6 @@ export function HeroFilterPanel({
   className,
 }: HeroFilterPanelProps) {
   const [saveAsDefault, setSaveAsDefault] = useState(false)
-  const distance = Number(filters.radius || SERVICE_DISTANCE_MIN)
 
   const params = toSearchParams()
   const values = toLandingValues(filters)
@@ -252,32 +247,10 @@ export function HeroFilterPanel({
       )}
     >
       <div className="landing-scroll-pane max-h-[28.5rem] overflow-x-hidden overflow-y-auto px-1.5 pt-1 pb-1.5">
-        <LandingFilterFields hideLocation value={values} onChange={handleChange} />
+        <LandingFilterFields value={values} onChange={handleChange} />
       </div>
 
-      <div className="relative z-30 shrink-0 space-y-2 border-t border-ink/15 bg-white/95 px-1.5 pb-1.5 pt-1.5">
-        <div>
-          <label className="mb-1 block text-xs font-bold text-black">Zipcode</label>
-          <Input
-            name="hero-zip"
-            value={filters.zip}
-            onChange={(e) => onChange('zip', e.target.value)}
-            placeholder="Enter location or ZIP"
-            className="h-8 text-[13px]"
-          />
-        </div>
-        <div>
-          <div className="mb-1 flex items-baseline justify-between gap-2">
-            <label className="text-xs font-bold text-black">Mile Radius</label>
-            <span className="text-[11px] text-ink/70">Distance: {distance} miles</span>
-          </div>
-          <RangeSlider
-            min={SERVICE_DISTANCE_MIN}
-            max={SERVICE_DISTANCE_MAX}
-            value={distance}
-            onChange={(miles) => onChange('radius', String(miles))}
-          />
-        </div>
+      <div className="relative z-30 shrink-0 space-y-1 border-t border-ink/15 bg-white/95 px-1.5 pb-1.5 pt-1.5">
         <label className="flex cursor-pointer items-center gap-2">
           <input
             type="checkbox"
