@@ -99,24 +99,26 @@ export function ArticlesBrowseView() {
   const [category, setCategory] = useState<BlogCategoryLabel | null>(null)
 
   return (
-    <NetworkPageFrame hideRight>
-      <div className="overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(15,31,26,0.04)]">
-        <div className="grid items-stretch xl:grid-cols-[minmax(230px,21rem)_minmax(0,1fr)]">
+    <NetworkPageFrame hideRight fill>
+      <div className="overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(15,31,26,0.04)] xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
+        <div className="grid items-stretch xl:h-full xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(230px,21rem)_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)]">
           <NetworkVerticalFilterRail filters={filters} onChange={setFilters} />
 
-          <div className="min-w-0">
-            <header className="px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
+          <div className="flex min-w-0 flex-col xl:h-full xl:min-h-0 xl:overflow-hidden">
+            <header className="shrink-0 px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
               <h1 className="font-display text-3xl font-semibold">
-                Articles (Blogs)
+                Articles:Commercial Real Estate Agents
               </h1>
             </header>
 
-            <NetworkVerticalFilterStack filters={filters} onChange={setFilters} />
+            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
+              <NetworkVerticalFilterStack filters={filters} onChange={setFilters} />
 
-            <ArticlesCategoryTabs category={category} onChange={setCategory} />
+              <ArticlesCategoryTabs category={category} onChange={setCategory} />
 
-            <div className="px-4 py-6 sm:px-5 sm:py-8">
-              <ArticlesGrid category={category} />
+              <div className="px-4 py-6 sm:px-5 sm:py-8">
+                <ArticlesGrid category={category} />
+              </div>
             </div>
           </div>
         </div>

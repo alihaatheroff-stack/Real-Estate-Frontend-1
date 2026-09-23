@@ -13,7 +13,6 @@ import {
   SERVICE_DISTANCE_MIN,
   type HeroFiltersState,
   AR_MEASUREMENT_TOOLS_OPTIONS,
-  BUYING_TREE,
   CLIENT_EXPERIENCE_TREE,
   CLIENT_MOTIVE_OPTIONS,
   EDUCATION_ARCHIVE_OPTIONS,
@@ -52,7 +51,6 @@ export function ServiceProfileBlock({
   selectedFields,
   representation,
   showRepresentation,
-  showBuying,
   distance,
   formOfPaymentMethods,
   businessName,
@@ -74,7 +72,6 @@ export function ServiceProfileBlock({
   selectedFields: string[]
   representation: string[]
   showRepresentation: boolean
-  showBuying: boolean
   distance: number
   formOfPaymentMethods: FormOfPaymentMethodEntry[]
   businessName: string
@@ -113,21 +110,11 @@ export function ServiceProfileBlock({
 
           {showRepresentation ? (
             <RegisterFilterSelect
-              label="Representation: "
-              placeholder="Ex. (Buying, Mortgage, etc.,)"
+              label="Representation's: "
+              placeholder="Ex. (Selling, Buying, Leasing, etc.,)"
               tree={REPRESENTATION_TOP_TREE}
               value={representation}
               onChange={(next) => setProfileFilterList('representation', next)}
-            />
-          ) : null}
-
-          {showBuying ? (
-            <RegisterFilterSelect
-              label="Buying:"
-              placeholder="Ex. (Buying, Mortgage, etc.,)"
-              tree={BUYING_TREE}
-              value={splitCsv(profileFilters.financing)}
-              onChange={(next) => setProfileFilterList('financing', next)}
             />
           ) : null}
         </ProfileFilterGroup>

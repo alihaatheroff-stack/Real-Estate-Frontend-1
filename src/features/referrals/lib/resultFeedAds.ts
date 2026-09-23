@@ -78,6 +78,8 @@ export function insertAdsIntoFeed<TItem, TAd>(
 }
 
 export function mergePageAds<T extends { id: string }>(items: T[], ads: T[]): T[] {
+  // An empty result set has no list cards; don't leave sponsored pins on the map.
+  if (items.length === 0) return []
   const extra = ads.filter((ad) => !items.some((item) => item.id === ad.id))
   return extra.length === 0 ? items : [...items, ...extra]
 }

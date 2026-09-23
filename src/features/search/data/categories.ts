@@ -4,6 +4,7 @@ export type FilterOption = {
 }
 
 export type HeroFiltersState = {
+  role: string
   find: string
   pspCategory: string
   representation: string
@@ -23,9 +24,28 @@ export type HeroFiltersState = {
   vacancy: string
   propertyTitle: string
   saleType: string
+  tagSkill: string
   govAgencies: string
+  institution: string
+  purchaseExperience: string
+  loanExperience: string
+  whichService: string
+  charge: string
+  income: string
+  dti: string
+  ltv: string
+  loanTypes: string
+  loanRateType: string
+  prepaymentPenalty: string
+  timeDuration: string
+  lengthToClose: string
+  creditCheck: string
   yourExperience: string
+  experienceLevel: string
   formOfPayment: string
+  prSqFt: string
+  proof: string
+  legalTitle: string
   educationArchive: string
   arMeasurementTools: string
   paymentPacket: string
@@ -62,6 +82,7 @@ export const SERVICE_DISTANCE_MAX = 100
 export const SERVICE_DISTANCE_DEFAULT = 50
 
 export const DEFAULT_FILTERS: HeroFiltersState = {
+  role: '',
   find: '',
   pspCategory: '',
   representation: '',
@@ -81,9 +102,28 @@ export const DEFAULT_FILTERS: HeroFiltersState = {
   vacancy: '',
   propertyTitle: '',
   saleType: '',
+  tagSkill: '',
   govAgencies: '',
+  institution: '',
+  purchaseExperience: '',
+  loanExperience: '',
+  whichService: '',
+  charge: '',
+  income: '',
+  dti: '',
+  ltv: '',
+  loanTypes: '',
+  loanRateType: '',
+  prepaymentPenalty: '',
+  timeDuration: '',
+  lengthToClose: '',
+  creditCheck: '',
   yourExperience: '',
+  experienceLevel: '',
   formOfPayment: '',
+  prSqFt: '',
+  proof: '',
+  legalTitle: '',
   educationArchive: '',
   arMeasurementTools: '',
   paymentPacket: '',

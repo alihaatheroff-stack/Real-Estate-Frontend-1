@@ -4,6 +4,7 @@ import { ProvidersMapView } from '@/features/referrals'
 import { useProfileResults } from '@/features/referrals/hooks/useProfileResults'
 import type { ProviderSortKey } from '@/features/referrals/model/sort'
 import {
+  DEFAULT_FILTERS,
   useProviderFilters,
   type HeroFiltersState,
 } from '@/features/search'
@@ -17,21 +18,10 @@ export function ProfileResultsPage() {
 
   useEffect(() => {
     const next: Partial<HeroFiltersState> = { find: 'profile' }
-    ;(
-      [
-        'pspCategory',
-        'englishLevel',
-        'region',
-        'gender',
-        'freelancerType',
-        'language',
-        'zip',
-        'radius',
-      ] as const
-    ).forEach((key) => {
+    for (const key of Object.keys(DEFAULT_FILTERS) as (keyof HeroFiltersState)[]) {
       const value = params.get(key)
       if (value) next[key] = value
-    })
+    }
     setFilters((prev) => ({ ...prev, ...next }))
   }, [params, setFilters])
 

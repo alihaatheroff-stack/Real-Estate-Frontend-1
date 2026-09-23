@@ -27,10 +27,11 @@ export function AdvertisePage() {
         {!creating ? (
           <Button
             type="button"
+            size="sm"
             leftIcon={<Plus className="h-4 w-4" strokeWidth={2} />}
             onClick={() => setCreating(true)}
           >
-            Create Advertisement
+            Create
           </Button>
         ) : null}
       </div>

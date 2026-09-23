@@ -15,6 +15,12 @@ export const CROWDFUNDING_MENU = [
   { label: 'LCRE Crowdfunding', href: PATHS.lcreCrowdfunding },
 ] as const
 
+/** Network dropdown — public Articles + Forums (guests see content without network sidebar) */
+export const NETWORK_MENU = [
+  { label: 'Articles', href: PATHS.networkArticles },
+  { label: 'Forums', href: PATHS.networkForums },
+] as const
+
 /** About dropdown — Contact lives under About, not as its own top-level nav item */
 export const ABOUT_MENU = [
   { label: 'Advertisement', href: PATHS.advertise },
@@ -25,7 +31,7 @@ export const ABOUT_MENU = [
 export const MARKETING_NAV = [
   { label: 'Referral', href: PATHS.referrals, hasDropdown: true, menuOnly: true },
   { label: 'Crowdfund', href: PATHS.crowdfunding, hasDropdown: true },
-  { label: 'Network', href: PATHS.networkFeed },
+  { label: 'Network', href: PATHS.network, hasDropdown: true },
   { label: 'Shop', href: PATHS.shop },
   { label: 'About', href: PATHS.about, hasDropdown: true },
 ] as const

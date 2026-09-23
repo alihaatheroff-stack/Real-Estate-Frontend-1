@@ -1,14 +1,13 @@
-import { RangeSlider } from '@/components/ui/RangeSlider'
+import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import {
   HeroFilterSelect,
   AR_MEASUREMENT_TOOLS_OPTIONS,
   EDUCATION_ARCHIVE_OPTIONS,
+  ENGLISH_LEVEL_OPTIONS,
+  LANGUAGE_BY_LETTER,
   PAYMENT_METHODS_TREE,
   PAYMENT_PACKET_OPTIONS,
   PAYMENT_TERMS_OPTIONS,
-  SERVICE_DISTANCE_DEFAULT,
-  SERVICE_DISTANCE_MAX,
-  SERVICE_DISTANCE_MIN,
   TIER_SELECTION_OPTIONS,
   WILLING_TO_TRAIN_FILTER_OPTIONS,
 } from '@/features/search'
@@ -18,19 +17,20 @@ type ForumServiceTailFieldsProps = {
   filters: ForumFiltersState
   onChange: (next: ForumFiltersState) => void
   selectedPrefix?: string
+  highlightSelected?: boolean
 }
 
 /**
- * Service-results filters from Willing to Train through Mile Radius,
- * appended at the bottom of the forums left rail.
+ * Service-results filters from Languages Spoken through the payment notes.
+ * Zipcode and Mile Radius are pinned under this list.
+ * Selected values keep the forums/articles blue highlight.
  */
 export function ForumServiceTailFields({
   filters,
   onChange,
   selectedPrefix = 'Selected: ',
+  highlightSelected = true,
 }: ForumServiceTailFieldsProps) {
-  const radiusMiles = Number(filters.radius || SERVICE_DISTANCE_DEFAULT)
-
   function setList<K extends keyof ForumFiltersState>(key: K, next: ForumFiltersState[K]) {
     onChange({ ...filters, [key]: next })
   }
@@ -40,6 +40,35 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
+        label="Languages Spoken:"
+        placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
+        optionsByLetter={LANGUAGE_BY_LETTER}
+        value={filters.language}
+        onChange={(next) => setList('language', next)}
+      />
+
+      <HeroFilterSelect
+        compact
+        selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
+        label="English Level:"
+        placeholder="Ex. (Low, Middle, High, etc.,)"
+        options={ENGLISH_LEVEL_OPTIONS.map((option) => option.label)}
+        value={filters.englishLevel}
+        onChange={(next) => setList('englishLevel', next)}
+      />
+
+      <ReferralShareInput
+        compact
+        value={filters.percentageShare[0] ?? ''}
+        onChange={(value) => setList('percentageShare', value ? [value] : [])}
+      />
+
+      <HeroFilterSelect
+        compact
+        selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="Willing to Train:"
         placeholder="Ex. (Yes; Recorded, Reach out, etc.,)"
         options={WILLING_TO_TRAIN_FILTER_OPTIONS.map((option) => option.label)}
@@ -50,6 +79,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="EDUCATION + ARCHIVE + video playlists:"
         placeholder="Ex. (Negotiation's, Hiring Appraisers)"
         options={EDUCATION_ARCHIVE_OPTIONS}
@@ -60,6 +90,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="AR Measurement Tools:"
         placeholder="Ex. (Doors, Windows, Land, etc.,)"
         options={AR_MEASUREMENT_TOOLS_OPTIONS}
@@ -72,6 +103,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="Payment Methods:"
         placeholder="Ex. (Cash, Credit)"
         tree={PAYMENT_METHODS_TREE}
@@ -82,6 +114,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="Payment Packet:"
         placeholder="Ex. (Monthly, Yearly, etc.,)"
         options={PAYMENT_PACKET_OPTIONS}
@@ -92,6 +125,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="Tier Selection:"
         placeholder="Ex. (Basic-Lux Tier)"
         options={TIER_SELECTION_OPTIONS}
@@ -102,6 +136,7 @@ export function ForumServiceTailFields({
       <HeroFilterSelect
         compact
         selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
         label="Payment Terms:"
         placeholder="Ex. (Before, After, etc.,)"
         options={PAYMENT_TERMS_OPTIONS}
@@ -174,39 +209,6 @@ export function ForumServiceTailFields({
         </div>
 
         <p className="text-[12px] text-black underline sm:text-[13px]">Advertise</p>
-      </div>
-
-      <div className="relative shrink-0 overflow-visible">
-        <label className="block truncate text-xs font-bold leading-4 text-black">
-          Zipcode
-        </label>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={filters.zip}
-          onChange={(e) => setList('zip', e.target.value)}
-          placeholder="Zipcode..."
-          className="mt-0.5 h-7 w-full rounded-md border border-black bg-white px-2 text-[11px] text-ink outline-none placeholder:text-[11px] placeholder:text-ink/55 focus:ring-1 focus:ring-brand/30"
-        />
-      </div>
-
-      <div className="relative shrink-0 overflow-visible pb-1">
-        <div className="flex items-baseline justify-between gap-2">
-          <label className="block truncate text-xs font-bold leading-4 text-black">
-            Mile Radius
-          </label>
-          <span className="shrink-0 text-[11px] font-medium text-ink/70">
-            {radiusMiles} mi
-          </span>
-        </div>
-        <RangeSlider
-          variant="freeio"
-          min={SERVICE_DISTANCE_MIN}
-          max={SERVICE_DISTANCE_MAX}
-          value={radiusMiles}
-          onChange={(miles) => setList('radius', String(miles))}
-          className="mt-1 space-y-0 px-1.5 py-0.5"
-        />
       </div>
     </div>
   )

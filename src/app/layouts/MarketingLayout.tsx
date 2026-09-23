@@ -6,6 +6,7 @@ import {
   CROWDFUNDING_MENU,
   FOOTER_LINKS,
   MARKETING_NAV,
+  NETWORK_MENU,
   REFERRALS_MENU,
 } from '@/app/config/nav'
 import { PATHS } from '@/app/router/paths'
@@ -37,6 +38,7 @@ export function MarketingLayout() {
         marketingNav={MARKETING_NAV}
         referralsMenu={REFERRALS_MENU}
         crowdfundingMenu={CROWDFUNDING_MENU}
+        networkMenu={NETWORK_MENU}
         aboutMenu={ABOUT_MENU}
       />
       <main

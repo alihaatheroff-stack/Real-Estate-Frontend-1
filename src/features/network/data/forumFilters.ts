@@ -19,10 +19,8 @@ export type ForumFiltersState = LandingFilterValues & {
   deedLienNote: string[]
   ownership: string[]
   tools: string[]
-  /** Forums-only Experience Level (1–10). */
-  experienceLevel: string[]
-  /** Service-results tail filters (Willing to Train → Payment Terms). */
-  willingToTrain: string[]
+  /** Service-results tail filters (English Level → Payment Terms). */
+  englishLevel: string[]
   educationArchive: string[]
   arMeasurementTools: string[]
   paymentMethods: string[]
@@ -38,7 +36,7 @@ export const DEFAULT_FORUM_PSP = ['Agent > Real Estate'] as const
 export const DEFAULT_FORUM_FIELD = ['Commercial'] as const
 
 /** Default Experience selection for this commercial RE agents forum. */
-export const DEFAULT_FORUM_EXPERIENCE = ['All'] as const
+export const DEFAULT_FORUM_EXPERIENCE = ['All Of The Above'] as const
 
 /** Default Experience Level (1–10 scale) for forums. */
 export const DEFAULT_FORUM_EXPERIENCE_LEVEL = ['5'] as const
@@ -55,10 +53,11 @@ export const FORUM_MODULE_OPTIONS = [
   'Shop',
 ] as const
 
-/** Shared "All" default for several forums dropdowns. */
-export const DEFAULT_FORUM_ALL = ['All'] as const
+/** Shared "All Of The Above" default for several forums dropdowns. */
+export const DEFAULT_FORUM_ALL = ['All Of The Above'] as const
 
 export const EMPTY_FORUM_FILTERS: ForumFiltersState = {
+  role: [],
   find: [],
   psp: [],
   representation: [],
@@ -69,12 +68,33 @@ export const EMPTY_FORUM_FILTERS: ForumFiltersState = {
   vacancy: [],
   propertyTitle: [],
   saleType: [],
+  tagSkill: [],
   yourExperience: [],
   motive: [],
   language: [],
-  percentageShare: '',
+  percentageShare: [],
+  willingToTrain: [],
   formOfPayment: [],
+  references: [],
   priceBand: [],
+  institution: [],
+  purchaseExperience: [],
+  loanExperience: [],
+  whichService: [],
+  govAgencies: [],
+  charge: [],
+  income: [],
+  dti: [],
+  ltv: [],
+  loanTypes: [],
+  loanRateType: [],
+  prepaymentPenalty: [],
+  timeDuration: [],
+  lengthToClose: [],
+  creditCheck: [],
+  prSqFt: [],
+  proof: [],
+  legalTitle: [],
   zip: '',
   radius: String(SERVICE_DISTANCE_DEFAULT),
   module: [...DEFAULT_FORUM_MODULE],
@@ -83,7 +103,7 @@ export const EMPTY_FORUM_FILTERS: ForumFiltersState = {
   ownership: [],
   tools: [],
   experienceLevel: [],
-  willingToTrain: [],
+  englishLevel: [],
   educationArchive: [],
   arMeasurementTools: [],
   paymentMethods: [],
@@ -299,8 +319,7 @@ const FORUM_COMPOSE_REQUIRED_ARRAYS: {
   { key: 'saleType', label: 'Sale Type' },
   { key: 'motive', label: "Motive's" },
   { key: 'language', label: 'Languages Spoken' },
-  { key: 'formOfPayment', label: 'Form Of Payment' },
-  { key: 'priceBand', label: 'Price Demography' },
+  { key: 'englishLevel', label: 'English Level' },
   { key: 'willingToTrain', label: 'Willing to Train' },
   { key: 'educationArchive', label: 'Education / Archive' },
   { key: 'arMeasurementTools', label: 'AR Measurement Tools' },
@@ -319,7 +338,7 @@ export function missingForumComposeFilters(filters: ForumFiltersState): string[]
     if (!Array.isArray(value) || value.length === 0) missing.push(label)
   }
 
-  if (!filters.percentageShare.trim()) missing.push('Referral Share')
+  if (!filters.percentageShare.length) missing.push('Referral Share')
   if (!filters.zip.trim()) missing.push('Zipcode')
   if (!String(filters.radius ?? '').trim()) missing.push('Mile Radius')
 

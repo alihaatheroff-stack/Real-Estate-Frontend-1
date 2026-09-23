@@ -29,6 +29,10 @@ export function isCrowdfundingNavItem(item: { label: string }) {
   return item.label === 'Crowdfund' || item.label === 'Crowdfunding'
 }
 
+export function isNetworkNavItem(item: { label: string }) {
+  return item.label === 'Network'
+}
+
 export function isModuleNavActive(pathname: string, item: ModuleNavItem) {
   if (isReferralsNavItem(item)) {
     return pathname === PATHS.referrals || pathname.startsWith(`${PATHS.referrals}/`)
@@ -36,7 +40,7 @@ export function isModuleNavActive(pathname: string, item: ModuleNavItem) {
   if (isCrowdfundingNavItem(item)) {
     return pathname === PATHS.crowdfunding || pathname.startsWith(`${PATHS.crowdfunding}/`)
   }
-  if (item.href === PATHS.network || item.href === PATHS.networkFeed) {
+  if (isNetworkNavItem(item)) {
     return pathname === PATHS.network || pathname.startsWith(`${PATHS.network}/`)
   }
   if (item.href === PATHS.about) {
@@ -49,6 +53,7 @@ export function SiteModuleNav({
   items,
   referralsMenu,
   crowdfundingMenu = [],
+  networkMenu = [],
   aboutMenu = [],
   compact = false,
   className,
@@ -56,6 +61,7 @@ export function SiteModuleNav({
   items: readonly ModuleNavItem[]
   referralsMenu: readonly ModuleNavLink[]
   crowdfundingMenu?: readonly ModuleNavLink[]
+  networkMenu?: readonly ModuleNavLink[]
   aboutMenu?: readonly ModuleNavLink[]
   compact?: boolean
   className?: string
@@ -67,6 +73,7 @@ export function SiteModuleNav({
     if (item.href === PATHS.about) return aboutMenu
     if (isReferralsNavItem(item)) return referralsMenu
     if (isCrowdfundingNavItem(item)) return crowdfundingMenu
+    if (isNetworkNavItem(item)) return networkMenu
     return []
   }
 

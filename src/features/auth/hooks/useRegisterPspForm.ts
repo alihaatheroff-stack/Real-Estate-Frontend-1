@@ -98,9 +98,6 @@ export function useRegisterPspForm() {
   const showRepresentation = selectedPsp.some(
     (value) => value === 'Agent' || value.startsWith('Agent > '),
   )
-  const showBuying = representation.some(
-    (value) => value === 'Buying' || value === 'Mortgage',
-  )
   const distance = Number(profileFilters.radius || SERVICE_DISTANCE_MIN)
 
   function setProfileFilter<K extends keyof HeroFiltersState>(
@@ -140,10 +137,7 @@ export function useRegisterPspForm() {
     }
     if (key === 'representation') {
       setProfileFilter('representation', joinCsv(next))
-      const stillBuying = next.some(
-        (value) => value === 'Buying' || value === 'Mortgage',
-      )
-      if (!stillBuying) setProfileFilter('financing', '')
+      setProfileFilter('financing', '')
       return
     }
     setProfileFilter(key, joinCsv(next))
@@ -731,7 +725,6 @@ export function useRegisterPspForm() {
     selectedFields,
     representation,
     showRepresentation,
-    showBuying,
     distance,
     setProfileFilter,
     setProfileFilterList,

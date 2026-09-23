@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { NetworkHeader } from '@/features/network/components/shell/NetworkHeader'
 import { NetworkLeftNav } from '@/features/network/components/shell/NetworkLeftNav'
 import { NetworkMobileNav } from '@/features/network/components/shell/NetworkMobileNav'
 import { NetworkSocialProvider } from '@/features/network/model/NetworkSocialContext'
+import { useIsAuthenticated } from '@/features/auth'
 import { cn } from '@/shared/lib/cn'
 
 const SIDEBAR_KEY = 're-network-sidebar-open'
@@ -23,6 +24,16 @@ function readSidebarOpen() {
   }
 }
 
+/** Guests may only browse Articles + Forums; feed and the rest require sign-in. */
+function isGuestPublicNetworkPath(pathname: string) {
+  return (
+    pathname === PATHS.networkArticles ||
+    pathname.startsWith(`${PATHS.networkArticles}/`) ||
+    pathname === PATHS.networkForums ||
+    pathname.startsWith(`${PATHS.networkForums}/`)
+  )
+}
+
 export function NetworkLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(readSidebarOpen)
@@ -30,6 +41,10 @@ export function NetworkLayout() {
   const mainRef = useRef<HTMLElement>(null)
   const sidebarRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
+  const isAuthenticated = useIsAuthenticated()
+  const showSidebar = isAuthenticated
+  const guestBlocked =
+    !isAuthenticated && !isGuestPublicNetworkPath(location.pathname)
   const lockScroll =
     location.pathname === PATHS.networkMessages || location.pathname === PATHS.networkNotes
 
@@ -38,15 +53,16 @@ export function NetworkLayout() {
   }, [location.pathname])
 
   useEffect(() => {
+    if (!showSidebar) return
     try {
       localStorage.setItem(SIDEBAR_KEY, sidebarOpen ? '1' : '0')
     } catch {
       /* ignore */
     }
-  }, [sidebarOpen])
+  }, [sidebarOpen, showSidebar])
 
   useEffect(() => {
-    if (!sidebarOpen) return
+    if (!showSidebar || !sidebarOpen) return
 
     function handlePointerDown(event: PointerEvent) {
       const target = event.target as Node | null
@@ -58,63 +74,81 @@ export function NetworkLayout() {
 
     document.addEventListener('pointerdown', handlePointerDown)
     return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [sidebarOpen])
+  }, [sidebarOpen, showSidebar])
+
+  if (guestBlocked) {
+    return (
+      <Navigate
+        to={PATHS.signIn}
+        replace
+        state={{ from: `${location.pathname}${location.search}` }}
+      />
+    )
+  }
 
   return (
     <NetworkSocialProvider>
       <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
-        <NetworkHeader onOpenMenu={() => setMenuOpen(true)} />
+        <NetworkHeader
+          onOpenMenu={showSidebar ? () => setMenuOpen(true) : undefined}
+          showNetworkMenu={showSidebar}
+        />
 
         <div className="relative flex min-h-0 flex-1 overflow-hidden">
-          {/* Overlay sidebar — inset from header like Forums card, floats over content. */}
-          <div
-            ref={sidebarRef}
-            className={cn(
-              'absolute bottom-4 left-0 top-4 z-20 hidden overflow-hidden rounded-r-xl transition-[width,box-shadow] duration-200 ease-out lg:block',
-              sidebarOpen && 'shadow-[4px_0_24px_rgba(0,0,0,0.08)]',
-            )}
-            style={{ width: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
-            aria-hidden={!sidebarOpen}
-          >
-            <div
-              className="network-shell-scroll h-full overflow-y-auto border border-black/5 border-l-0 bg-white"
-              style={{ width: SIDEBAR_WIDTH }}
-            >
-              <NetworkLeftNav />
-            </div>
-          </div>
+          {showSidebar ? (
+            <>
+              {/* Overlay sidebar — inset from header like Forums card, floats over content. */}
+              <div
+                ref={sidebarRef}
+                className={cn(
+                  'absolute bottom-4 left-0 top-4 z-20 hidden overflow-hidden rounded-r-xl transition-[width,box-shadow] duration-200 ease-out lg:block',
+                  sidebarOpen && 'shadow-[4px_0_24px_rgba(0,0,0,0.08)]',
+                )}
+                style={{ width: sidebarOpen ? SIDEBAR_WIDTH : 0 }}
+                aria-hidden={!sidebarOpen}
+              >
+                <div
+                  className="network-shell-scroll h-full overflow-y-auto border border-black/5 border-l-0 bg-white"
+                  style={{ width: SIDEBAR_WIDTH }}
+                >
+                  <NetworkLeftNav />
+                </div>
+              </div>
 
-          <button
-            ref={toggleRef}
-            type="button"
-            onClick={() => setSidebarOpen((open) => !open)}
-            className="absolute top-1/2 z-30 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-ink/70 shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-[left,color,border-color] duration-200 ease-out hover:border-brand/25 hover:text-brand lg:flex"
-            style={{ left: sidebarOpen ? SIDEBAR_WIDTH : TOGGLE_HALF }}
-            aria-label={sidebarOpen ? 'Hide menu' : 'Show menu'}
-            aria-expanded={sidebarOpen}
-            title={sidebarOpen ? 'Hide menu' : 'Show menu'}
-          >
-            {sidebarOpen ? (
-              <ChevronLeft className="h-4 w-4" strokeWidth={2.25} />
-            ) : (
-              <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
-            )}
-          </button>
+              <button
+                ref={toggleRef}
+                type="button"
+                onClick={() => setSidebarOpen((open) => !open)}
+                className="absolute top-1/2 z-30 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-ink/70 shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-[left,color,border-color] duration-200 ease-out hover:border-brand/25 hover:text-brand lg:flex"
+                style={{ left: sidebarOpen ? SIDEBAR_WIDTH : TOGGLE_HALF }}
+                aria-label={sidebarOpen ? 'Hide menu' : 'Show menu'}
+                aria-expanded={sidebarOpen}
+                title={sidebarOpen ? 'Hide menu' : 'Show menu'}
+              >
+                {sidebarOpen ? (
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2.25} />
+                ) : (
+                  <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
+                )}
+              </button>
+            </>
+          ) : null}
 
           <main
             ref={mainRef}
             className={cn(
               'network-shell-scroll flex h-full min-h-0 min-w-0 flex-1 flex-col',
-              lockScroll ? 'overflow-hidden' : 'overflow-y-auto pb-16 lg:pb-0',
+              lockScroll ? 'overflow-hidden' : 'overflow-y-auto',
+              showSidebar ? 'pb-16 lg:pb-0' : 'pb-0',
             )}
           >
             <Outlet />
           </main>
         </div>
 
-        <NetworkMobileNav onOpenMenu={() => setMenuOpen(true)} />
+        {showSidebar ? <NetworkMobileNav onOpenMenu={() => setMenuOpen(true)} /> : null}
 
-        {menuOpen ? (
+        {showSidebar && menuOpen ? (
           <div className="fixed inset-0 z-[70] lg:hidden">
             <button
               type="button"

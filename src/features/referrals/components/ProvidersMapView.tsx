@@ -98,9 +98,14 @@ export function ProvidersMapView({
 
   function applyFilters() {
     const params = toSearchParams()
-    params.set('find', 'profile')
     params.delete('view')
-    navigate(`${PATHS.profileResults}?${params.toString()}`)
+    const find = filters.find
+    const target = find.includes('agency')
+      ? PATHS.employerResults
+      : find.includes('profile')
+        ? PATHS.profileResults
+        : PATHS.results
+    navigate(`${target}?${params.toString()}`)
   }
 
   function focusProvider(id: string | null) {

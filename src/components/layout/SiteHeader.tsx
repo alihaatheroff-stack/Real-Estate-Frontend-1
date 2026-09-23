@@ -17,6 +17,7 @@ import { SITE } from '@/shared/config/site'
 import { cn } from '@/shared/lib/cn'
 import {
   isCrowdfundingNavItem,
+  isNetworkNavItem,
   isReferralsNavItem,
   NavLabel,
   SiteModuleNav,
@@ -34,6 +35,7 @@ type SiteHeaderProps = {
   marketingNav: readonly NavItem[]
   referralsMenu: readonly MenuLink[]
   crowdfundingMenu?: readonly MenuLink[]
+  networkMenu?: readonly MenuLink[]
   aboutMenu?: readonly MenuLink[]
 }
 
@@ -46,6 +48,7 @@ export function SiteHeader({
   marketingNav,
   referralsMenu,
   crowdfundingMenu = [],
+  networkMenu = [],
   aboutMenu = [],
 }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
@@ -57,6 +60,7 @@ export function SiteHeader({
     if (item.href === PATHS.about) return aboutMenu
     if (isReferralsNavItem(item)) return referralsMenu
     if (isCrowdfundingNavItem(item)) return crowdfundingMenu
+    if (isNetworkNavItem(item)) return networkMenu
     return []
   }
 
@@ -92,6 +96,7 @@ export function SiteHeader({
           items={marketingNav}
           referralsMenu={referralsMenu}
           crowdfundingMenu={crowdfundingMenu}
+          networkMenu={networkMenu}
           aboutMenu={aboutMenu}
         />
 

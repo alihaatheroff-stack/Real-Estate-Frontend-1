@@ -14,8 +14,8 @@ import type { AdvertisementDraft } from '@/features/advertise/types'
 import { cn } from '@/shared/lib/cn'
 
 /**
- * Left filters match create-form height; live preview spans full width below.
- * Action buttons sit after the preview.
+ * Vertical dropdowns stay on the left. Live preview sits at the top of the
+ * right column, with the create form underneath. Action buttons sit after both.
  */
 export function AdvertiseCreateWorkspace({
   draft,
@@ -28,8 +28,8 @@ export function AdvertiseCreateWorkspace({
   onAskAiReview: () => void
   className?: string
 }) {
-  const formRef = useRef<HTMLDivElement>(null)
-  const [formHeight, setFormHeight] = useState<number | null>(null)
+  const columnRef = useRef<HTMLDivElement>(null)
+  const [columnHeight, setColumnHeight] = useState<number | null>(null)
   const [filters, setFilters] = useState<AdvertiseFilters>(EMPTY_ADVERTISE_FILTERS)
   const [savedNote, setSavedNote] = useState(false)
   const bannerSize = resolveBannerSize(filters.bannerSize)
@@ -38,12 +38,12 @@ export function AdvertiseCreateWorkspace({
   )
 
   useEffect(() => {
-    const node = formRef.current
+    const node = columnRef.current
     if (!node) return
 
     function measure() {
-      if (!formRef.current) return
-      setFormHeight(Math.round(formRef.current.getBoundingClientRect().height))
+      if (!columnRef.current) return
+      setColumnHeight(Math.round(columnRef.current.getBoundingClientRect().height))
     }
 
     measure()
@@ -60,21 +60,16 @@ export function AdvertiseCreateWorkspace({
           filters={filters}
           onFiltersChange={setFilters}
           style={
-            formHeight
-              ? { height: formHeight, maxHeight: formHeight }
+            columnHeight
+              ? { height: columnHeight, maxHeight: columnHeight }
               : undefined
           }
         />
-        <div ref={formRef} className="min-w-0 flex-1">
+        <div ref={columnRef} className="flex min-w-0 flex-1 flex-col gap-4">
+          <AdvertisementPreview draft={draft} bannerSize={bannerSize} />
           <CreateAdvertisementForm draft={draft} onChange={onDraftChange} />
         </div>
       </div>
-
-      <AdvertisementPreview
-        className="w-full"
-        draft={draft}
-        bannerSize={bannerSize}
-      />
 
       <div className="flex flex-wrap gap-2 border-t border-line pt-4">
         <Button type="button" variant="outline" onClick={onAskAiReview} disabled={!canReview}>

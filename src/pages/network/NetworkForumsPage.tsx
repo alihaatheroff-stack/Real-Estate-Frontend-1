@@ -210,13 +210,13 @@ export function NetworkForumsPage() {
   }
 
   return (
-    <NetworkPageFrame hideRight>
-      <div className="overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(15,31,26,0.04)]">
-        <div className="grid items-stretch xl:grid-cols-[minmax(230px,21rem)_minmax(0,1fr)]">
+    <NetworkPageFrame hideRight fill>
+      <div className="overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(15,31,26,0.04)] xl:flex xl:min-h-0 xl:flex-1 xl:flex-col">
+        <div className="grid items-stretch xl:h-full xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(230px,21rem)_minmax(0,1fr)] xl:grid-rows-[minmax(0,1fr)]">
           <NetworkVerticalFilterRail filters={filters} onChange={setFilters} />
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-start justify-between gap-3 px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
+          <div className="flex min-w-0 flex-col xl:h-full xl:min-h-0 xl:overflow-hidden">
+            <div className="flex shrink-0 flex-wrap items-start justify-between gap-3 px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
               <h1 className="font-display text-3xl font-semibold">
                 Forums: Commercial Real Estate Agents
               </h1>
@@ -246,6 +246,7 @@ export function NetworkForumsPage() {
               )}
             </div>
 
+            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
             {composeOpen ? (
               <>
                 <NetworkVerticalFilterStack
@@ -414,6 +415,7 @@ export function NetworkForumsPage() {
                 </div>
               </>
             )}
+            </div>
           </div>
         </div>
       </div>

@@ -55,7 +55,7 @@ export function AdvertisementPreview({
         </p>
       </div>
 
-      <div className="flex justify-center overflow-x-auto rounded-lg bg-mist/60 p-4">
+      <div className="flex justify-center overflow-x-auto">
         <div
           className={cn(
             'group relative overflow-hidden rounded-md border border-line bg-white shadow-sm transition-all duration-300',

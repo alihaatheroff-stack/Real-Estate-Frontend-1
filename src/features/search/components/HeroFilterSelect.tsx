@@ -33,6 +33,8 @@ type HeroFilterSelectProps = {
   letterHeading?: 'bar' | 'underline'
   /** After each A–Z letter group, show Suggest + E-Mail suggestion row (PSPs). */
   showLetterSuggest?: boolean
+  /** Show a single Suggest + E-Mail row at the end of the menu (e.g. Fields). */
+  showSuggest?: boolean
   /** Allow long labels to wrap instead of truncating with ellipsis. */
   wrapLabel?: boolean
   /** Only one option can be selected at a time (radio behavior). */
@@ -43,6 +45,11 @@ type HeroFilterSelectProps = {
   controlClassName?: string
   /** Prefix shown before selected values in the trigger (e.g. "Selected: "). */
   selectedPrefix?: string
+  /**
+   * Soft blue wash / border / text when values are selected.
+   * Intended for forums (and similar network rails) — keep off on landing.
+   */
+  highlightSelected?: boolean
 }
 
 function toggleValue(list: string[], item: string) {
@@ -782,12 +789,14 @@ export function HeroFilterSelect({
   showPriorityPanel = false,
   letterHeading = 'bar',
   showLetterSuggest = false,
+  showSuggest = false,
   wrapLabel = false,
   singleSelect = false,
   invalid = false,
   className,
   controlClassName,
   selectedPrefix,
+  highlightSelected = false,
 }: HeroFilterSelectProps) {
   const [open, setOpen] = useState(false)
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
@@ -902,7 +911,7 @@ export function HeroFilterSelect({
               dense ? 'text-[11px] leading-tight' : 'text-sm leading-snug',
               invalid
                 ? 'text-danger'
-                : value.length > 0
+                : value.length > 0 && highlightSelected
                   ? 'text-[#6495ED]'
                   : 'text-ink',
             )
@@ -946,11 +955,12 @@ export function HeroFilterSelect({
             cn(
               'relative overflow-hidden border shadow-sm transition duration-150',
               dense ? 'border' : 'border-2',
-              // Selected: soft cornflower wash + lightly highlighted border (text carries the blue).
+              // Selected: soft cornflower wash (forums / network rails only).
               !invalid &&
+                highlightSelected &&
                 value.length > 0 &&
                 'bg-[rgba(100,149,237,0.08)] shadow-[inset_0_0_0_1px_rgba(100,149,237,0.14)]',
-              (invalid || value.length === 0) && 'bg-white',
+              (invalid || value.length === 0 || !highlightSelected) && 'bg-white',
               labelInsideShell
                 ? invalid
                   ? dense ? 'rounded-lg border-danger' : 'rounded-xl border-danger'
@@ -962,10 +972,10 @@ export function HeroFilterSelect({
                           ? 'rounded-b-lg rounded-t-none border-t-transparent'
                           : 'rounded-b-xl rounded-t-none border-t-transparent',
                         open
-                          ? value.length > 0
+                          ? highlightSelected && value.length > 0
                             ? 'border-b-[rgba(100,149,237,0.7)] border-l-[rgba(100,149,237,0.7)] border-r-[rgba(100,149,237,0.7)]'
                             : 'border-b-brand border-l-brand border-r-brand'
-                          : value.length > 0
+                          : highlightSelected && value.length > 0
                             ? 'border-b-[rgba(100,149,237,0.45)] border-l-[rgba(100,149,237,0.45)] border-r-[rgba(100,149,237,0.45)]'
                             : 'border-b-brand/40 border-l-brand/40 border-r-brand/40',
                       )
@@ -977,10 +987,10 @@ export function HeroFilterSelect({
                     invalid
                       ? 'border-danger'
                       : open
-                        ? value.length > 0
+                        ? highlightSelected && value.length > 0
                           ? 'border-[rgba(100,149,237,0.65)]'
                           : 'border-brand'
-                        : value.length > 0
+                        : highlightSelected && value.length > 0
                           ? 'border-[rgba(100,149,237,0.45)]'
                           : 'border-ink/15',
                   ),
@@ -1011,8 +1021,8 @@ export function HeroFilterSelect({
                 'appearance-none shrink-0 px-2 leading-tight shadow-none',
                 dense ? 'text-[11px]' : 'text-sm',
                 value.length > 0 && !invalid ? 'bg-transparent' : 'bg-white',
-                // Empty "Ex." placeholders stay one line; only grow when a wrapped value is shown.
-                value.length > 0 && wrapLabel && !alwaysShowPlaceholder
+                // Wrapped labels / long Ex. placeholders need room to grow past one line.
+                wrapLabel
                   ? dense
                     ? 'min-h-7 items-start py-1'
                     : 'min-h-9 items-start py-1.5'
@@ -1021,16 +1031,18 @@ export function HeroFilterSelect({
                     : 'h-9 items-center overflow-hidden py-0',
                 alwaysShowPlaceholder || value.length === 0
                   ? 'text-ink-soft'
-                  : value.length > 0 && !invalid
+                  : value.length > 0 && !invalid && highlightSelected
                     ? 'font-medium text-[#6495ED]'
-                    : 'text-ink',
+                    : value.length > 0 && !invalid
+                      ? 'font-medium text-ink'
+                      : 'text-ink',
                 unifiedShell
                   ? 'rounded-none border-0 ring-0 focus:border-transparent focus:ring-0'
                   : cn(
                     dense
                       ? 'rounded-lg border border-solid border-ink/15 focus:border-brand focus:ring-1 focus:ring-brand/25'
                       : 'rounded-xl border-2 border-solid border-ink/15 focus:border-brand focus:ring-2 focus:ring-brand/25',
-                    value.length > 0
+                    value.length > 0 && highlightSelected
                       ? 'border-[rgba(100,149,237,0.45)] bg-[rgba(100,149,237,0.08)] font-medium text-[#6495ED]'
                       : null,
                     open &&
@@ -1040,9 +1052,16 @@ export function HeroFilterSelect({
                         : 'border-brand ring-2 ring-brand/25'),
                     open &&
                       value.length > 0 &&
+                      highlightSelected &&
                       (dense
                         ? 'border-[rgba(100,149,237,0.65)] ring-1 ring-[rgba(100,149,237,0.2)]'
                         : 'border-[rgba(100,149,237,0.65)] ring-2 ring-[rgba(100,149,237,0.2)]'),
+                    open &&
+                      value.length > 0 &&
+                      !highlightSelected &&
+                      (dense
+                        ? 'border-brand ring-1 ring-brand/25'
+                        : 'border-brand ring-2 ring-brand/25'),
                   ),
               )
               : cn(
@@ -1052,15 +1071,15 @@ export function HeroFilterSelect({
           )}
         >
           <span className="flex min-w-0 flex-1 items-center overflow-hidden pr-1.5">
-            {alwaysShowPlaceholder || value.length === 0 ? (
+            {wrapLabel ? (
+              <span className="min-w-0 flex-1 whitespace-normal break-words leading-snug">
+                {summary}
+              </span>
+            ) : alwaysShowPlaceholder || value.length === 0 ? (
               <FittedEtcText
                 text={summary}
                 className="block w-full min-w-0 overflow-hidden whitespace-nowrap leading-none"
               />
-            ) : wrapLabel ? (
-              <span className="min-w-0 flex-1 whitespace-normal break-words">
-                {summary}
-              </span>
             ) : (
               <span className="min-w-0 flex-1 truncate" title={summary}>
                 {summary}
@@ -1075,7 +1094,7 @@ export function HeroFilterSelect({
                 compact
                   ? cn(
                       dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
-                      value.length > 0 && !invalid
+                      value.length > 0 && !invalid && highlightSelected
                         ? 'text-[#6495ED]/75'
                         : 'text-brand',
                     )
@@ -1090,7 +1109,7 @@ export function HeroFilterSelect({
                 compact
                   ? cn(
                       dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
-                      value.length > 0 && !invalid
+                      value.length > 0 && !invalid && highlightSelected
                         ? 'text-[#6495ED]/65'
                         : 'text-ink-soft',
                     )
@@ -1099,6 +1118,10 @@ export function HeroFilterSelect({
             />
           )}
         </button>
+
+        {open && unifiedShell ? (
+          <div className="mx-auto h-px w-[70%] bg-black" aria-hidden />
+        ) : null}
 
         {open ? (
           <div
@@ -1144,44 +1167,102 @@ export function HeroFilterSelect({
             }}
           >
             {(() => {
-              const optionsPane = tree ? (
-                <TreeNodes
-                  nodes={tree}
-                  value={value}
-                  onChange={onChange}
-                  compact={compact}
-                  dottedLeader={inlineMenu}
-                  hoveredKey={hoveredKey}
-                />
-              ) : letterEntries ? (
-                letterEntries.map(([letter, items]) => (
-                  <div key={letter} className={compact ? 'mb-1 last:mb-0' : 'mb-1'}>
-                    <LetterHeading
-                      letter={letter}
+              const suggestContext = label.replace(/:\s*$/, '').trim() || 'option'
+              const allOfTheAbove = 'All Of The Above'
+              const suggestRow = showSuggest ? (
+                <LetterSuggestRow letter={suggestContext} compact={compact} />
+              ) : null
+
+              let optionsPane: ReactNode
+              if (tree) {
+                const allIndex = tree.findIndex((node) => node.label === allOfTheAbove)
+                const hasTrailingAll =
+                  showSuggest && allIndex === tree.length - 1 && allIndex >= 0
+                optionsPane = hasTrailingAll ? (
+                  <>
+                    <TreeNodes
+                      nodes={tree.slice(0, -1)}
+                      value={value}
+                      onChange={onChange}
                       compact={compact}
-                      variant={letterHeading}
+                      dottedLeader={inlineMenu}
+                      hoveredKey={hoveredKey}
                     />
-                    <div
-                      className={cn(
-                        'ml-2 pl-1',
-                        compact ? 'mt-0.5 pl-2' : 'border-l border-black/20',
-                        letterHeading === 'underline' && 'border-0',
-                      )}
-                    >
-                      <OptionsAlignGrid compact={compact}>
-                        {items.map((item) => renderTopItem(item))}
-                      </OptionsAlignGrid>
-                      {showLetterSuggest ? (
-                        <LetterSuggestRow letter={letter} compact={compact} />
-                      ) : null}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <OptionsAlignGrid compact={compact}>
-                  {options.map((item) => renderTopItem(item))}
-                </OptionsAlignGrid>
-              )
+                    {suggestRow}
+                    <TreeNodes
+                      nodes={tree.slice(-1)}
+                      value={value}
+                      onChange={onChange}
+                      compact={compact}
+                      dottedLeader={inlineMenu}
+                      hoveredKey={hoveredKey}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <TreeNodes
+                      nodes={tree}
+                      value={value}
+                      onChange={onChange}
+                      compact={compact}
+                      dottedLeader={inlineMenu}
+                      hoveredKey={hoveredKey}
+                    />
+                    {suggestRow}
+                  </>
+                )
+              } else if (letterEntries) {
+                optionsPane = (
+                  <>
+                    {letterEntries.map(([letter, items]) => (
+                      <div key={letter} className={compact ? 'mb-1 last:mb-0' : 'mb-1'}>
+                        <LetterHeading
+                          letter={letter}
+                          compact={compact}
+                          variant={letterHeading}
+                        />
+                        <div
+                          className={cn(
+                            'ml-2 pl-1',
+                            compact ? 'mt-0.5 pl-2' : 'border-l border-black/20',
+                            letterHeading === 'underline' && 'border-0',
+                          )}
+                        >
+                          <OptionsAlignGrid compact={compact}>
+                            {items.map((item) => renderTopItem(item))}
+                          </OptionsAlignGrid>
+                          {showLetterSuggest ? (
+                            <LetterSuggestRow letter={letter} compact={compact} />
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                    {suggestRow}
+                  </>
+                )
+              } else {
+                const allIndex = options.indexOf(allOfTheAbove)
+                const hasTrailingAll =
+                  showSuggest && allIndex === options.length - 1 && allIndex >= 0
+                optionsPane = hasTrailingAll ? (
+                  <>
+                    <OptionsAlignGrid compact={compact}>
+                      {options.slice(0, -1).map((item) => renderTopItem(item))}
+                    </OptionsAlignGrid>
+                    {suggestRow}
+                    <OptionsAlignGrid compact={compact}>
+                      {renderTopItem(allOfTheAbove)}
+                    </OptionsAlignGrid>
+                  </>
+                ) : (
+                  <>
+                    <OptionsAlignGrid compact={compact}>
+                      {options.map((item) => renderTopItem(item))}
+                    </OptionsAlignGrid>
+                    {suggestRow}
+                  </>
+                )
+              }
 
               if (compact && showPriorityPanel) {
                 return (

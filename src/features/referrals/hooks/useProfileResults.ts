@@ -101,10 +101,12 @@ export function useProfileResults({
       list = list.filter((p) => !p.verified || p.reviewCount < 80)
     }
 
-    if (filters.language) {
-      const language = filters.language.toLowerCase()
+    const languages = splitCsv(filters.language).map((value) => value.toLowerCase())
+    if (languages.length) {
       list = list.filter((p) =>
-        p.languages.some((lang) => lang.toLowerCase().includes(language)),
+        languages.some((language) =>
+          p.languages.some((lang) => lang.toLowerCase().includes(language)),
+        ),
       )
     }
 

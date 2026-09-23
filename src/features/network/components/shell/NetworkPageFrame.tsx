@@ -26,12 +26,15 @@ export function NetworkPageFrame({
   left,
   right,
   hideRight,
+  fill = false,
   className,
 }: {
   children: ReactNode
   left?: ReactNode
   right?: ReactNode
   hideRight?: boolean
+  /** Fill the network main area so side columns can share one ending edge. */
+  fill?: boolean
   className?: string
 }) {
   const showRight = !hideRight
@@ -41,6 +44,7 @@ export function NetworkPageFrame({
     <div
       className={cn(
         'w-full py-4',
+        fill && 'xl:flex xl:h-full xl:min-h-0 xl:flex-col xl:overflow-hidden',
         showLeft && showRight ? 'px-3 sm:px-4 lg:pr-0' : 'px-3 sm:px-4 lg:px-5',
         className,
       )}
@@ -74,7 +78,9 @@ export function NetworkPageFrame({
           ) : null}
         </div>
       ) : (
-        <div className="min-w-0 w-full">{children}</div>
+        <div className={cn('min-w-0 w-full', fill && 'xl:flex xl:min-h-0 xl:flex-1 xl:flex-col')}>
+          {children}
+        </div>
       )}
     </div>
   )

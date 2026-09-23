@@ -150,7 +150,6 @@ export function RegisterPspForm() {
           selectedFields={form.selectedFields}
           representation={form.representation}
           showRepresentation={form.showRepresentation}
-          showBuying={form.showBuying}
           distance={form.distance}
           formOfPaymentMethods={form.formOfPaymentMethods}
           businessName={form.data.businessName}

@@ -52,7 +52,7 @@ export function NetworkVerticalFilterStack({
   return (
     <div className={cn('border-t border-line/60 xl:hidden', className)}>
       <ForumFilterPanel
-        className="max-w-none"
+        className="h-[70vh] max-w-none"
         filters={filters}
         onChange={onChange}
       />
