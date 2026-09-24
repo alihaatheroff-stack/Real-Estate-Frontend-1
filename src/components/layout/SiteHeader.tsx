@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { ChevronDown, GraduationCap, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -20,6 +20,7 @@ import {
   isNetworkNavItem,
   isReferralsNavItem,
   NavLabel,
+  resolveModuleNavHref,
   SiteModuleNav,
 } from '@/components/layout/SiteModuleNav'
 
@@ -53,6 +54,7 @@ export function SiteHeader({
 }: SiteHeaderProps) {
   const [open, setOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const joinNetworkRef = useRef<HTMLAnchorElement>(null)
   const isAuthenticated = isAuthenticatedProp ?? false
   const navigate = useNavigate()
 
@@ -63,6 +65,31 @@ export function SiteHeader({
     if (isNetworkNavItem(item)) return networkMenu
     return []
   }
+
+  useEffect(() => {
+    const node = joinNetworkRef.current
+    if (!node) {
+      document.documentElement.style.removeProperty('--join-network-width')
+      return
+    }
+
+    const apply = () => {
+      const width = node.offsetWidth
+      if (width > 0) {
+        document.documentElement.style.setProperty('--join-network-width', `${width}px`)
+      } else {
+        document.documentElement.style.removeProperty('--join-network-width')
+      }
+    }
+
+    apply()
+    const observer = new ResizeObserver(apply)
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--join-network-width')
+    }
+  }, [isAuthenticated])
 
   function handleMobileLogout() {
     onSignOut?.()
@@ -153,7 +180,7 @@ export function SiteHeader({
                 signInHref={signInHref}
                 registerHref={registerHref}
               />
-              <Link to={registerHref} className="hidden md:block">
+              <Link ref={joinNetworkRef} to={registerHref} className="hidden md:block">
                 <Button size="sm">Join RE Network</Button>
               </Link>
             </>
@@ -172,8 +199,9 @@ export function SiteHeader({
       {open ? (
         <div className="border-t border-line bg-paper lg:hidden">
           <Container className="flex max-w-none flex-col gap-1 px-3 py-3 sm:px-4 lg:px-5">
-            {marketingNav.map((item, index) =>
-              item.hasDropdown ? (
+            {marketingNav.map((item, index) => {
+              const href = resolveModuleNavHref(item, isAuthenticated)
+              return item.hasDropdown ? (
                 <div key={item.href} className="flex flex-col">
                   <div className="flex items-center">
                     {item.menuOnly ? (
@@ -190,7 +218,7 @@ export function SiteHeader({
                       </button>
                     ) : (
                       <Link
-                        to={item.href}
+                        to={href}
                         onClick={() => setOpen(false)}
                         className="min-w-0 flex-1 rounded-lg px-3 py-2 text-left text-sm font-semibold hover:bg-mist"
                       >
@@ -234,14 +262,14 @@ export function SiteHeader({
               ) : (
                 <NavLink
                   key={item.href}
-                  to={item.href}
+                  to={href}
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-mist"
                 >
                   <NavLabel index={index} label={item.label} />
                 </NavLink>
-              ),
-            )}
+              )
+            })}
             <div className="mt-2 flex items-center justify-center gap-1 border-t border-line pt-3">
               <WritingMenu locked={!isAuthenticated} />
               <AdvertiseMenu />

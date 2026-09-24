@@ -6,5 +6,6 @@ export { AdvertiseCreateWorkspace } from '@/features/advertise/components/Advert
 export { AdvertisementPreview } from '@/features/advertise/components/AdvertisementPreview'
 export { CreateAdvertisementForm } from '@/features/advertise/components/CreateAdvertisementForm'
 export * from '@/features/advertise/data/advertiseFilterOptions'
+export * from '@/features/advertise/data/advertisePreviewPlacement'
 export type { AdImage, AdvertisementDraft } from '@/features/advertise/types'
 export { EMPTY_ADVERTISEMENT_DRAFT } from '@/features/advertise/types'

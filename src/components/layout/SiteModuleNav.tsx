@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
+import { useIsAuthenticated } from '@/features/auth'
 import { cn } from '@/shared/lib/cn'
 
 export type ModuleNavItem = {
@@ -31,6 +32,15 @@ export function isCrowdfundingNavItem(item: { label: string }) {
 
 export function isNetworkNavItem(item: { label: string }) {
   return item.label === 'Network'
+}
+
+/** Guests stay on the coming-soon page. Signed-in members open the sidebar feed. */
+export function resolveModuleNavHref(
+  item: { label: string; href: string },
+  isAuthenticated: boolean,
+) {
+  if (isNetworkNavItem(item) && isAuthenticated) return PATHS.networkFeed
+  return item.href
 }
 
 export function isModuleNavActive(pathname: string, item: ModuleNavItem) {
@@ -67,6 +77,7 @@ export function SiteModuleNav({
   className?: string
 }) {
   const { pathname } = useLocation()
+  const isAuthenticated = useIsAuthenticated()
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   function menuFor(item: ModuleNavItem): readonly ModuleNavLink[] {
@@ -80,6 +91,7 @@ export function SiteModuleNav({
   return (
     <nav className={cn('items-center', compact ? 'gap-16' : 'gap-4', className)}>
       {items.map((item, index) => {
+        const href = resolveModuleNavHref(item, isAuthenticated)
         const active = isModuleNavActive(pathname, item)
         const open = openDropdown === item.href
         const highlighted = active || open
@@ -119,7 +131,7 @@ export function SiteModuleNav({
                   {trigger}
                 </button>
               ) : (
-                <Link to={item.href} className={triggerClassName}>
+                <Link to={href} className={triggerClassName}>
                   {trigger}
                 </Link>
               )}
@@ -150,7 +162,7 @@ export function SiteModuleNav({
         return (
           <Link
             key={item.href}
-            to={item.href}
+            to={href}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'inline-flex items-center rounded-lg font-semibold transition',

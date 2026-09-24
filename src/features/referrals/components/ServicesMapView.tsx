@@ -106,7 +106,7 @@ export function ServicesMapView({
       rootClassName="flex h-full min-h-0 flex-1 flex-col overflow-hidden"
       splitRowClassName="flex min-h-0 flex-1 overflow-hidden"
       asideClassName="bg-paper lg:w-1/2"
-      toolbarClassName="relative z-30 flex items-start justify-between gap-3 border-b border-line bg-paper px-4 py-4 sm:px-5"
+      toolbarClassName="relative z-30 flex items-start justify-between gap-3 bg-paper px-4 py-4 sm:px-5"
       showMapBarClassName="border-t border-line p-3 lg:hidden"
       mapPanelClassName="min-w-0 lg:w-1/2"
       mapInnerClassName="absolute inset-0 overflow-hidden bg-mist"

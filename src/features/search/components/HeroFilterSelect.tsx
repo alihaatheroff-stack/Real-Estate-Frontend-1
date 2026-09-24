@@ -43,6 +43,8 @@ type HeroFilterSelectProps = {
   className?: string
   /** Width/layout classes for the bordered trigger shell (not the label). */
   controlClassName?: string
+  /** Omit the visible label when a heading already sits outside the control. */
+  hideLabel?: boolean
   /** Prefix shown before selected values in the trigger (e.g. "Selected: "). */
   selectedPrefix?: string
   /**
@@ -797,6 +799,7 @@ export function HeroFilterSelect({
   controlClassName,
   selectedPrefix,
   highlightSelected = false,
+  hideLabel = false,
 }: HeroFilterSelectProps) {
   const [open, setOpen] = useState(false)
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
@@ -898,7 +901,7 @@ export function HeroFilterSelect({
     : null
 
   // Register fields keep the title inside the same bordered shell as the trigger.
-  const labelInsideShell = compact && inlineMenu
+  const labelInsideShell = compact && inlineMenu && !hideLabel
   // Landing + register: one visible box for placeholder and open options.
   const unifiedShell = compact
 
@@ -947,7 +950,7 @@ export function HeroFilterSelect({
           : undefined
       }
     >
-      {labelInsideShell ? null : labelNode}
+      {hideLabel || labelInsideShell ? null : labelNode}
       <div
         className={cn(
           labelInsideShell ? undefined : dense ? 'mt-0' : 'mt-0.5',
@@ -1001,6 +1004,7 @@ export function HeroFilterSelect({
         {labelInsideShell ? labelNode : null}
         <button
           type="button"
+          aria-label={hideLabel ? label : undefined}
           aria-expanded={open}
           onClick={() => {
             window.clearTimeout(closeTimerRef.current)

@@ -8,6 +8,7 @@ export type AdvertisementDraft = {
   title: string
   description: string
   cta: string
+  /** Image or video media for the ad. */
   images: AdImage[]
 }
 
@@ -16,4 +17,8 @@ export const EMPTY_ADVERTISEMENT_DRAFT: AdvertisementDraft = {
   description: '',
   cta: '',
   images: [],
+}
+
+export function isAdVideo(media: AdImage) {
+  return media.file.type.startsWith('video/')
 }

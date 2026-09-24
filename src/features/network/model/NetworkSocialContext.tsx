@@ -23,20 +23,35 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
   const [friendResponses, setFriendResponses] = useState<Record<string, FriendRequestAction>>({})
   const [followingIds, setFollowingIds] = useState<string[]>(() => getCurrentMember().friendIds)
 
-  const addPost = useCallback((input: { text: string; audience: PostAudience; image?: string }) => {
-    const next: NetworkPost = {
-      id: `local-${Date.now()}`,
-      memberId: CURRENT_MEMBER_ID,
-      timeAgo: 'Just now',
-      audience: input.audience,
-      text: input.text,
-      image: input.image,
-      likes: 0,
-      shares: 0,
-      comments: [],
-      likedByMe: false,
-    }
-    setPosts((current) => [next, ...current])
+  const addPost = useCallback(
+    (input: {
+      text: string
+      audience: PostAudience
+      image?: string
+      feeling?: string
+      location?: string
+    }) => {
+      const next: NetworkPost = {
+        id: `local-${Date.now()}`,
+        memberId: CURRENT_MEMBER_ID,
+        timeAgo: 'Just now',
+        audience: input.audience,
+        text: input.text,
+        image: input.image,
+        feeling: input.feeling,
+        location: input.location,
+        likes: 0,
+        shares: 0,
+        comments: [],
+        likedByMe: false,
+      }
+      setPosts((current) => [next, ...current])
+    },
+    [],
+  )
+
+  const deletePost = useCallback((postId: string) => {
+    setPosts((current) => current.filter((post) => post.id !== postId))
   }, [])
 
   const toggleLike = useCallback((postId: string) => {
@@ -53,28 +68,33 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  const addComment = useCallback((postId: string, text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed) return
-    setPosts((current) =>
-      current.map((post) => {
-        if (post.id !== postId) return post
-        return {
-          ...post,
-          comments: [
-            ...post.comments,
-            {
-              id: `lc-${Date.now()}`,
-              memberId: CURRENT_MEMBER_ID,
-              text: trimmed,
-              timeAgo: 'Just now',
-              likes: 0,
-            },
-          ],
-        }
-      }),
-    )
-  }, [])
+  const addComment = useCallback(
+    (postId: string, text: string, options?: { anonymous?: boolean; parentId?: string }) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setPosts((current) =>
+        current.map((post) => {
+          if (post.id !== postId) return post
+          return {
+            ...post,
+            comments: [
+              ...post.comments,
+              {
+                id: `lc-${Date.now()}`,
+                memberId: CURRENT_MEMBER_ID,
+                text: trimmed,
+                timeAgo: 'Just now',
+                likes: 0,
+                anonymous: options?.anonymous || undefined,
+                parentId: options?.parentId,
+              },
+            ],
+          }
+        }),
+      )
+    },
+    [],
+  )
 
   const markChatRead = useCallback((chatId: string) => {
     setChats((current) =>
@@ -308,6 +328,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       friendResponses,
       followingIds,
       addPost,
+      deletePost,
       toggleLike,
       addComment,
       markChatRead,
@@ -329,6 +350,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       friendResponses,
       followingIds,
       addPost,
+      deletePost,
       toggleLike,
       addComment,
       markChatRead,

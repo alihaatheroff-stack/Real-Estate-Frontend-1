@@ -18,9 +18,20 @@ export type NetworkSocialValue = {
   unreadMessageCount: number
   friendResponses: Record<string, FriendRequestAction>
   followingIds: string[]
-  addPost: (input: { text: string; audience: PostAudience; image?: string }) => void
+  addPost: (input: {
+    text: string
+    audience: PostAudience
+    image?: string
+    feeling?: string
+    location?: string
+  }) => void
+  deletePost: (postId: string) => void
   toggleLike: (postId: string) => void
-  addComment: (postId: string, text: string) => void
+  addComment: (
+    postId: string,
+    text: string,
+    options?: { anonymous?: boolean; parentId?: string },
+  ) => void
   markChatRead: (chatId: string) => void
   sendChatMessage: (chatId: string, payload: { text: string; attachments: ChatAttachment[] }) => void
   createGroupChat: (input: { name: string; memberIds: string[] }) => string

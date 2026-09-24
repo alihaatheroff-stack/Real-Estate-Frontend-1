@@ -47,6 +47,7 @@ import { SignInPage } from '@/pages/auth/SignInPage'
 import { RegisterPspPage } from '@/pages/auth/RegisterPspPage'
 import { NotFoundPage } from '@/pages/errors/NotFoundPage'
 import { PlaceholderPage } from '@/pages/errors/PlaceholderPage'
+import { AboutPage } from '@/pages/about/AboutPage'
 import { AdvertisePage } from '@/pages/advertise/AdvertisePage'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import {
@@ -94,9 +95,7 @@ export const router = createBrowserRouter([
           },
           {
             path: PATHS.about,
-            element: (
-              <PlaceholderPage title="About" description="Vision, mission, and story — coming soon." />
-            ),
+            element: <AboutPage />,
           },
           {
             path: PATHS.contact,

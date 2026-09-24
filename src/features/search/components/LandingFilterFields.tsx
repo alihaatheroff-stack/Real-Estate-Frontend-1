@@ -149,6 +149,10 @@ type LandingFilterFieldsProps = {
    * Service results keeps its own Languages Spoken block and everything under it.
    */
   stopBeforeLanguage?: boolean
+  /** Advertisement renders Search By at the top of its own panel. */
+  hideSearchBy?: boolean
+  /** Advertisement renders A–Z PSP at the top of its own panel. */
+  hidePsp?: boolean
 }
 
 /**
@@ -174,6 +178,8 @@ export function LandingFilterFields({
   searchByAfterFields = false,
   hideLocation = false,
   stopBeforeLanguage = false,
+  hideSearchBy = false,
+  hidePsp = false,
 }: LandingFilterFieldsProps) {
   const profile = getPspFilterProfile(value.psp)
   const isExecutive = profile === 'executive'
@@ -1180,11 +1186,11 @@ export function LandingFilterFields({
   return (
     <div className="flex flex-col gap-1">
       {searchByAfterFields ? null : roleField}
-      {searchByAfterFields ? null : searchByField}
-      {searchByAfterFields ? fieldsField : pspField}
-      {searchByAfterFields ? pspField : null}
+      {searchByAfterFields || hideSearchBy ? null : searchByField}
+      {searchByAfterFields ? fieldsField : hidePsp ? null : pspField}
+      {searchByAfterFields && !hidePsp ? pspField : null}
       {searchByAfterFields ? roleField : null}
-      {searchByAfterFields ? searchByField : null}
+      {searchByAfterFields && !hideSearchBy ? searchByField : null}
 
       {showMortgageFilters
         ? mortgageCategoryFields

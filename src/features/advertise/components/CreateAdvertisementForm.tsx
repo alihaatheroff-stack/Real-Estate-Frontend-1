@@ -3,10 +3,13 @@ import { ImagePlus, X } from 'lucide-react'
 import { Input } from '@/components/ui/Input'
 import { cn } from '@/shared/lib/cn'
 import type { AdImage, AdvertisementDraft } from '@/features/advertise/types'
+import { isAdVideo } from '@/features/advertise/types'
 
 type CreateAdvertisementFormProps = {
   draft: AdvertisementDraft
   onChange: (next: AdvertisementDraft) => void
+  /** When false, omit the outer card chrome (for nesting in a shared box). */
+  framed?: boolean
   className?: string
 }
 
@@ -17,6 +20,7 @@ function revokeImage(image: AdImage) {
 export function CreateAdvertisementForm({
   draft,
   onChange,
+  framed = true,
   className,
 }: CreateAdvertisementFormProps) {
   const fileInputId = useId()
@@ -27,8 +31,8 @@ export function CreateAdvertisementForm({
   }
 
   function onFiles(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []).filter((file) =>
-      file.type.startsWith('image/'),
+    const files = Array.from(event.target.files ?? []).filter(
+      (file) => file.type.startsWith('image/') || file.type.startsWith('video/'),
     )
     event.target.value = ''
     if (!files.length) return
@@ -50,17 +54,18 @@ export function CreateAdvertisementForm({
   return (
     <section
       className={cn(
-        'flex min-w-0 flex-col overflow-hidden rounded-xl border border-line bg-white shadow-sm',
+        'flex min-w-0 flex-col overflow-hidden',
+        framed && 'rounded-2xl border border-line bg-white shadow-sm',
         className,
       )}
     >
-      <div className="border-b border-line px-4 py-3">
+      <div className={cn('px-4 py-3 sm:px-5', framed && 'border-b border-line')}>
         <p className="text-sm text-muted">
           Add a headline, images, and copy — then ask the AI assistant to review.
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 py-4">
+      <div className="flex flex-col gap-4 px-4 pb-5 pt-1 sm:px-5">
         <Input
           label="Headline"
           name="adTitle"
@@ -77,7 +82,7 @@ export function CreateAdvertisementForm({
             value={draft.description}
             onChange={(event) => patch({ description: event.target.value })}
             placeholder="Describe the offer, audience, and what viewers should do next…"
-            className="rounded-xl border border-line bg-paper px-3 py-2 text-ink outline-none transition placeholder:text-muted/70 focus:border-brand focus:ring-2 focus:ring-brand/20"
+            className="rounded-xl border border-line bg-paper px-3 py-2.5 text-ink outline-none transition placeholder:text-muted/70 focus:border-brand focus:ring-2 focus:ring-brand/20"
           />
         </label>
 
@@ -92,14 +97,14 @@ export function CreateAdvertisementForm({
 
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-sm font-bold text-ink">Images</span>
+            <span className="text-sm font-bold text-ink">Images & Videos</span>
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
               className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-brand transition hover:bg-brand/5"
             >
               <ImagePlus className="h-4 w-4" strokeWidth={1.75} />
-              Add images
+              Add images & videos
             </button>
           </div>
 
@@ -107,7 +112,7 @@ export function CreateAdvertisementForm({
             id={fileInputId}
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             multiple
             className="sr-only"
             onChange={onFiles}
@@ -117,10 +122,13 @@ export function CreateAdvertisementForm({
             <button
               type="button"
               onClick={() => fileRef.current?.click()}
-              className="flex min-h-[7.5rem] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-mist/40 px-4 py-6 text-sm text-muted transition hover:border-brand/40 hover:bg-brand/5"
+              className="flex min-h-[8rem] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-brand/25 bg-[linear-gradient(180deg,#f8faf9_0%,#eef2f0_100%)] px-4 py-6 text-sm text-muted transition hover:border-brand/50 hover:bg-brand/5"
             >
-              <ImagePlus className="h-6 w-6 text-brand/70" strokeWidth={1.5} />
-              <span>Drop or choose photos for this ad</span>
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <ImagePlus className="h-5 w-5" strokeWidth={1.5} />
+              </span>
+              <span className="font-medium text-ink-soft">Drop or choose photos & videos</span>
+              <span className="text-xs text-muted">These appear instantly in the live preview</span>
             </button>
           ) : (
             <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -129,11 +137,20 @@ export function CreateAdvertisementForm({
                   key={image.id}
                   className="group relative aspect-square overflow-hidden rounded-xl border border-line bg-mist"
                 >
-                  <img
-                    src={image.previewUrl}
-                    alt={image.file.name}
-                    className="h-full w-full object-cover"
-                  />
+                  {isAdVideo(image) ? (
+                    <video
+                      src={image.previewUrl}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={image.previewUrl}
+                      alt={image.file.name}
+                      className="h-full w-full object-cover"
+                    />
+                  )}
                   <button
                     type="button"
                     onClick={() => removeImage(image.id)}

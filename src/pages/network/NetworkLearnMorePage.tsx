@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
 import { Section } from '@/components/layout/Section'
 import { Button } from '@/components/ui/Button'
+import { useIsAuthenticated } from '@/features/auth'
 import { NETWORK_LEARN_MORE as C } from '@/features/network'
 import { cn } from '@/shared/lib/cn'
 
 export function NetworkLearnMorePage() {
+  const isAuthenticated = useIsAuthenticated()
+  if (isAuthenticated) return <Navigate to={PATHS.networkFeed} replace />
+  return <NetworkLearnMoreContent />
+}
+
+function NetworkLearnMoreContent() {
   const navigate = useNavigate()
   const [phase, setPhase] = useState<'intro' | 'leaving' | 'done'>('intro')
 

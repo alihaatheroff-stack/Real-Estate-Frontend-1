@@ -43,8 +43,6 @@ function FilterSection({ title, children }: FilterSectionProps) {
   )
 }
 
-const landingSelectClassName = '[&>label]:hidden'
-
 function toLandingValues(filters: HeroFiltersState): LandingFilterValues {
   const findLabels = splitCsv(filters.find).map((value) => {
     if (value === 'service') return 'Service'
@@ -286,7 +284,7 @@ export function ServiceFiltersDrawer({
             <HeroFilterSelect
               compact
               inlineMenu
-              className={landingSelectClassName}
+              hideLabel
               label="Languages Spoken:"
               placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
               optionsByLetter={LANGUAGE_BY_LETTER}

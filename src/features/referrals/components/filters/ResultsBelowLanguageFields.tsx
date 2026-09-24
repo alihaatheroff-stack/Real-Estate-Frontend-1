@@ -25,8 +25,6 @@ type ResultsBelowLanguageFieldsProps = {
   ) => void
 }
 
-const landingSelectClassName = '[&>label]:hidden'
-
 function FilterSection({
   title,
   children,
@@ -122,7 +120,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="English Level:"
           placeholder="Ex. (Low, Middle, High, etc.,)"
           options={ENGLISH_LEVEL_OPTIONS.map((option) => option.label)}
@@ -153,7 +151,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="EDUCATION + ARCHIVE + video playlists based on search:"
           placeholder="Ex. (Negotiation's, Hiring Appraisers)"
           options={EDUCATION_ARCHIVE_OPTIONS}
@@ -166,7 +164,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={cn(landingSelectClassName, '[&_label_span]:underline')}
+          hideLabel
           label="AR MEASUREMENT TOOLS"
           placeholder="Ex. (Doors, Windows, Land, etc.,)"
           options={AR_MEASUREMENT_TOOLS_OPTIONS}
@@ -181,7 +179,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="Payment Methods:"
           placeholder="Ex. (Cash, Credit)"
           tree={PAYMENT_METHODS_TREE}
@@ -194,7 +192,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="Payment Packet:"
           placeholder="Ex. (Monthly, Yearly, etc.,)"
           options={PAYMENT_PACKET_OPTIONS}
@@ -207,7 +205,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="Tier Selection:"
           placeholder="Ex. (Basic-Lux Tier)"
           options={TIER_SELECTION_OPTIONS}
@@ -220,7 +218,7 @@ export function ResultsBelowLanguageFields({
         <HeroFilterSelect
           compact
           inlineMenu
-          className={landingSelectClassName}
+          hideLabel
           label="Payment Terms:"
           placeholder="Ex. (Before, After, etc.,)"
           options={PAYMENT_TERMS_OPTIONS}

@@ -35,6 +35,10 @@ export type NetworkComment = {
   text: string
   timeAgo: string
   likes: number
+  /** When true, show as Unanimous member instead of the real profile. */
+  anonymous?: boolean
+  /** Nested reply under another comment on the same post. */
+  parentId?: string
 }
 
 export type NetworkPost = {
