@@ -145,7 +145,6 @@ function NetworkPageMock({
   placement: NetworkPlacementId
 }) {
   const leftActive = placement === 'top-left'
-  const rightActive = placement === 'top-right'
   const feedActive = placement === 'in-between-posts'
 
   if (feedActive) {

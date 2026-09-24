@@ -363,7 +363,7 @@ function CommentRow({
           ) : (
             <VerifiedName
               name={name}
-              memberId={commenter?.id}
+              memberId={commenter?.id ?? item.memberId}
               verified={commenter?.verified}
               className="text-[13px]"
             />
