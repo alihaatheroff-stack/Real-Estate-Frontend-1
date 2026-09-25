@@ -1,19 +1,63 @@
 import { Star } from 'lucide-react'
+import { AdRoleInfo } from '@/features/advertise/components/AdRoleInfo'
+import { ReferralBurstBadge } from '@/features/advertise/components/ReferralBurstBadge'
 import type { AdvertisementDraft } from '@/features/advertise/types'
-import { isAdVideo } from '@/features/advertise/types'
+import { isAdVideo, resolveReferralPercent } from '@/features/advertise/types'
 import type {
   NetworkPlacementId,
   PreviewPageId,
   PreviewPlacementId,
 } from '@/features/advertise/data/advertisePreviewPlacement'
+import { isNetworkNewsfeedPage } from '@/features/advertise/data/advertisePreviewPlacement'
 import { cn } from '@/shared/lib/cn'
 
 function draftCopy(draft: AdvertisementDraft) {
   return {
-    title: draft.title.trim() || 'Your headline',
-    description: draft.description.trim() || 'Your ad description will show here.',
-    media: draft.images[0],
+    title: (draft.title ?? '').trim() || 'Your headline',
+    description: (draft.description ?? '').trim() || 'Your ad description will show here.',
+    media: draft.images?.[0],
   }
+}
+
+function referralBadgeFor(draft: AdvertisementDraft) {
+  if (!draft.offerReferral || !draft.referralPercent) return null
+  const percent = resolveReferralPercent(draft.referralPercent)
+  if (!percent) return null
+  return percent
+}
+
+function FeedMedia({
+  imageUrl,
+  mediaIsVideo,
+  referralPercent,
+}: {
+  imageUrl?: string
+  mediaIsVideo: boolean
+  referralPercent?: string | null
+}) {
+  return (
+    <div className="relative w-full overflow-hidden bg-ink">
+      {imageUrl ? (
+        mediaIsVideo ? (
+          <video
+            src={imageUrl}
+            className="max-h-[420px] w-full object-cover"
+            muted
+            autoPlay
+            loop
+            playsInline
+          />
+        ) : (
+          <img src={imageUrl} alt="" className="max-h-[420px] w-full object-cover" />
+        )
+      ) : (
+        <div className="flex h-[280px] w-full items-center justify-center bg-[linear-gradient(135deg,#d8efe6_0%,#c5ddd2_100%)] text-sm text-ink-soft">
+          Your image appears here
+        </div>
+      )}
+      {referralPercent ? <ReferralBurstBadge percent={referralPercent} /> : null}
+    </div>
+  )
 }
 
 /** Matches Network feed / sidebar ad cards after publish. */
@@ -27,6 +71,8 @@ function PlacementAdCreative({
   const { title, description, media } = draftCopy(draft)
   const imageUrl = media?.previewUrl
   const mediaIsVideo = media ? isAdVideo(media) : false
+  const roleAbove = draft.rolePlacement === 'above-image'
+  const referralPercent = referralBadgeFor(draft)
 
   if (variant === 'feed') {
     return (
@@ -36,35 +82,26 @@ function PlacementAdCreative({
             <Star className="h-5 w-5" strokeWidth={1.5} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold text-ink">Your ad</span>
-            <span className="block text-[13px] text-muted">Sponsored</span>
+            <span className="block font-semibold text-ink">Sponsored</span>
+            <span className="block text-[13px] text-muted">Advertisement</span>
           </span>
         </div>
         <p className="px-4 py-3 text-[15px] leading-relaxed text-ink">{description}</p>
-        <div className="relative w-full bg-ink">
-          {imageUrl ? (
-            mediaIsVideo ? (
-              <video
-                src={imageUrl}
-                className="max-h-[420px] w-full object-cover"
-                muted
-                autoPlay
-                loop
-                playsInline
-              />
-            ) : (
-              <img
-                src={imageUrl}
-                alt=""
-                className="max-h-[420px] w-full object-cover"
-              />
-            )
-          ) : (
-            <div className="flex h-[280px] w-full items-center justify-center bg-[linear-gradient(135deg,#d8efe6_0%,#c5ddd2_100%)] text-sm text-ink-soft">
-              Your image appears here
-            </div>
-          )}
-        </div>
+        {roleAbove ? (
+          <div className="border-y border-line/70 bg-paper/80 px-4 py-2.5">
+            <AdRoleInfo draft={draft} />
+          </div>
+        ) : null}
+        <FeedMedia
+          imageUrl={imageUrl}
+          mediaIsVideo={mediaIsVideo}
+          referralPercent={referralPercent}
+        />
+        {!roleAbove ? (
+          <div className="border-t border-line/70 bg-paper/80 px-4 py-2.5">
+            <AdRoleInfo draft={draft} />
+          </div>
+        ) : null}
         <div className="flex items-center justify-between gap-3 border-t border-line/80 bg-[#F7F8F9] px-4 py-3">
           <span className="min-w-0">
             <span className="block text-[11px] font-semibold uppercase tracking-wide text-muted">
@@ -82,7 +119,12 @@ function PlacementAdCreative({
 
   return (
     <div className="overflow-hidden rounded-lg bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06),0_0_0_1px_rgba(15,31,26,0.04)] ring-2 ring-brand/70 ring-offset-1 ring-offset-[#eef2f0]">
-      <div className="relative h-28 w-full bg-mist sm:h-36">
+      {roleAbove ? (
+        <div className="border-b border-line/70 px-2.5 py-2">
+          <AdRoleInfo draft={draft} size="sm" />
+        </div>
+      ) : null}
+      <div className="relative h-28 w-full overflow-hidden bg-mist sm:h-36">
         {imageUrl ? (
           mediaIsVideo ? (
             <video
@@ -99,11 +141,17 @@ function PlacementAdCreative({
         ) : (
           <div className="absolute inset-0 bg-[linear-gradient(135deg,#d8efe6_0%,#c5ddd2_100%)]" />
         )}
-        <span className="absolute left-2 top-2 rounded-md bg-white px-2 py-0.5 text-[11px] font-semibold text-ink shadow-sm">
+        <span className="absolute left-2 top-2 z-[3] rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-semibold text-ink shadow-sm">
           Ad
         </span>
+        {referralPercent ? <ReferralBurstBadge percent={referralPercent} size="sm" /> : null}
       </div>
       <div className="p-3">
+        {!roleAbove ? (
+          <div className="mb-2">
+            <AdRoleInfo draft={draft} size="sm" />
+          </div>
+        ) : null}
         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Sponsored</p>
         <p className="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-ink">{title}</p>
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">{description}</p>
@@ -152,7 +200,7 @@ function NetworkPageMock({
       <div className="overflow-hidden rounded-xl border border-line bg-[#eef2f0]">
         <div className="flex items-center gap-2 border-b border-line/80 bg-white px-3 py-2">
           <span className="h-2 w-2 rounded-full bg-brand" />
-          <p className="text-[11px] font-semibold text-ink">Network · News feed</p>
+          <p className="text-[11px] font-semibold text-ink">Network · Newsfeed</p>
           <p className="ml-auto text-[10px] text-muted">Between posts</p>
         </div>
 
@@ -169,7 +217,7 @@ function NetworkPageMock({
     <div className="overflow-hidden rounded-xl border border-line bg-[#eef2f0]">
       <div className="flex items-center gap-2 border-b border-line/80 bg-white px-3 py-2">
         <span className="h-2 w-2 rounded-full bg-brand" />
-        <p className="text-[11px] font-semibold text-ink">Network · News feed</p>
+        <p className="text-[11px] font-semibold text-ink">Network · Newsfeed</p>
         <p className="ml-auto text-[10px] text-muted">
           {leftActive ? 'Top left rail' : 'Top right rail'}
         </p>
@@ -223,7 +271,7 @@ export function AdPlacementPreview({
   placement: PreviewPlacementId
   className?: string
 }) {
-  if (page === 'network') {
+  if (isNetworkNewsfeedPage(page)) {
     return (
       <div className={cn(className)}>
         <NetworkPageMock draft={draft} placement={placement as NetworkPlacementId} />

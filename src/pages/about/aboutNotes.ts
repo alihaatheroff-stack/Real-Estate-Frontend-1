@@ -63,7 +63,7 @@ export const ABOUT_NOTES: readonly AboutNoteBlock[] = [
       },
       {
         heading: 'About',
-        lines: ['Advertisement', 'About', 'Contact'],
+        lines: ['Advertisement', 'Monetization', 'Contact'],
       },
     ],
   },

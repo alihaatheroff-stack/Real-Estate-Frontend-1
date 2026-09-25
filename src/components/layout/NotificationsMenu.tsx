@@ -1,5 +1,6 @@
 import { Bell } from 'lucide-react'
 import { ModulePlatformMenu } from '@/components/layout/ModulePlatformMenu'
+import { PATHS } from '@/app/router/paths'
 import {
   buildNotificationPlatforms,
   platformUnreadTotal,
@@ -24,8 +25,10 @@ export function NotificationsMenu({
       panelTitle={`Notifications (${unread})`}
       panelSubtitle="Choose a platform to review your alerts."
       footerLabel="See more notifications"
+      footerHref={PATHS.networkNotifications}
       platforms={platforms}
       badgeCount={unread}
+      circledListRows
       locked={locked}
     />
   )

@@ -1,5 +1,6 @@
-import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ComponentType, type MouseEvent, type ReactNode } from 'react'
 import { ArrowUp, ChevronRight, LayoutGrid } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { GuestAuthPopover } from '@/components/layout/GuestAuthPopover'
 import { cn } from '@/shared/lib/cn'
 
@@ -9,6 +10,8 @@ export type ModulePlatformDetail = {
   subtitle: string
   timeAgo: string
   avatarSrc?: string
+  /** When set, clicking the row navigates here (e.g. full chat). */
+  href?: string
 }
 
 export type ModulePlatformRow = {
@@ -31,6 +34,10 @@ type ModulePlatformMenuProps = {
   footerLabel: string
   platforms: ModulePlatformRow[]
   badgeCount?: number
+  /** Inbox / Notifications: list rows use circled arrows + count around the module name. */
+  circledListRows?: boolean
+  /** Optional footer destination (e.g. full messages page). */
+  footerHref?: string
   /** Guest / non-registered: show demo/example framing */
   demo?: boolean
   /** Guest / non-registered: keep the icon, block the feature */
@@ -46,10 +53,55 @@ function PlatformIcon() {
   )
 }
 
-function DetailRow({ item }: { item: ModulePlatformDetail }) {
+function CircledArrowButton({
+  onClick,
+  label,
+  className,
+}: {
+  onClick: (event: MouseEvent) => void
+  label: string
+  className?: string
+}) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      className={cn(
+        'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[2.5px] border-ink text-ink transition hover:bg-mist',
+        className,
+      )}
+      aria-label={label}
+    >
+      <ArrowUp className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+    </button>
+  )
+}
+
+function CircledCount({ count }: { count: number }) {
+  return (
+    <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-ink text-xs font-semibold tabular-nums text-ink">
+      {count}
+    </span>
+  )
+}
+
+function platformRowCount(platform: ModulePlatformRow) {
+  const match = platform.summary.match(/\d+/)
+  if (match) return Number(match[0])
+  return platform.unreadCount > 0 ? platform.unreadCount : platform.items.length
+}
+
+function DetailRow({
+  item,
+  onOpen,
+}: {
+  item: ModulePlatformDetail
+  onOpen: (item: ModulePlatformDetail) => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen(item)}
       className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-mist/80"
     >
       {item.avatarSrc ? (
@@ -77,10 +129,53 @@ function DetailRow({ item }: { item: ModulePlatformDetail }) {
 function PlatformRow({
   platform,
   onOpen,
+  onPrev,
+  onNext,
+  circledMeta = false,
 }: {
   platform: ModulePlatformRow
   onOpen: () => void
+  onPrev?: () => void
+  onNext?: () => void
+  circledMeta?: boolean
 }) {
+  if (circledMeta) {
+    const count = platformRowCount(platform)
+
+    return (
+      <div className="flex w-full items-center gap-2.5 px-3 py-3">
+        <CircledArrowButton
+          label={`Previous module from ${platform.label}`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onPrev?.()
+          }}
+        />
+        <CircledCount count={count} />
+        <button
+          type="button"
+          onClick={onOpen}
+          className="min-w-0 flex-1 text-center transition hover:opacity-80"
+        >
+          <span className="block truncate text-sm font-bold uppercase tracking-wide text-ink underline decoration-ink decoration-2 underline-offset-4">
+            {platform.label}
+          </span>
+          <span className="mt-1 block truncate text-xs font-medium text-ink underline decoration-ink underline-offset-2">
+            {platform.summary}
+          </span>
+        </button>
+        <CircledCount count={count} />
+        <CircledArrowButton
+          label={`Next module from ${platform.label}`}
+          onClick={(event) => {
+            event.stopPropagation()
+            onNext?.()
+          }}
+        />
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"
@@ -102,6 +197,44 @@ function PlatformRow({
         <span className="min-w-[2.25rem] text-right text-xs text-muted">{platform.timeAgo}</span>
       </span>
     </button>
+  )
+}
+
+function ActivePlatformHeader({
+  platform,
+  onBack,
+  onPrev,
+  onNext,
+}: {
+  platform: ModulePlatformRow
+  onBack: () => void
+  onPrev: () => void
+  onNext: () => void
+}) {
+  const count = platformRowCount(platform)
+
+  return (
+    <div className="border-b border-line px-3 py-3">
+      <div className="flex items-center gap-2.5">
+        <CircledArrowButton label="Previous module" onClick={() => onPrev()} />
+        <CircledCount count={count} />
+        <button
+          type="button"
+          onClick={onBack}
+          className="min-w-0 flex-1 text-center transition hover:opacity-80"
+          title="Back to all platforms"
+        >
+          <span className="block truncate text-base font-bold uppercase tracking-wide text-ink underline decoration-ink decoration-2 underline-offset-4">
+            {platform.label}
+          </span>
+          <span className="mt-1.5 block truncate text-xs font-medium text-ink underline decoration-ink underline-offset-2">
+            {platform.summary}
+          </span>
+        </button>
+        <CircledCount count={count} />
+        <CircledArrowButton label="Next module" onClick={() => onNext()} />
+      </div>
+    </div>
   )
 }
 
@@ -146,9 +279,12 @@ function UnlockedPlatformMenu({
   footerLabel,
   platforms,
   badgeCount = 0,
+  circledListRows = false,
+  footerHref,
   demo = false,
   footer,
 }: Omit<ModulePlatformMenuProps, 'locked'>) {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [activePlatformId, setActivePlatformId] = useState<string | null>(null)
   const panelId = useId()
@@ -159,9 +295,26 @@ function UnlockedPlatformMenu({
       ? null
       : (platforms.find((platform) => platform.id === activePlatformId) ?? null)
 
+  const activeIndex =
+    activePlatformId == null ? -1 : platforms.findIndex((platform) => platform.id === activePlatformId)
+
   function closeMenu() {
     setOpen(false)
     setActivePlatformId(null)
+  }
+
+  function cyclePlatform(fromIndex: number, delta: number) {
+    if (platforms.length === 0) return
+    const nextIndex = (fromIndex + delta + platforms.length) % platforms.length
+    setActivePlatformId(platforms[nextIndex]!.id)
+  }
+
+  function openDetail(item: ModulePlatformDetail) {
+    if (item.href) {
+      closeMenu()
+      navigate(item.href)
+      return
+    }
   }
 
   useEffect(() => {
@@ -178,6 +331,16 @@ function UnlockedPlatformMenu({
         if (activePlatformId) setActivePlatformId(null)
         else closeMenu()
       }
+      if (activePlatformId && platforms.length > 1) {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault()
+          cyclePlatform(activeIndex, -1)
+        }
+        if (event.key === 'ArrowRight') {
+          event.preventDefault()
+          cyclePlatform(activeIndex, 1)
+        }
+      }
     }
 
     document.addEventListener('mousedown', handlePointerDown)
@@ -186,7 +349,7 @@ function UnlockedPlatformMenu({
       document.removeEventListener('mousedown', handlePointerDown)
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [open, activePlatformId])
+  }, [open, activePlatformId, activeIndex, platforms])
 
   return (
     <div ref={rootRef} className={cn('relative', className)}>
@@ -221,36 +384,18 @@ function UnlockedPlatformMenu({
         >
           {activePlatform ? (
             <>
-              <div>
-                <div className="flex items-center border-b border-line px-1 py-1">
-                  <button
-                    type="button"
-                    onClick={() => setActivePlatformId(null)}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-mist"
-                    aria-label="Back to platforms"
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                  <p className="min-w-0 flex-1 truncate px-2 text-center text-sm font-semibold text-ink underline underline-offset-4">
-                    {activePlatform.label}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setActivePlatformId(null)}
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-mist"
-                    aria-label="Back to platforms"
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                  </button>
-                </div>
-                <p className="truncate border-b border-line px-4 py-2 text-center text-xs text-muted">
-                  {activePlatform.summary}
-                </p>
-              </div>
+              <ActivePlatformHeader
+                platform={activePlatform}
+                onBack={() => setActivePlatformId(null)}
+                onPrev={() => cyclePlatform(activeIndex, -1)}
+                onNext={() => cyclePlatform(activeIndex, 1)}
+              />
 
               <div className="max-h-[min(70vh,26rem)] divide-y divide-line overflow-y-auto">
                 {activePlatform.items.length > 0 ? (
-                  activePlatform.items.map((item) => <DetailRow key={item.id} item={item} />)
+                  activePlatform.items.map((item) => (
+                    <DetailRow key={item.id} item={item} onOpen={openDetail} />
+                  ))
                 ) : (
                   <p className="px-4 py-8 text-center text-sm text-muted">
                     No saved items in {activePlatform.label} yet.
@@ -274,11 +419,14 @@ function UnlockedPlatformMenu({
               </div>
 
               <div className="max-h-[min(70vh,26rem)] divide-y divide-line overflow-y-auto">
-                {platforms.map((platform) => (
+                {platforms.map((platform, index) => (
                   <PlatformRow
                     key={platform.id}
                     platform={platform}
+                    circledMeta={circledListRows}
                     onOpen={() => setActivePlatformId(platform.id)}
+                    onPrev={() => cyclePlatform(index, -1)}
+                    onNext={() => cyclePlatform(index, 1)}
                   />
                 ))}
               </div>
@@ -288,7 +436,14 @@ function UnlockedPlatformMenu({
                   <button
                     type="button"
                     className="text-sm font-medium text-brand transition hover:underline"
-                    onClick={closeMenu}
+                    onClick={() => {
+                      if (footerHref) {
+                        closeMenu()
+                        navigate(footerHref)
+                        return
+                      }
+                      closeMenu()
+                    }}
                   >
                     {footerLabel}
                   </button>

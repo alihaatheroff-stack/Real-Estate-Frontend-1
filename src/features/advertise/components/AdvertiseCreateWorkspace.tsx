@@ -9,6 +9,7 @@ import {
   AdvertisementPreview,
   resolveBannerSize,
 } from '@/features/advertise/components/AdvertisementPreview'
+import { AdvertisePreviewBoundary } from '@/features/advertise/components/AdvertisePreviewBoundary'
 import { CreateAdvertisementForm } from '@/features/advertise/components/CreateAdvertisementForm'
 import { placementsForPage } from '@/features/advertise/data/advertisePreviewPlacement'
 import type { AdvertisementDraft } from '@/features/advertise/types'
@@ -38,7 +39,9 @@ export function AdvertiseCreateWorkspace({
     hoveredBannerSize ? [hoveredBannerSize] : filters.bannerSize,
   )
   const canReview = Boolean(
-    draft.title.trim() || draft.description.trim() || draft.images.length,
+    (draft.title ?? '').trim() ||
+      (draft.description ?? '').trim() ||
+      (draft.images?.length ?? 0),
   )
 
   function handlePreviewPageChange(page: string) {
@@ -62,15 +65,17 @@ export function AdvertiseCreateWorkspace({
         />
         <div className="min-w-0 flex-1">
           <div className="overflow-hidden rounded-2xl border border-line/90 bg-white shadow-[0_12px_40px_-28px_rgba(15,31,26,0.35),0_0_0_1px_rgba(15,31,26,0.03)]">
-            <AdvertisementPreview
-              draft={draft}
-              bannerSize={bannerSize}
-              customWidth={filters.customBannerWidth}
-              customHeight={filters.customBannerHeight}
-              framed={false}
-              previewPage={previewPage}
-              previewPlacement={previewPlacement}
-            />
+            <AdvertisePreviewBoundary>
+              <AdvertisementPreview
+                draft={draft}
+                bannerSize={bannerSize}
+                customWidth={filters.customBannerWidth}
+                customHeight={filters.customBannerHeight}
+                framed={false}
+                previewPage={previewPage}
+                previewPlacement={previewPlacement}
+              />
+            </AdvertisePreviewBoundary>
             <CreateAdvertisementForm
               draft={draft}
               onChange={onDraftChange}

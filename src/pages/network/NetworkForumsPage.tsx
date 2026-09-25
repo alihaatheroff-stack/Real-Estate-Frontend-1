@@ -19,13 +19,14 @@ import {
   Video,
   X,
 } from 'lucide-react'
-import { PATHS, networkForumPath, networkProfilePath } from '@/app/router/paths'
+import { networkProfilePath } from '@/app/router/paths'
 import { Button } from '@/components/ui/Button'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
 import { NetworkPageFrame } from '@/features/network/components/shell/NetworkPageFrame'
 import { NewTopicComposer } from '@/features/network/components/forums/NewTopicComposer'
 import { ForumTaxonomyPanel } from '@/features/network/components/forums/ForumTaxonomyPanel'
+import { useContentRoutes } from '@/features/network/model/contentRoutes'
 import {
   NetworkVerticalFilterRail,
   NetworkVerticalFilterStack,
@@ -111,6 +112,7 @@ function resolveThread(id: string): NetworkForumThread | undefined {
 
 export function NetworkForumsPage() {
   const navigate = useNavigate()
+  const { forumPath, forumsTitle } = useContentRoutes()
   const [filters, setFilters] = useState<ForumFiltersState>(DEFAULT_FORUM_FILTERS)
   const [sort, setSort] = useState<ForumSortId>('latest')
   const [query, setQuery] = useState('')
@@ -152,7 +154,7 @@ export function NetworkForumsPage() {
       <button
         key={thread.id}
         type="button"
-        onClick={() => navigate(networkForumPath(thread.id))}
+        onClick={() => navigate(forumPath(thread.id))}
         className="flex w-full gap-3 border-t border-line/60 px-4 py-4 text-left hover:bg-mist/60 sm:px-5"
       >
         <MemberAvatar
@@ -218,7 +220,7 @@ export function NetworkForumsPage() {
           <div className="flex min-w-0 flex-col xl:h-full xl:min-h-0 xl:overflow-hidden">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-3 px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
               <h1 className="font-display text-3xl font-semibold">
-                Forums: Commercial Real Estate Agents
+                {forumsTitle}
               </h1>
               {composeOpen ? (
                 <Button
@@ -266,7 +268,7 @@ export function NetworkForumsPage() {
                     setLocalThreads(next)
                     setComposeOpen(false)
                     setFilters(DEFAULT_FORUM_FILTERS)
-                    navigate(networkForumPath(thread.id))
+                    navigate(forumPath(thread.id))
                   }}
                 />
               </>
@@ -425,6 +427,7 @@ export function NetworkForumsPage() {
 
 export function NetworkForumThreadPage() {
   const { forumId } = useParams()
+  const { forumsList } = useContentRoutes()
   const [thread, setThread] = useState<NetworkForumThread | undefined>(() =>
     forumId ? resolveThread(forumId) : undefined,
   )
@@ -482,7 +485,7 @@ export function NetworkForumThreadPage() {
   const author = thread ? getMember(thread.authorId) : undefined
 
   if (!thread || !author) {
-    return <Navigate to={PATHS.networkForums} replace />
+    return <Navigate to={forumsList} replace />
   }
 
   const facets = thread.filters
@@ -629,7 +632,7 @@ export function NetworkForumThreadPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Link
-            to={PATHS.networkForums}
+            to={forumsList}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline"
           >
             <ArrowLeft className="h-4 w-4" />

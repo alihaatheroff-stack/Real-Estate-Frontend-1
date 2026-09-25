@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { Check } from 'lucide-react'
-import { PATHS, networkArticlePath, networkProfilePath } from '@/app/router/paths'
+import { networkProfilePath } from '@/app/router/paths'
 import { Button } from '@/components/ui/Button'
 import { ArticlesBrowseView } from '@/features/network/components/articles/ArticlesBrowseView'
 import {
@@ -14,6 +14,7 @@ import { NetworkPageFrame } from '@/features/network/components/shell/NetworkPag
 import { NETWORK_ARTICLES, getArticle } from '@/features/network/data/community'
 import { categoryForArticle } from '@/features/network/data/articleCategories'
 import { getMember } from '@/features/network/data/members'
+import { useContentRoutes } from '@/features/network/model/contentRoutes'
 
 export { ArticlesBrowseView as NetworkArticlesPage }
 
@@ -34,6 +35,7 @@ const DEFAULT_REQUIREMENTS = [
 
 export function NetworkArticleDetailPage() {
   const { articleId } = useParams()
+  const { articlesList, articlePath } = useContentRoutes()
   const article = getArticle(articleId ?? '')
   const author = article ? getMember(article.authorId) : undefined
   const [comment, setComment] = useState('')
@@ -45,7 +47,7 @@ export function NetworkArticleDetailPage() {
 
   useEffect(() => () => window.clearTimeout(submittedTimer.current), [])
 
-  if (!article || !author) return <Navigate to={PATHS.networkArticles} replace />
+  if (!article || !author) return <Navigate to={articlesList} replace />
 
   const index = NETWORK_ARTICLES.findIndex((item) => item.id === article.id)
   const previous = index > 0 ? NETWORK_ARTICLES[index - 1] : undefined
@@ -219,7 +221,7 @@ export function NetworkArticleDetailPage() {
             <div className="mt-8 grid gap-3 border-t border-[#E9EEF2] pt-6 sm:grid-cols-2">
               {previous ? (
                 <Link
-                  to={networkArticlePath(previous.id)}
+                  to={articlePath(previous.id)}
                   className="rounded-2xl border border-line px-4 py-4 transition hover:border-brand hover:bg-mist/50"
                 >
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -232,7 +234,7 @@ export function NetworkArticleDetailPage() {
               )}
               {next ? (
                 <Link
-                  to={networkArticlePath(next.id)}
+                  to={articlePath(next.id)}
                   className="rounded-2xl border border-line px-4 py-4 text-right transition hover:border-brand hover:bg-mist/50 sm:justify-self-end"
                 >
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -296,11 +298,11 @@ export function NetworkArticleDetailPage() {
 
         <section className="rounded-[28px] bg-white px-5 py-7 shadow-[0_12px_40px_rgba(15,31,26,0.06)] ring-1 ring-black/[0.04] sm:px-8">
           <h3 className="text-2xl font-bold text-ink">Related posts</h3>
-          <div className="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid gap-x-6 gap-y-8 sm:grid-cols-2 xl:grid-cols-4">
             {relatedFallback.map((item) => (
               <Link
                 key={item.id}
-                to={networkArticlePath(item.id)}
+                to={articlePath(item.id)}
                 className="group block min-w-0"
               >
                 <div className="overflow-hidden rounded-xl">

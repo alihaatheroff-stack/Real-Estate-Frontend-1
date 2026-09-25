@@ -32,7 +32,7 @@ export function DashboardSidebar({
           />
           <div className="min-w-0">
             <p className="truncate font-semibold text-ink">PSP Account</p>
-            <p className="text-sm text-muted">$191 balance</p>
+            <p className="text-sm text-muted">$234.68 balance</p>
             <Link
               to={providerPath('p1')}
               onClick={onNavigate}

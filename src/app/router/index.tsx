@@ -9,6 +9,16 @@ import { LandingPage } from '@/pages/landing/LandingPage'
 import { CrowdfundingExplorePage } from '@/pages/crowdfunding/CrowdfundingExplorePage'
 import { LcreCrowdfundingPage } from '@/pages/crowdfunding/LcreCrowdfundingPage'
 import {
+  CrowdfundingArticleDetailPage,
+  CrowdfundingArticlesPage,
+  CrowdfundingForumThreadPage,
+  CrowdfundingForumsPage,
+  ReferralsArticleDetailPage,
+  ReferralsArticlesPage,
+  ReferralsForumThreadPage,
+  ReferralsForumsPage,
+} from '@/pages/shared/ModuleArticlesForumsPages'
+import {
   NetworkLearnMorePage,
   NetworkFeedPage,
   NetworkExplorePage,
@@ -89,13 +99,21 @@ export const router = createBrowserRouter([
             path: PATHS.lcreCrowdfunding,
             element: <LcreCrowdfundingPage />,
           },
+          { path: PATHS.crowdfundingArticles, element: <CrowdfundingArticlesPage /> },
+          { path: PATHS.crowdfundingArticle, element: <CrowdfundingArticleDetailPage /> },
+          { path: PATHS.crowdfundingForums, element: <CrowdfundingForumsPage /> },
+          { path: PATHS.crowdfundingForum, element: <CrowdfundingForumThreadPage /> },
           {
             path: PATHS.network,
             element: <NetworkLearnMorePage />,
           },
           {
-            path: PATHS.about,
+            path: PATHS.monetization,
             element: <AboutPage />,
+          },
+          {
+            path: PATHS.about,
+            element: <Navigate to={PATHS.monetization} replace />,
           },
           {
             path: PATHS.contact,
@@ -156,6 +174,10 @@ export const router = createBrowserRouter([
           { path: PATHS.providerServices, element: <ProviderServicesPage /> },
           { path: PATHS.providerProfile, element: <ProviderProfilePage /> },
           { path: PATHS.postOffer, element: <PostOfferPage /> },
+          { path: PATHS.referralsArticles, element: <ReferralsArticlesPage /> },
+          { path: PATHS.referralsArticle, element: <ReferralsArticleDetailPage /> },
+          { path: PATHS.referralsForums, element: <ReferralsForumsPage /> },
+          { path: PATHS.referralsForum, element: <ReferralsForumThreadPage /> },
         ],
       },
       {

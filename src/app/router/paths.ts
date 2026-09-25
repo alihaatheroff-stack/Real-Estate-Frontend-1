@@ -12,8 +12,16 @@ export const PATHS = {
   providerProfile: '/referrals/providers/:id',
   providerServices: '/referrals/providers/:id/services',
   postOffer: '/referrals/post',
+  referralsArticles: '/referrals/articles',
+  referralsArticle: '/referrals/articles/:articleId',
+  referralsForums: '/referrals/forums',
+  referralsForum: '/referrals/forums/:forumId',
   crowdfunding: '/crowdfunding',
   lcreCrowdfunding: '/crowdfunding/lcre',
+  crowdfundingArticles: '/crowdfunding/articles',
+  crowdfundingArticle: '/crowdfunding/articles/:articleId',
+  crowdfundingForums: '/crowdfunding/forums',
+  crowdfundingForum: '/crowdfunding/forums/:forumId',
   network: '/network',
   networkFeed: '/network/feed',
   networkExplore: '/network/explore',
@@ -65,6 +73,7 @@ export const PATHS = {
   dashboardBriefs: '/dashboard/briefs',
   dashboardSettings: '/dashboard/settings',
   about: '/about',
+  monetization: '/monetization',
   contact: '/contact',
   advertise: '/advertise',
 } as const
@@ -113,6 +122,26 @@ export function networkArticlePath(articleId: string) {
   return `/network/articles/${articleId}`
 }
 
+export function referralsArticlePath(articleId: string) {
+  return `/referrals/articles/${articleId}`
+}
+
+export function referralsForumPath(forumId: string) {
+  return `/referrals/forums/${forumId}`
+}
+
+export function crowdfundingArticlePath(articleId: string) {
+  return `/crowdfunding/articles/${articleId}`
+}
+
+export function crowdfundingForumPath(forumId: string) {
+  return `/crowdfunding/forums/${forumId}`
+}
+
 export function networkSettingsPath(tab?: string) {
   return tab ? `/network/settings?tab=${tab}` : '/network/settings'
+}
+
+export function networkMessagesPath(chatId?: string) {
+  return chatId ? `${PATHS.networkMessages}?chat=${encodeURIComponent(chatId)}` : PATHS.networkMessages
 }

@@ -54,7 +54,13 @@ export function isModuleNavActive(pathname: string, item: ModuleNavItem) {
     return pathname === PATHS.network || pathname.startsWith(`${PATHS.network}/`)
   }
   if (item.href === PATHS.about) {
-    return pathname === PATHS.about || pathname === PATHS.contact || pathname.startsWith(`${PATHS.about}/`)
+    return (
+      pathname === PATHS.monetization ||
+      pathname === PATHS.contact ||
+      pathname === PATHS.advertise ||
+      pathname === PATHS.about ||
+      pathname.startsWith(`${PATHS.about}/`)
+    )
   }
   return pathname === item.href || pathname.startsWith(`${item.href}/`)
 }

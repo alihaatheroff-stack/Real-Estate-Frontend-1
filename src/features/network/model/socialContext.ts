@@ -34,6 +34,7 @@ export type NetworkSocialValue = {
   ) => void
   markChatRead: (chatId: string) => void
   sendChatMessage: (chatId: string, payload: { text: string; attachments: ChatAttachment[] }) => void
+  deleteChatMessage: (chatId: string, messageId: string, mode: 'me' | 'everyone') => void
   createGroupChat: (input: { name: string; memberIds: string[] }) => string
   updateGroupChat: (
     chatId: string,

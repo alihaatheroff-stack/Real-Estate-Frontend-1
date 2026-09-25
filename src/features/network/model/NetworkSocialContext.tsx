@@ -97,9 +97,11 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
   )
 
   const markChatRead = useCallback((chatId: string) => {
-    setChats((current) =>
-      current.map((chat) => (chat.id === chatId && chat.unread > 0 ? { ...chat, unread: 0 } : chat)),
-    )
+    setChats((current) => {
+      const target = current.find((chat) => chat.id === chatId)
+      if (!target || target.unread === 0) return current
+      return current.map((chat) => (chat.id === chatId ? { ...chat, unread: 0 } : chat))
+    })
   }, [])
 
   const sendChatMessage = useCallback(
@@ -114,7 +116,15 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
         read: true,
         attachments: payload.attachments.length ? payload.attachments : undefined,
       }
-      const preview = text || payload.attachments[0]?.name || 'Attachment'
+      const first = payload.attachments[0]
+      const preview =
+        text ||
+        (first?.kind === 'audio'
+          ? 'Voice note'
+          : first?.kind === 'video-note'
+            ? 'Video note'
+            : first?.name) ||
+        'Attachment'
       setChats((current) => {
         const index = current.findIndex((item) => item.id === chatId)
         if (index < 0) return current
@@ -131,6 +141,55 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
         if (index === 0) return [updated, ...current.slice(1)]
         return [updated, ...current.slice(0, index), ...current.slice(index + 1)]
       })
+    },
+    [],
+  )
+
+  const deleteChatMessage = useCallback(
+    (chatId: string, messageId: string, mode: 'me' | 'everyone') => {
+      setChats((current) =>
+        current.map((chat) => {
+          if (chat.id !== chatId) return chat
+          const target = chat.messages.find((message) => message.id === messageId)
+          if (!target) return chat
+          if (mode === 'everyone' && !target.fromMe) return chat
+
+          const messages = chat.messages.map((message) => {
+            if (message.id !== messageId) return message
+            if (mode === 'me') {
+              return { ...message, deletedForMe: true }
+            }
+            return {
+              ...message,
+              deletedForEveryone: true,
+              text: '',
+              attachments: undefined,
+            }
+          })
+
+          const lastVisible = [...messages]
+            .reverse()
+            .find((message) => !message.deletedForMe && !message.deletedForEveryone)
+
+          return {
+            ...chat,
+            messages,
+            preview: lastVisible
+              ? lastVisible.deletedForEveryone
+                ? 'This message was deleted'
+                : lastVisible.text ||
+                  (lastVisible.attachments?.[0]?.kind === 'audio'
+                    ? 'Voice note'
+                    : lastVisible.attachments?.[0]?.kind === 'video-note'
+                      ? 'Video note'
+                      : lastVisible.attachments?.[0]?.name) ||
+                  'Attachment'
+              : mode === 'everyone'
+                ? 'This message was deleted'
+                : chat.preview,
+          }
+        }),
+      )
     },
     [],
   )
@@ -333,6 +392,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       addComment,
       markChatRead,
       sendChatMessage,
+      deleteChatMessage,
       createGroupChat,
       updateGroupChat,
       addNote,
@@ -355,6 +415,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       addComment,
       markChatRead,
       sendChatMessage,
+      deleteChatMessage,
       createGroupChat,
       updateGroupChat,
       addNote,

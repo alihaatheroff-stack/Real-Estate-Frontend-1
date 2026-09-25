@@ -1,8 +1,11 @@
 import { getCurrentMember, getMember } from '@/features/network/data/members'
+import { getMemberNickname } from '@/features/network/model/nicknames'
 import type { NetworkChat, NetworkMember } from '@/features/network/data/types'
 
 export type ChatIdentity = {
   title: string
+  /** Real profile name when a private nickname is set. */
+  realName?: string
   subtitle: string
   online: boolean
   member?: NetworkMember
@@ -29,9 +32,18 @@ export function getChatIdentity(chat: NetworkChat): ChatIdentity {
   }
 
   const member = chat.memberId ? getMember(chat.memberId) : undefined
+  const nickname = getMemberNickname(chat.memberId)
+  const realName = member?.name
+  const title = nickname || realName || 'Conversation'
+
   return {
-    title: member?.name ?? 'Conversation',
-    subtitle: member?.online ? 'Active now' : (member?.title ?? 'Direct message'),
+    title,
+    realName: nickname && realName && nickname !== realName ? realName : undefined,
+    subtitle: nickname
+      ? `~ ${realName || 'Contact'}`
+      : member?.online
+        ? 'Active now'
+        : (member?.title ?? 'Direct message'),
     online: member?.online ?? false,
     member,
     avatars: member ? [member] : [],
@@ -45,6 +57,7 @@ export function matchesChatQuery(chat: NetworkChat, query: string) {
   const identity = getChatIdentity(chat)
   return (
     identity.title.toLowerCase().includes(q) ||
+    (identity.realName?.toLowerCase().includes(q) ?? false) ||
     chat.preview.toLowerCase().includes(q)
   )
 }

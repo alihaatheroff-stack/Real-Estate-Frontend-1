@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { ChevronRight, Search } from 'lucide-react'
 import { PATHS, networkProfilePath } from '@/app/router/paths'
-import { AdvertiseSlot, FeedAdCard } from '@/features/network/components/feed/FeedAdCard'
+import { AdvertiseSlot, FeedAdCard, FeedAdCarousel } from '@/features/network/components/feed/FeedAdCard'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
 import { NETWORK_LISTINGS } from '@/features/network/data/community'
@@ -19,7 +19,7 @@ export function NetworkRightRail() {
 
   return (
     <>
-      {FEED_RIGHT_ADS[0] ? <FeedAdCard ad={FEED_RIGHT_ADS[0]} /> : null}
+      {FEED_RIGHT_ADS.length > 0 ? <FeedAdCarousel ads={FEED_RIGHT_ADS} /> : null}
 
       <NetworkCard>
         <div className="mb-3 flex items-center justify-between">
@@ -46,7 +46,9 @@ export function NetworkRightRail() {
         </div>
       </NetworkCard>
 
-      {FEED_RIGHT_ADS[1] ? <FeedAdCard ad={FEED_RIGHT_ADS[1]} /> : null}
+      {FEED_RIGHT_ADS.length > 1 ? (
+        <FeedAdCarousel ads={FEED_RIGHT_ADS} initialAdIndex={2} />
+      ) : null}
 
       {suggested.length > 0 ? (
         <NetworkCard>

@@ -6,6 +6,8 @@ export const REFERRALS_MENU = [
   { label: 'Service Selected', href: '/referrals/services/s1' },
   { label: 'Profile', href: '/referrals/providers/p1' },
   { label: 'Employer Results', href: PATHS.employerResults },
+  { label: 'Articles', href: PATHS.referralsArticles },
+  { label: 'Forums', href: PATHS.referralsForums },
   { label: 'Dashboard', href: PATHS.dashboard },
 ] as const
 
@@ -13,6 +15,8 @@ export const REFERRALS_MENU = [
 export const CROWDFUNDING_MENU = [
   { label: 'Explore Priority Index', href: PATHS.crowdfunding },
   { label: 'LCRE Crowdfunding', href: PATHS.lcreCrowdfunding },
+  { label: 'Articles', href: PATHS.crowdfundingArticles },
+  { label: 'Forums', href: PATHS.crowdfundingForums },
 ] as const
 
 /** Network dropdown — public Articles + Forums (guests see content without network sidebar) */
@@ -24,7 +28,7 @@ export const NETWORK_MENU = [
 /** About dropdown — Contact lives under About, not as its own top-level nav item */
 export const ABOUT_MENU = [
   { label: 'Advertisement', href: PATHS.advertise },
-  { label: 'About', href: PATHS.about },
+  { label: 'Monetization', href: PATHS.monetization },
   { label: 'Contact', href: PATHS.contact },
 ] as const
 
@@ -33,7 +37,7 @@ export const MARKETING_NAV = [
   { label: 'Crowdfund', href: PATHS.crowdfunding, hasDropdown: true },
   { label: 'Network', href: PATHS.network, hasDropdown: true },
   { label: 'Shop', href: PATHS.shop },
-  { label: 'About', href: PATHS.about, hasDropdown: true },
+  { label: 'About', href: PATHS.about, hasDropdown: true, menuOnly: true },
 ] as const
 
 export const FOOTER_LINKS = {

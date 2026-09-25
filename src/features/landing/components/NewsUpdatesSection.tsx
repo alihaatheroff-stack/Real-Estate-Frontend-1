@@ -28,6 +28,22 @@ function BulletIcon({ index }: { index: number }) {
   return <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
 }
 
+const stampClass =
+  'm-0 text-base font-semibold leading-snug tracking-tight text-ink underline decoration-ink/40 underline-offset-4'
+
+function NewsStamp({ offsetMinutes = 0 }: { offsetMinutes?: number }) {
+  const date = new Date()
+  if (offsetMinutes) date.setMinutes(date.getMinutes() - offsetMinutes)
+  const stamp = formatLocalStamp(date)
+
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:gap-x-6">
+      <p className={cn(stampClass, 'shrink-0 tabular-nums')}>{stamp.time}</p>
+      <p className={cn(stampClass, 'shrink-0')}>{stamp.day}</p>
+    </div>
+  )
+}
+
 function LiveDateTimeHeader({
   heading,
   children,
@@ -35,38 +51,10 @@ function LiveDateTimeHeader({
   heading: string
   children: ReactNode
 }) {
-  const stamp = formatLocalStamp()
-  const halfTimeSpacer = stamp.time.slice(0, Math.ceil(stamp.time.length / 2))
-
-  const itemClass =
-    'm-0 text-base font-semibold leading-snug tracking-tight text-ink underline decoration-ink/40 underline-offset-4'
-
   return (
-    <div>
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:gap-x-6">
-        <p className={cn(itemClass, 'shrink-0 tabular-nums')}>{stamp.time}</p>
-        <p className={cn(itemClass, 'shrink-0')}>{stamp.day}</p>
-      </div>
-
-      <div className="mt-3 flex min-w-0">
-        <span
-          aria-hidden
-          className="invisible shrink-0 select-none whitespace-pre text-base font-semibold tabular-nums leading-snug tracking-tight"
-        >
-          {halfTimeSpacer}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="relative flex min-h-[1.5rem] items-baseline">
-            <h3 className={itemClass}>{heading}</h3>
-            <div className="absolute left-[58%] top-0 space-y-1 sm:left-[62%]">
-              <p className={cn(itemClass, 'whitespace-nowrap')}>Deal closed this month</p>
-              <p className={cn(itemClass, 'whitespace-nowrap')}>Deals closed this week</p>
-              <p className={cn(itemClass, 'whitespace-nowrap')}>Deals closed this day</p>
-            </div>
-          </div>
-          {children}
-        </div>
-      </div>
+    <div className="min-w-0">
+      {heading ? <h3 className={stampClass}>{heading}</h3> : null}
+      {children}
     </div>
   )
 }
@@ -108,7 +96,7 @@ export function NewsUpdatesSection() {
             <span aria-hidden className="mr-1.5 inline-block text-[1.1em] leading-none sm:mr-2">
               📰
             </span>
-            News \ Updates:
+            News
           </h2>
         </div>
 
@@ -136,23 +124,26 @@ export function NewsUpdatesSection() {
 
       <article className="relative z-[1] mt-2.5 w-full bg-white px-4 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.25)] sm:px-6 sm:py-4 lg:px-8">
         <LiveDateTimeHeader heading={activeTab.heading}>
-          <ul className="mt-3 space-y-2">
+          <ul className={cn('space-y-4', activeTab.heading ? 'mt-3' : '')}>
             {activeTab.bullets.map((bullet, index) => (
-              <li key={`${activeTab.id}-${index}`} className="flex gap-2.5">
-                <BulletIcon index={index} />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium leading-snug text-ink">
-                    {bullet.text}
-                  </p>
-                  {bullet.children?.length ? (
-                    <ul className="mt-1 space-y-0.5 border-l border-line pl-3">
-                      {bullet.children.map((child) => (
-                        <li key={child} className="text-sm leading-snug text-muted">
-                          {child}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
+              <li key={`${activeTab.id}-${index}`} className="min-w-0">
+                <NewsStamp offsetMinutes={index * 3} />
+                <div className="mt-1.5 flex gap-2.5">
+                  <BulletIcon index={index} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium leading-snug text-ink">
+                      {bullet.text}
+                    </p>
+                    {bullet.children?.length ? (
+                      <ul className="mt-1 space-y-0.5 border-l border-line pl-3">
+                        {bullet.children.map((child) => (
+                          <li key={child} className="text-sm leading-snug text-muted">
+                            {child}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
                 </div>
               </li>
             ))}

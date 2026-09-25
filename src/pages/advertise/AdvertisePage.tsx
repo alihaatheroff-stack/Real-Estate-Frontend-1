@@ -5,9 +5,50 @@ import {
   EMPTY_ADVERTISEMENT_DRAFT,
   type AdvertisementDraft,
 } from '@/features/advertise/types'
+import { getCurrentMember } from '@/features/network/data/members'
+
+function createInitialDraft(): AdvertisementDraft {
+  const me = getCurrentMember()
+  return {
+    ...EMPTY_ADVERTISEMENT_DRAFT,
+    advertiserName: me?.name ?? '',
+    role: me?.title ?? '',
+    brokerage: me?.company ?? '',
+    service: '',
+    address: '',
+    city: me?.city ?? '',
+    zipcode: '',
+    phone: '',
+    offerReferral: false,
+    referralPercent: '',
+  }
+}
+
+function normalizeDraft(next: AdvertisementDraft): AdvertisementDraft {
+  return {
+    ...EMPTY_ADVERTISEMENT_DRAFT,
+    ...next,
+    images: next.images ?? [],
+    advertiserName: next.advertiserName ?? '',
+    role: next.role ?? '',
+    rolePlacement: next.rolePlacement ?? 'below-image',
+    brokerage: next.brokerage ?? '',
+    service: next.service ?? '',
+    brokerLicense: next.brokerLicense ?? '',
+    address: next.address ?? '',
+    city: next.city ?? '',
+    zipcode: next.zipcode ?? '',
+    phone: next.phone ?? '',
+    offerReferral: Boolean(next.offerReferral),
+    referralPercent: next.referralPercent != null ? String(next.referralPercent) : '',
+    title: next.title ?? '',
+    description: next.description ?? '',
+    cta: next.cta ?? '',
+  }
+}
 
 export function AdvertisePage() {
-  const [draft, setDraft] = useState<AdvertisementDraft>(EMPTY_ADVERTISEMENT_DRAFT)
+  const [draft, setDraft] = useState<AdvertisementDraft>(createInitialDraft)
   const [reviewRequestId, setReviewRequestId] = useState(0)
 
   function askAiReview() {
@@ -30,7 +71,7 @@ export function AdvertisePage() {
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-8 pt-4 sm:px-4 lg:px-5">
         <AdvertiseCreateWorkspace
           draft={draft}
-          onDraftChange={setDraft}
+          onDraftChange={(next) => setDraft(normalizeDraft(next))}
           onAskAiReview={askAiReview}
         />
       </div>

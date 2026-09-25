@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarDays, Camera, Cake } from 'lucide-react'
 import { PATHS, networkProfilePath } from '@/app/router/paths'
-import { AdvertiseSlot, FeedAdCard } from '@/features/network/components/feed/FeedAdCard'
+import { AdvertiseSlot, FeedAdCarousel } from '@/features/network/components/feed/FeedAdCard'
 import { COMMUNITY_SOCIALS } from '@/features/network/components/community/SocialPlatformIcons'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
@@ -39,7 +39,7 @@ export function NetworkLeftRail() {
 
   return (
     <>
-      {FEED_LEFT_ADS[0] ? <FeedAdCard ad={FEED_LEFT_ADS[0]} /> : null}
+      {FEED_LEFT_ADS.length > 0 ? <FeedAdCarousel ads={FEED_LEFT_ADS} /> : null}
 
       {suggestion ? (
         <NetworkCard>
@@ -152,7 +152,9 @@ export function NetworkLeftRail() {
         </ul>
       </NetworkCard>
 
-      {FEED_LEFT_ADS[1] ? <FeedAdCard ad={FEED_LEFT_ADS[1]} /> : null}
+      {FEED_LEFT_ADS.length > 1 ? (
+        <FeedAdCarousel ads={FEED_LEFT_ADS} initialAdIndex={2} />
+      ) : null}
 
       <NetworkCard>
         <div className="mb-3 flex items-center justify-between">

@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { networkArticlePath } from '@/app/router/paths'
 import {
   NetworkVerticalFilterRail,
   NetworkVerticalFilterStack,
@@ -15,9 +14,11 @@ import {
   DEFAULT_FORUM_FILTERS,
   type ForumFiltersState,
 } from '@/features/network/data/forumFilters'
+import { useContentRoutes } from '@/features/network/model/contentRoutes'
 import { cn } from '@/shared/lib/cn'
 
 function ArticlesGrid({ category }: { category: BlogCategoryLabel | null }) {
+  const { articlePath } = useContentRoutes()
   const articles = useMemo(() => {
     if (!category) return NETWORK_ARTICLES
     const selected = BLOG_CATEGORIES.find((item) => item.label === category)
@@ -32,11 +33,11 @@ function ArticlesGrid({ category }: { category: BlogCategoryLabel | null }) {
   const visible = articles.length > 0 ? articles : NETWORK_ARTICLES
 
   return (
-    <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
       {visible.map((article) => (
         <Link
           key={article.id}
-          to={networkArticlePath(article.id)}
+          to={articlePath(article.id)}
           className="group block min-w-0"
         >
           <div className="overflow-hidden rounded-xl">
@@ -95,6 +96,7 @@ function ArticlesCategoryTabs({
 
 /** Articles listing with the same vertical filter rail as Forums. */
 export function ArticlesBrowseView() {
+  const { articlesTitle } = useContentRoutes()
   const [filters, setFilters] = useState<ForumFiltersState>(DEFAULT_FORUM_FILTERS)
   const [category, setCategory] = useState<BlogCategoryLabel | null>(null)
 
@@ -107,7 +109,7 @@ export function ArticlesBrowseView() {
           <div className="flex min-w-0 flex-col xl:h-full xl:min-h-0 xl:overflow-hidden">
             <header className="shrink-0 px-4 pb-2 pt-4 sm:px-5 sm:pb-2.5">
               <h1 className="font-display text-3xl font-semibold">
-                Articles:Commercial Real Estate Agents
+                {articlesTitle}
               </h1>
             </header>
 

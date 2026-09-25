@@ -33,7 +33,7 @@ import {
   VIDEO_LENGTH_OPTIONS,
 } from '@/features/advertise/data/advertiseFilterOptions'
 import {
-  PREVIEW_PAGE_OPTIONS,
+  PREVIEW_PAGE_GROUPS,
   placementsForPage,
 } from '@/features/advertise/data/advertisePreviewPlacement'
 
@@ -276,18 +276,26 @@ export function AdvertiseFilterPanel({
         <p className="text-[11px] font-bold uppercase tracking-wide text-ink">
           Preview on page
         </p>
-        <Select
-          label="Choose Page"
-          name="previewPage"
-          placeholder="Select a page…"
-          options={PREVIEW_PAGE_OPTIONS.map((option) => ({
-            label: option.label,
-            value: option.value,
-          }))}
-          value={previewPage}
-          onChange={(event) => onPreviewPageChange?.(event.target.value)}
-          className="h-9 rounded-lg text-sm"
-        />
+        <label className="flex w-full flex-col gap-1.5 text-sm">
+          <span className="font-bold text-ink">Choose Page</span>
+          <select
+            name="previewPage"
+            value={previewPage}
+            onChange={(event) => onPreviewPageChange?.(event.target.value)}
+            className="h-9 w-full appearance-none rounded-lg border border-line bg-paper px-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
+          >
+            <option value="">Select a page…</option>
+            {PREVIEW_PAGE_GROUPS.map((group) => (
+              <optgroup key={group.label} label={group.label}>
+                {group.pages.map((page) => (
+                  <option key={page.value} value={page.value}>
+                    {page.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+        </label>
         <Select
           label="Placement"
           name="previewPlacement"

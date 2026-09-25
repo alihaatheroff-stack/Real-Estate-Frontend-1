@@ -425,12 +425,6 @@ function CommentForm({
           <MemberAvatar name={me.name} src={me.avatar} size="sm" />
         )}
         <div className="relative flex min-w-0 flex-1 items-center">
-          <input
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            placeholder={anonymous ? 'Write anonymously…' : placeholder}
-            className="h-9 w-full rounded-full border border-[#C5CDD3] bg-[#F0F2F5] py-0 pl-4 pr-11 text-sm outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/25"
-          />
           <button
             type="button"
             aria-label={anonymous ? 'Post as yourself' : 'Reply anonymously'}
@@ -438,12 +432,18 @@ function CommentForm({
             title={anonymous ? 'Posting as Unanimous' : 'Reply anonymously'}
             onClick={() => onAnonymousChange(!anonymous)}
             className={cn(
-              'absolute right-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full transition',
+              'absolute left-1.5 inline-flex h-7 w-7 items-center justify-center rounded-full transition',
               anonymous ? 'bg-brand-light text-brand' : 'text-muted hover:bg-white hover:text-brand',
             )}
           >
             {anonymous ? <Lock className="h-4 w-4" /> : <UserRound className="h-4 w-4" />}
           </button>
+          <input
+            value={value}
+            onChange={(event) => onChange(event.target.value)}
+            placeholder={anonymous ? 'Write anonymously…' : placeholder}
+            className="h-9 w-full rounded-full border border-[#C5CDD3] bg-[#F0F2F5] py-0 pl-11 pr-4 text-sm outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/25"
+          />
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2 pl-10">

@@ -167,9 +167,11 @@ export type NetworkListing = {
 export type ChatAttachment = {
   id: string
   name: string
-  kind: 'image' | 'video' | 'file'
+  kind: 'image' | 'video' | 'file' | 'audio' | 'video-note'
   url?: string
   sizeLabel: string
+  /** Length for voice / video notes, in milliseconds. */
+  durationMs?: number
 }
 
 export type ChatMessage = {
@@ -180,6 +182,10 @@ export type ChatMessage = {
   time: string
   read?: boolean
   attachments?: ChatAttachment[]
+  /** Hidden from the current user's inbox only. */
+  deletedForMe?: boolean
+  /** Removed for all participants; show a tombstone in the thread. */
+  deletedForEveryone?: boolean
 }
 
 export type NetworkChat = {

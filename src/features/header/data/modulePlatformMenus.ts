@@ -1,9 +1,15 @@
 import type { ModulePlatformRow } from '@/components/layout/ModulePlatformMenu'
+import { networkMessagesPath, PATHS } from '@/app/router/paths'
+import { getMember } from '@/features/network/data/members'
 
 const MODULES = ['Referral', 'Crowdfund', 'Network', 'Shop'] as const
 
 function withDemoSummary(summary: string, demo: boolean) {
   return demo ? `Demo: ${summary}` : summary
+}
+
+function memberAvatar(memberId: string, fallback: string) {
+  return getMember(memberId)?.avatar ?? fallback
 }
 
 export function buildMessagePlatforms(demo = false): ModulePlatformRow[] {
@@ -20,37 +26,41 @@ export function buildMessagePlatforms(demo = false): ModulePlatformRow[] {
           title: 'Aisha Rahman',
           subtitle: 'New referral match ready for review in Fresno.',
           timeAgo: '2m',
-          avatarSrc: '/images/profile/F_1.jpg',
+          avatarSrc: memberAvatar('aisha', '/images/profile/F3.jpg'),
+          href: networkMessagesPath('chat-aisha'),
         },
         {
           id: 'r2',
           title: 'Jordan Blake',
           subtitle: 'Can you take this buyer intro this week?',
           timeAgo: '1h',
-          avatarSrc: '/images/profile/m1.jpg',
+          avatarSrc: memberAvatar('jordan', '/images/profile/m1.jpg'),
+          href: networkMessagesPath('chat-jordan'),
         },
       ],
     },
     {
       id: 'crowdfunding',
       label: 'Crowdfund',
-      summary: withDemoSummary('3 people messaged you', demo),
+      summary: withDemoSummary('2 people messaged you', demo),
       timeAgo: '5h',
-      unreadCount: demo ? 0 : 3,
+      unreadCount: demo ? 0 : 2,
       items: [
         {
           id: 'c1',
           title: 'Sofia Ramirez',
           subtitle: 'Pledge update on the Visalia recreational project.',
           timeAgo: '5h',
-          avatarSrc: '/images/profile/F_2.jpg',
+          avatarSrc: memberAvatar('sofia', '/images/profile/F_2.jpg'),
+          href: networkMessagesPath('chat-sofia'),
         },
         {
           id: 'c2',
           title: 'Ethan Cole',
           subtitle: 'Investor Q&A starts Friday — want the invite?',
           timeAgo: '6h',
-          avatarSrc: '/images/profile/m2.jpg',
+          avatarSrc: memberAvatar('ethan', '/images/profile/m2.jpg'),
+          href: networkMessagesPath('chat-ethan'),
         },
       ],
     },
@@ -63,17 +73,19 @@ export function buildMessagePlatforms(demo = false): ModulePlatformRow[] {
       items: [
         {
           id: 'n1',
-          title: 'Marcus Webb',
+          title: 'Marcus Holt',
           subtitle: 'New forum reply in your Groups thread.',
           timeAgo: '35m',
-          avatarSrc: '/images/profile/m3.jpg',
+          avatarSrc: memberAvatar('marcus', '/images/profile/m3.jpg'),
+          href: networkMessagesPath('chat-marcus'),
         },
         {
           id: 'n2',
           title: 'Maya Chen',
           subtitle: 'Someone requested to connect on Network.',
           timeAgo: '2h',
-          avatarSrc: '/images/avatars/avatar-12.jpg',
+          avatarSrc: memberAvatar('maya', '/images/profile/F_1.jpg'),
+          href: networkMessagesPath('chat-maya'),
         },
       ],
     },
@@ -90,6 +102,7 @@ export function buildMessagePlatforms(demo = false): ModulePlatformRow[] {
           subtitle: 'Your order was shipped — tracking is ready.',
           timeAgo: '1d',
           avatarSrc: '/images/avatars/avatar-5.jpg',
+          href: PATHS.networkMessages,
         },
       ],
     },
@@ -118,6 +131,7 @@ export function buildNotificationPlatforms(demo = false): ModulePlatformRow[] {
             : `New activity in ${label} needs your attention.`,
           timeAgo: times[index],
           avatarSrc: '/images/profile/F_1.jpg',
+          href: PATHS.networkNotifications,
         },
         {
           id: `${label}-2`,
@@ -127,6 +141,7 @@ export function buildNotificationPlatforms(demo = false): ModulePlatformRow[] {
             : `Follow up on your latest ${label} activity.`,
           timeAgo: '1d',
           avatarSrc: '/images/profile/m1.jpg',
+          href: PATHS.networkNotifications,
         },
       ],
     }

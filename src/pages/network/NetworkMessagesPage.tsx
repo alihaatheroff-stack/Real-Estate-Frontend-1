@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ChatThread } from '@/features/network/components/messages/ChatThread'
 import { ConversationList, type InboxTab } from '@/features/network/components/messages/ConversationList'
 import { GroupInfoDialog } from '@/features/network/components/messages/GroupInfoDialog'
@@ -9,9 +10,16 @@ import { cn } from '@/shared/lib/cn'
 import type { ChatAttachment } from '@/features/network/data/types'
 
 export function NetworkMessagesPage() {
-  const { chats, markChatRead, sendChatMessage, createGroupChat, updateGroupChat } = useNetworkSocial()
-  const [activeId, setActiveId] = useState(chats[0]?.id ?? '')
-  const [mobileThread, setMobileThread] = useState(false)
+  const { chats, markChatRead, sendChatMessage, deleteChatMessage, createGroupChat, updateGroupChat } =
+    useNetworkSocial()
+  const [params, setParams] = useSearchParams()
+  const chatFromUrl = params.get('chat')
+
+  const [activeId, setActiveId] = useState(() => {
+    if (chatFromUrl && chats.some((chat) => chat.id === chatFromUrl)) return chatFromUrl
+    return chats[0]?.id ?? ''
+  })
+  const [mobileThread, setMobileThread] = useState(Boolean(chatFromUrl))
   const [listOpen, setListOpen] = useState(true)
   const [newGroupOpen, setNewGroupOpen] = useState(false)
   const [groupInfoOpen, setGroupInfoOpen] = useState(false)
@@ -40,6 +48,18 @@ export function NetworkMessagesPage() {
   }, [chats, filter, tab])
 
   useEffect(() => {
+    if (!chatFromUrl) return
+    if (!chats.some((chat) => chat.id === chatFromUrl)) return
+    setActiveId(chatFromUrl)
+    setMobileThread(true)
+  }, [chatFromUrl, chats])
+
+  useEffect(() => {
+    if (!chatFromUrl) return
+    markChatRead(chatFromUrl)
+  }, [chatFromUrl, markChatRead])
+
+  useEffect(() => {
     if (visibleChats.some((chat) => chat.id === activeId)) return
     setActiveId(visibleChats[0]?.id ?? '')
   }, [activeId, visibleChats])
@@ -57,6 +77,14 @@ export function NetworkMessagesPage() {
     setActiveId(id)
     setMobileThread(true)
     setText('')
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('chat', id)
+        return next
+      },
+      { replace: true },
+    )
   }
 
   function compose() {
@@ -108,6 +136,7 @@ export function NetworkMessagesPage() {
             draft={text}
             onDraft={setText}
             onSend={send}
+            onDeleteMessage={(messageId, mode) => deleteChatMessage(active.id, messageId, mode)}
             onBack={() => setMobileThread(false)}
             listCollapsed={!listOpen}
             onExpandList={() => setListOpen(true)}

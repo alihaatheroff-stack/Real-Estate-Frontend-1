@@ -8,6 +8,7 @@ import {
   EMPTY_ADVERTISEMENT_DRAFT,
   type AdvertisementDraft,
 } from '@/features/advertise/types'
+import { getCurrentMember } from '@/features/network/data/members'
 import {
   DASHBOARD_ADVERTISEMENTS,
   countAdsByModule,
@@ -20,9 +21,49 @@ const STATUS_STYLES = {
   Draft: 'bg-mist text-muted',
 } as const
 
+function createInitialDraft(): AdvertisementDraft {
+  const me = getCurrentMember()
+  return {
+    ...EMPTY_ADVERTISEMENT_DRAFT,
+    advertiserName: me?.name ?? '',
+    role: me?.title ?? '',
+    brokerage: me?.company ?? '',
+    service: '',
+    address: '',
+    city: me?.city ?? '',
+    zipcode: '',
+    phone: '',
+    offerReferral: false,
+    referralPercent: '',
+  }
+}
+
+function normalizeDraft(next: AdvertisementDraft): AdvertisementDraft {
+  return {
+    ...EMPTY_ADVERTISEMENT_DRAFT,
+    ...next,
+    images: next.images ?? [],
+    advertiserName: next.advertiserName ?? '',
+    role: next.role ?? '',
+    rolePlacement: next.rolePlacement ?? 'below-image',
+    brokerage: next.brokerage ?? '',
+    service: next.service ?? '',
+    brokerLicense: next.brokerLicense ?? '',
+    address: next.address ?? '',
+    city: next.city ?? '',
+    zipcode: next.zipcode ?? '',
+    phone: next.phone ?? '',
+    offerReferral: Boolean(next.offerReferral),
+    referralPercent: next.referralPercent != null ? String(next.referralPercent) : '',
+    title: next.title ?? '',
+    description: next.description ?? '',
+    cta: next.cta ?? '',
+  }
+}
+
 export function DashboardAdvertisementsView() {
   const [creating, setCreating] = useState(false)
-  const [draft, setDraft] = useState<AdvertisementDraft>(EMPTY_ADVERTISEMENT_DRAFT)
+  const [draft, setDraft] = useState<AdvertisementDraft>(createInitialDraft)
   const [reviewRequestId, setReviewRequestId] = useState(0)
 
   const ads = DASHBOARD_ADVERTISEMENTS
@@ -49,7 +90,7 @@ export function DashboardAdvertisementsView() {
 
         <AdvertiseCreateWorkspace
           draft={draft}
-          onDraftChange={setDraft}
+          onDraftChange={(next) => setDraft(normalizeDraft(next))}
           onAskAiReview={askAiReview}
         />
 

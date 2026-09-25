@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { CheckCheck, PanelLeftClose, Search, SquarePen, UsersRound } from 'lucide-react'
 import { ConversationAvatar } from '@/features/network/components/messages/ConversationAvatar'
 import { getChatIdentity } from '@/features/network/components/messages/chatIdentity'
+import { useNicknameVersion } from '@/features/network/model/nicknames'
 import type { NetworkChat } from '@/features/network/data/types'
 import { cn } from '@/shared/lib/cn'
 
@@ -36,6 +37,7 @@ export function ConversationList({
   const earlier = chats.filter((chat) => chat.section === 'earlier')
   const [composeOpen, setComposeOpen] = useState(false)
   const composeRef = useRef<HTMLDivElement>(null)
+  useNicknameVersion()
 
   useEffect(() => {
     if (!composeOpen) return

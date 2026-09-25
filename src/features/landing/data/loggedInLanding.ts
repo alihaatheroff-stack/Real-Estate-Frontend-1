@@ -18,8 +18,8 @@ export type NewsTab = {
 export const NEWS_TABS: NewsTab[] = [
   {
     id: 'features',
-    label: "FEATURE'S:",
-    heading: "Feature's:",
+    label: 'ALL:',
+    heading: '',
     bullets: [
       {
         text: "GPS. Perhapp's previously you been second-guessing or delaying. Be Certained your PSP is on their way.",
@@ -43,9 +43,9 @@ export const NEWS_TABS: NewsTab[] = [
     heading: "Referral's:",
     href: PATHS.results,
     bullets: [
-      { text: 'Send and receive trusted PSP introductions with clear percentage share.' },
-      { text: 'Learn, teach, and earn on live property deals.' },
-      { text: 'GPS-aware workflows so you know your PSP is on the way.' },
+      { text: 'Deal closed this month' },
+      { text: 'Deals closed this week' },
+      { text: 'Deals closed this day' },
     ],
   },
   {

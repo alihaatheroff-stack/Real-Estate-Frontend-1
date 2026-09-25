@@ -7,5 +7,5 @@ export { AdvertisementPreview } from '@/features/advertise/components/Advertisem
 export { CreateAdvertisementForm } from '@/features/advertise/components/CreateAdvertisementForm'
 export * from '@/features/advertise/data/advertiseFilterOptions'
 export * from '@/features/advertise/data/advertisePreviewPlacement'
-export type { AdImage, AdvertisementDraft } from '@/features/advertise/types'
-export { EMPTY_ADVERTISEMENT_DRAFT } from '@/features/advertise/types'
+export type { AdImage, AdvertisementDraft, AdRolePlacement } from '@/features/advertise/types'
+export { EMPTY_ADVERTISEMENT_DRAFT, resolveReferralPercent } from '@/features/advertise/types'
