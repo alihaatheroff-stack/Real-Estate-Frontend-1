@@ -172,7 +172,10 @@ function FieldCard({
         src={field.image}
         alt={ariaHidden ? '' : field.title}
         className="absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover:scale-110"
-        loading="lazy"
+        width={640}
+        height={640}
+        loading="eager"
+        decoding="async"
         draggable={false}
       />
       <div
