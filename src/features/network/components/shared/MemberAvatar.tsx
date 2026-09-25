@@ -6,7 +6,7 @@ type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 
 type MemberAvatarProps = {
   name: string
-  src: string
+  src?: string
   memberId?: string
   size?: AvatarSize
   online?: boolean
@@ -50,11 +50,13 @@ export function MemberAvatar({
         className,
       )}
     >
-      <img
-        src={src}
-        alt=""
-        className="absolute inset-0 size-full max-w-none object-cover object-[center_18%]"
-      />
+      {src ? (
+        <img
+          src={src}
+          alt=""
+          className="absolute inset-0 size-full max-w-none object-cover object-[center_18%]"
+        />
+      ) : null}
       {online ? (
         <span
           className={cn(

@@ -320,7 +320,7 @@ function UnlockedPlatformMenu({
   useEffect(() => {
     if (!open) return
 
-    function handlePointerDown(event: MouseEvent) {
+    function handlePointerDown(event: globalThis.MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         closeMenu()
       }

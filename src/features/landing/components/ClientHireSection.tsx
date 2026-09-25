@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react'
 import {
+  type LucideIcon,
   ArrowRight,
   BadgeCheck,
   Check,
@@ -27,7 +27,7 @@ import {
 } from '@/features/landing/data/clientHire'
 import { cn } from '@/shared/lib/cn'
 
-const BENEFIT_ICONS: ComponentType<{ className?: string }>[] = [
+const BENEFIT_ICONS: LucideIcon[] = [
   ShieldCheck,
   BadgeCheck,
   MapPinned,
