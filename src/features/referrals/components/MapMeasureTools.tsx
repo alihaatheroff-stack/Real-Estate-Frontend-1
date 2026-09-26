@@ -24,10 +24,10 @@ import {
 } from '@/features/referrals/lib/mapMeasure'
 import { cn } from '@/shared/lib/cn'
 
-const LINE_STYLE = { color: '#1b6b4f', weight: 3, opacity: 0.95 }
-const FILL_STYLE = { color: '#1b6b4f', weight: 3, opacity: 0.95, fillColor: '#1b6b4f', fillOpacity: 0.18 }
-const VERTEX_STYLE = { color: '#ffffff', weight: 2, fillColor: '#1b6b4f', fillOpacity: 1 }
-const PREVIEW_STYLE = { color: '#1b6b4f', weight: 3, opacity: 0.55, dashArray: '6 6' }
+const LINE_STYLE = { color: '#0b1f3a', weight: 3, opacity: 0.95 }
+const FILL_STYLE = { color: '#0b1f3a', weight: 3, opacity: 0.95, fillColor: '#0b1f3a', fillOpacity: 0.18 }
+const VERTEX_STYLE = { color: '#ffffff', weight: 2, fillColor: '#0b1f3a', fillOpacity: 1 }
+const PREVIEW_STYLE = { color: '#0b1f3a', weight: 3, opacity: 0.55, dashArray: '6 6' }
 
 function vertices(points: LatLngTuple[]) {
   return points.map((point, index) => (

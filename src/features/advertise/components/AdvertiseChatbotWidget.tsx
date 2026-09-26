@@ -52,7 +52,7 @@ export function AdvertiseChatbotWidget({
         type="button"
         onClick={() => setOpen((value) => !value)}
         className={cn(
-          'pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-[0_12px_28px_rgba(27,107,79,0.45)] transition hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2',
+          'pointer-events-auto inline-flex h-14 w-14 items-center justify-center rounded-full bg-brand text-white shadow-[0_12px_28px_rgba(11,31,58,0.45)] transition hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2',
           open && 'ring-2 ring-white/80',
         )}
         aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}

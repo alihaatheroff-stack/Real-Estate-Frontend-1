@@ -10,7 +10,7 @@ import { cn } from '@/shared/lib/cn'
 import type { ChatAttachment } from '@/features/network/data/types'
 
 export function NetworkMessagesPage() {
-  const { chats, markChatRead, sendChatMessage, deleteChatMessage, createGroupChat, updateGroupChat } =
+  const { chats, markChatRead, sendChatMessage, deleteChatMessage, createGroupChat, updateGroupChat, logChatCall } =
     useNetworkSocial()
   const [params, setParams] = useSearchParams()
   const chatFromUrl = params.get('chat')
@@ -141,6 +141,7 @@ export function NetworkMessagesPage() {
             listCollapsed={!listOpen}
             onExpandList={() => setListOpen(true)}
             onOpenInfo={active.kind === 'group' ? () => setGroupInfoOpen(true) : undefined}
+            onLogCall={(call) => logChatCall(active.id, call)}
           />
         ) : (
           <div className="grid flex-1 place-items-center text-sm text-muted">Select a conversation</div>

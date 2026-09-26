@@ -145,11 +145,7 @@ export function RegisterPspForm() {
           profileFilters={form.profileFilters}
           setProfileFilter={form.setProfileFilter}
           setProfileFilterList={form.setProfileFilterList}
-          findLabels={form.findLabels}
-          selectedPsp={form.selectedPsp}
-          selectedFields={form.selectedFields}
-          representation={form.representation}
-          showRepresentation={form.showRepresentation}
+          applyLandingFilterChange={form.applyLandingFilterChange}
           distance={form.distance}
           formOfPaymentMethods={form.formOfPaymentMethods}
           businessName={form.data.businessName}

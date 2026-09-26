@@ -10,15 +10,15 @@
   --color-ink-soft: #24352e;
   --color-mist: #eef2f0;
   --color-paper: #f8faf9;
-  --color-brand: #1b6b4f;
-  --color-brand-dark: #134a38;
-  --color-brand-light: #d8efe6;
+  --color-brand: #0b1f3a;
+  --color-brand-dark: #071422;
+  --color-brand-light: #E7EAF1;
   --color-accent: #d4a017;
   --color-accent-soft: #f7ecd0;
   --color-muted: #5c6b64;
   --color-line: #d5ddd8;
   --color-danger: #b42318;
-  --color-success: #1b6b4f;
+  --color-success: #0b1f3a;
   --color-freeio: #5BBB7B;
   --color-freeio-soft: #E7F6ED;
   --color-freeio-peach: #FFF1ED;
@@ -71,7 +71,7 @@
     font-family: var(--font-sans);
     color: var(--color-ink);
     background:
-      radial-gradient(ellipse 80% 50% at 10% -10%, rgb(27 107 79 / 0.12), transparent 55%),
+      radial-gradient(ellipse 80% 50% at 10% -10%, rgb(11 31 58 / 0.12), transparent 55%),
       radial-gradient(ellipse 60% 40% at 100% 0%, rgb(212 160 23 / 0.1), transparent 50%),
       var(--color-paper);
     -webkit-font-smoothing: antialiased;
@@ -288,6 +288,35 @@
   }
 }
 
+.news-marquee__track {
+  animation: hire-fields-marquee 38s linear infinite;
+  will-change: transform;
+}
+
+.news-ticker__track {
+  animation: hire-fields-marquee 190s linear infinite;
+  will-change: transform;
+}
+
+.news-marquee[data-paused='true'] .news-marquee__track,
+.news-marquee[data-paused='true'] .news-ticker__track {
+  animation-play-state: paused;
+}
+
+@keyframes news-kenburns {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.07);
+  }
+}
+
+.news-lead-photo {
+  animation: news-kenburns 18s ease-in-out infinite alternate;
+}
+
 @keyframes hero-kenburns {
   from {
     transform: scale(1);
@@ -320,6 +349,27 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translate3d(0, var(--reveal-y, 28px), 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+}
+
+.scroll-reveal[data-reveal='fade'] {
+  transform: none;
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.scroll-reveal[data-reveal='fade'].is-visible {
+  transform: none;
 }
 
 .animate-drawer-in {
@@ -364,7 +414,7 @@
 
 .landing-scroll-pane {
   scrollbar-width: thin;
-  scrollbar-color: rgb(27 107 79 / 0.35) transparent;
+  scrollbar-color: rgb(11 31 58 / 0.35) transparent;
 }
 
 .landing-scroll-pane::-webkit-scrollbar {
@@ -373,7 +423,7 @@
 
 .landing-scroll-pane::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgb(27 107 79 / 0.35);
+  background: rgb(11 31 58 / 0.35);
 }
 
 .landing-scroll-pane::-webkit-scrollbar-track {
@@ -388,6 +438,19 @@
   .service-map-marker__body,
   .service-map-marker__shadow {
     animation: none !important;
+  }
+
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .news-marquee__track,
+  .news-ticker__track,
+  .news-lead-photo {
+    animation: none;
   }
 }
 
@@ -546,7 +609,7 @@
 
 .network-thin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgb(27 107 79 / 0.22) transparent;
+  scrollbar-color: rgb(11 31 58 / 0.22) transparent;
 }
 
 .network-thin-scroll::-webkit-scrollbar {
@@ -561,7 +624,7 @@
 
 .network-thin-scroll::-webkit-scrollbar-thumb {
   border-radius: 9999px;
-  background: rgb(27 107 79 / 0.22);
+  background: rgb(11 31 58 / 0.22);
 }
 
 .network-shell-scroll {
@@ -640,7 +703,7 @@
     transform 0.16s ease,
     visibility 0.16s ease;
   scrollbar-width: thin;
-  scrollbar-color: rgb(27 107 79 / 0.35) transparent;
+  scrollbar-color: rgb(11 31 58 / 0.35) transparent;
 }
 
 .settings-paste-menu::-webkit-scrollbar {
@@ -648,7 +711,7 @@
 }
 
 .settings-paste-menu::-webkit-scrollbar-thumb {
-  background: rgb(27 107 79 / 0.28);
+  background: rgb(11 31 58 / 0.28);
   border-radius: 999px;
   border: 2px solid #fff;
 }
@@ -998,7 +1061,7 @@
 }
 
 .vote-select-options::-webkit-scrollbar-thumb {
-  background: rgb(27 107 79 / 0.28);
+  background: rgb(11 31 58 / 0.28);
   border-radius: 999px;
 }
 

@@ -66,8 +66,8 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
         className={cn(
           'relative flex h-full cursor-pointer flex-col rounded-2xl border bg-white p-5 transition',
           selected || active
-            ? 'border-freeio shadow-[0_12px_36px_rgba(91,187,123,0.18)]'
-            : 'border-freeio-border-soft shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-freeio/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
+            ? 'border-[#0b1f3a] shadow-[0_12px_36px_rgba(11,31,58,0.18)]'
+            : 'border-freeio-border-soft shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-[#0b1f3a]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
         )}
       >
         <button
@@ -113,7 +113,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             <Link
               to={providerPath(provider.id)}
               onClick={(event) => event.stopPropagation()}
-              className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-freeio"
+              className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-[#0b1f3a]"
             >
               {provider.name}
             </Link>
@@ -168,7 +168,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
           <Link
             to={providerPath(provider.id)}
             onClick={(event) => event.stopPropagation()}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg border px-4 text-sm font-semibold transition hover:bg-freeio-soft border-freeio text-freeio"
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#0b1f3a] px-4 text-sm font-semibold text-[#0b1f3a] transition hover:bg-[#0b1f3a]/10"
           >
             View Profile
             <ArrowUpRight className="h-4 w-4" />

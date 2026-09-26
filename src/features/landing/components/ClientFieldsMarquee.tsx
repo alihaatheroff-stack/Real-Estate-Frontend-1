@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
 import { CLIENT_FIELD_CARDS } from '@/features/landing/data/clientFieldCards'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { cn } from '@/shared/lib/cn'
 
 const LOOP_CARDS = [...CLIENT_FIELD_CARDS, ...CLIENT_FIELD_CARDS]
@@ -83,7 +84,7 @@ export function ClientFieldsMarquee() {
         }}
       />
 
-      <div className="relative z-[1] flex w-full items-end justify-between gap-4 pl-4 pr-4 pb-2 pt-10 sm:pl-5 sm:pr-6 sm:pt-12 lg:pl-6 lg:pr-8">
+      <ScrollReveal className="relative z-[1] flex w-full items-end justify-between gap-4 pl-4 pr-4 pb-2 pt-10 sm:pl-5 sm:pr-6 sm:pt-12 lg:pl-6 lg:pr-8">
         <div className="min-w-0 text-left">
           <p className="font-display text-3xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
             Multiple Demographics
@@ -115,9 +116,9 @@ export function ClientFieldsMarquee() {
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
-      </div>
+      </ScrollReveal>
 
-      <div className="relative z-[1] mt-8 overflow-hidden pb-10 sm:mt-10 sm:pb-12">
+      <ScrollReveal variant="fade" delay={90} className="relative z-[1] mt-8 overflow-hidden pb-10 sm:mt-10 sm:pb-12">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-y-0 left-0 z-[2] w-10 bg-gradient-to-r from-freeio-navy to-transparent sm:w-16"
@@ -140,7 +141,7 @@ export function ClientFieldsMarquee() {
             />
           ))}
         </div>
-      </div>
+      </ScrollReveal>
     </section>
   )
 }

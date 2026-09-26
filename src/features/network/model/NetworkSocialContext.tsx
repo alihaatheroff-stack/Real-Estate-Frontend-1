@@ -2,7 +2,16 @@ import { useCallback, useMemo, useState, type ReactNode } from 'react'
 import { NETWORK_CHATS, NETWORK_POSTS } from '@/features/network/data/feed'
 import { NETWORK_NOTES } from '@/features/network/data/notes'
 import { CURRENT_MEMBER_ID, getCurrentMember, getMember } from '@/features/network/data/members'
-import type { ChatAttachment, NetworkChat, NetworkNote, NetworkPost, PostAudience } from '@/features/network/data/types'
+import type {
+  ChatAttachment,
+  ChatCallLog,
+  ChatMessage,
+  NetworkChat,
+  NetworkNote,
+  NetworkPost,
+  PostAudience,
+} from '@/features/network/data/types'
+import { callLogLabel } from '@/features/network/components/messages/callLog'
 import {
   NetworkSocialContext,
   type FriendRequestAction,
@@ -145,6 +154,34 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const logChatCall = useCallback((chatId: string, call: ChatCallLog) => {
+    const preview = callLogLabel(call)
+    const next: ChatMessage = {
+      id: `call-${Date.now()}`,
+      fromMe: true,
+      text: '',
+      time: 'Now',
+      read: true,
+      callLog: call,
+    }
+    setChats((current) => {
+      const index = current.findIndex((item) => item.id === chatId)
+      if (index < 0) return current
+      const chat = current[index]
+      if (!chat) return current
+      const updated = {
+        ...chat,
+        messages: [...chat.messages, next],
+        preview,
+        timeAgo: 'Now',
+        unread: 0,
+        section: 'recent' as const,
+      }
+      if (index === 0) return [updated, ...current.slice(1)]
+      return [updated, ...current.slice(0, index), ...current.slice(index + 1)]
+    })
+  }, [])
+
   const deleteChatMessage = useCallback(
     (chatId: string, messageId: string, mode: 'me' | 'everyone') => {
       setChats((current) =>
@@ -175,9 +212,11 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
             ...chat,
             messages,
             preview: lastVisible
-              ? lastVisible.deletedForEveryone
-                ? 'This message was deleted'
-                : lastVisible.text ||
+              ? lastVisible.callLog
+                ? callLogLabel(lastVisible.callLog)
+                : lastVisible.deletedForEveryone
+                  ? 'This message was deleted'
+                  : lastVisible.text ||
                   (lastVisible.attachments?.[0]?.kind === 'audio'
                     ? 'Voice note'
                     : lastVisible.attachments?.[0]?.kind === 'video-note'
@@ -392,6 +431,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       addComment,
       markChatRead,
       sendChatMessage,
+      logChatCall,
       deleteChatMessage,
       createGroupChat,
       updateGroupChat,
@@ -415,6 +455,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       addComment,
       markChatRead,
       sendChatMessage,
+      logChatCall,
       deleteChatMessage,
       createGroupChat,
       updateGroupChat,

@@ -72,10 +72,12 @@ export const PATHS = {
   dashboardOrders: '/dashboard/orders',
   dashboardBriefs: '/dashboard/briefs',
   dashboardSettings: '/dashboard/settings',
+  glossary: '/glossary',
   about: '/about',
   monetization: '/monetization',
   contact: '/contact',
   advertise: '/advertise',
+  news: '/news',
 } as const
 
 export function servicePath(id: string) {

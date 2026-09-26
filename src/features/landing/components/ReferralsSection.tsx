@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { PATHS } from '@/app/router/paths'
 import { Section } from '@/components/layout/Section'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { useIsAuthenticated } from '@/features/auth'
 import { FieldsGrid } from '@/features/landing/components/FieldsGrid'
 import { ReferralAwards } from '@/features/landing/components/ReferralAwards'
@@ -196,35 +197,36 @@ function GuestReferralsContent() {
     <>
       <FieldsGrid embedded className="mb-12" />
 
-      <div className="mb-10 w-full">
+      <ScrollReveal className="mb-10 w-full">
         <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           1. Referral
         </h2>
-      </div>
+      </ScrollReveal>
 
       <ReferralAwards embedded showHeading={false} className="mb-10 w-full" />
 
       <div className="mb-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 lg:grid-cols-5 lg:gap-5">
-        {GUEST_ITEMS.map(({ icon, title, text }) => {
+        {GUEST_ITEMS.map(({ icon, title, text }, index) => {
           const Icon = GUEST_ICONS[icon]
           return (
-            <article
-              key={title}
-              className="group flex h-full min-w-0 flex-col rounded-2xl border border-line bg-paper/90 p-5 transition duration-300 hover:border-brand/25 hover:bg-paper"
-            >
-              <div className="mb-4 inline-flex w-fit rounded-xl bg-brand-light p-2.5 text-brand transition duration-300 group-hover:bg-brand group-hover:text-white">
-                <Icon className="h-5 w-5" aria-hidden />
-              </div>
-              <h3 className="font-display text-base font-semibold tracking-tight text-ink">
-                {title}
-              </h3>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{text}</p>
-            </article>
+            <ScrollReveal key={title} delay={index * 80} className="h-full min-w-0">
+              <article className="group flex h-full min-w-0 flex-col rounded-2xl border border-line bg-paper/90 p-5 transition duration-300 hover:border-brand/25 hover:bg-paper">
+                <div className="mb-4 inline-flex w-fit rounded-xl bg-brand-light p-2.5 text-brand transition duration-300 group-hover:bg-brand group-hover:text-white">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </div>
+                <h3 className="font-display text-base font-semibold tracking-tight text-ink">
+                  {title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">{text}</p>
+              </article>
+            </ScrollReveal>
           )
         })}
       </div>
 
-      <LearnMoreSection className="mb-10" />
+      <ScrollReveal>
+        <LearnMoreSection className="mb-10" />
+      </ScrollReveal>
 
       <SectionCtas exploreTo={PATHS.results} label="Explore Referrals" />
     </>
@@ -234,15 +236,19 @@ function GuestReferralsContent() {
 function AuthenticatedReferralsContent() {
   return (
     <>
-      <div className="mb-10 w-full">
+      <ScrollReveal className="mb-10 w-full">
         <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           1. Referral
         </h2>
-      </div>
+      </ScrollReveal>
 
-      <ReferralMemberHub className="mb-12" />
+      <ScrollReveal delay={80}>
+        <ReferralMemberHub className="mb-12" />
+      </ScrollReveal>
 
-      <LearnMoreSection className="mt-10" />
+      <ScrollReveal>
+        <LearnMoreSection className="mt-10" />
+      </ScrollReveal>
     </>
   )
 }

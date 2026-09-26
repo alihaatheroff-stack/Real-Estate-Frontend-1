@@ -20,6 +20,7 @@ export const NEWS_TABS: NewsTab[] = [
     id: 'features',
     label: 'ALL:',
     heading: '',
+    href: PATHS.news,
     bullets: [
       {
         text: "GPS. Perhapp's previously you been second-guessing or delaying. Be Certained your PSP is on their way.",

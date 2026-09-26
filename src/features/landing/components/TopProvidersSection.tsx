@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import { Section } from '@/components/layout/Section'
 import { SectionHeading } from '@/components/layout/SectionHeading'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { ProviderCard } from '@/features/referrals'
 import {
   getModuleTopProviders,
@@ -55,7 +56,11 @@ export function TopProvidersSection({
 
   const content = (
     <div className={cn(embedded && 'mt-2', className)}>
-      {showHeading ? <TopProvidersHeading module={module} embedded={embedded} /> : null}
+      {showHeading ? (
+        <ScrollReveal>
+          <TopProvidersHeading module={module} embedded={embedded} />
+        </ScrollReveal>
+      ) : null}
       <div
         className={cn(
           providers.length > 4
@@ -63,27 +68,33 @@ export function TopProvidersSection({
             : 'grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6',
         )}
       >
-        {providers.map((provider) => (
-          <div key={provider.id} className="min-w-0">
+        {providers.map((provider, index) => (
+          <ScrollReveal
+            key={provider.id}
+            delay={Math.min(index, 5) * 70}
+            className="h-full min-w-0"
+          >
             <ProviderCard
               provider={provider}
               variant="marketplace"
               rateDisplay={module === 'crowdfunding' ? '% - NonDisclosed' : undefined}
             />
-          </div>
+          </ScrollReveal>
         ))}
       </div>
 
       {listHref && listLabel ? (
-        <div className="mt-5 flex justify-end">
-          <Link
-            to={listHref}
-            className="inline-flex items-center gap-1.5 font-display text-sm font-semibold tracking-tight text-brand underline underline-offset-4 transition hover:text-brand-dark"
-          >
-            {listLabel}
-            <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
-          </Link>
-        </div>
+        <ScrollReveal delay={80}>
+          <div className="mt-5 flex justify-end">
+            <Link
+              to={listHref}
+              className="inline-flex items-center gap-1.5 font-display text-sm font-semibold tracking-tight text-brand underline underline-offset-4 transition hover:text-brand-dark"
+            >
+              {listLabel}
+              <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
+            </Link>
+          </div>
+        </ScrollReveal>
       ) : null}
     </div>
   )

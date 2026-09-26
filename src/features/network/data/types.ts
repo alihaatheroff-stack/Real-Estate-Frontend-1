@@ -174,6 +174,12 @@ export type ChatAttachment = {
   durationMs?: number
 }
 
+export type ChatCallLog = {
+  mode: 'voice' | 'video'
+  outcome: 'completed' | 'cancelled'
+  durationSec: number
+}
+
 export type ChatMessage = {
   id: string
   fromMe: boolean
@@ -182,6 +188,8 @@ export type ChatMessage = {
   time: string
   read?: boolean
   attachments?: ChatAttachment[]
+  /** Placed in the thread after a voice or video call ends. */
+  callLog?: ChatCallLog
   /** Hidden from the current user's inbox only. */
   deletedForMe?: boolean
   /** Removed for all participants; show a tombstone in the thread. */

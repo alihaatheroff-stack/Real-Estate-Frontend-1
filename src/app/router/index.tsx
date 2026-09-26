@@ -59,6 +59,8 @@ import { NotFoundPage } from '@/pages/errors/NotFoundPage'
 import { PlaceholderPage } from '@/pages/errors/PlaceholderPage'
 import { AboutPage } from '@/pages/about/AboutPage'
 import { AdvertisePage } from '@/pages/advertise/AdvertisePage'
+import { NewsPage } from '@/pages/news/NewsPage'
+import { GlossaryPage } from '@/pages/glossary/GlossaryPage'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import {
   DashboardAboutPage,
@@ -124,6 +126,14 @@ export const router = createBrowserRouter([
           {
             path: PATHS.advertise,
             element: <AdvertisePage />,
+          },
+          {
+            path: PATHS.news,
+            element: <NewsPage />,
+          },
+          {
+            path: PATHS.glossary,
+            element: <GlossaryPage />,
           },
           {
             path: PATHS.shop,

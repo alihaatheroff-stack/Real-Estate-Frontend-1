@@ -25,8 +25,8 @@ function PageViewsChart() {
     <svg viewBox={`0 0 ${width} ${height}`} className="h-56 w-full" role="img" aria-label="Page views">
       <defs>
         <linearGradient id="dashViewsFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1b6b4f" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#1b6b4f" stopOpacity="0.02" />
+          <stop offset="0%" stopColor="#0b1f3a" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#0b1f3a" stopOpacity="0.02" />
         </linearGradient>
       </defs>
       {[0, 0.5, 1].map((t) => {
@@ -47,7 +47,7 @@ function PageViewsChart() {
       <polyline
         points={points}
         fill="none"
-        stroke="#1b6b4f"
+        stroke="#0b1f3a"
         strokeWidth="2.5"
         strokeLinejoin="round"
         strokeLinecap="round"

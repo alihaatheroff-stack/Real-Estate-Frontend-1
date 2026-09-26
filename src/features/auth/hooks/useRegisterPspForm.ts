@@ -34,7 +34,9 @@ import {
 import {
   DEFAULT_FILTERS,
   SERVICE_DISTANCE_MIN,
+  getPspFilterProfile,
   type HeroFiltersState,
+  type LandingFilterValues,
   joinCsv,
   splitCsv,
 } from '@/features/search'
@@ -109,6 +111,92 @@ export function useRegisterPspForm() {
     if (key === 'pspCategory') clearFieldError('pspCategory')
   }
 
+  function applyPspSelection(next: string[]) {
+    const profile = getPspFilterProfile(next)
+    setProfileFilters((prev) => {
+      const updated: HeroFiltersState = {
+        ...prev,
+        pspCategory: joinCsv(next),
+      }
+      if (profile !== 'real-estate' && profile !== 'executive') {
+        updated.representation = ''
+        updated.financing = ''
+        updated.tagSkill = ''
+      }
+      if (profile !== 'mortgage') {
+        updated.institution = ''
+        updated.purchaseExperience = ''
+        updated.loanExperience = ''
+        updated.whichService = ''
+        updated.govAgencies = ''
+        updated.charge = ''
+        updated.income = ''
+        updated.dti = ''
+        updated.ltv = ''
+        updated.loanTypes = ''
+        updated.loanRateType = ''
+        updated.prepaymentPenalty = ''
+        updated.timeDuration = ''
+        updated.lengthToClose = ''
+        updated.creditCheck = ''
+      }
+      if (profile !== 'trades') {
+        updated.prSqFt = ''
+        updated.proof = ''
+        updated.legalTitle = ''
+      }
+      return updated
+    })
+    setError('')
+    clearFieldError('pspCategory')
+  }
+
+  function applyLandingFilterChange<K extends keyof LandingFilterValues>(
+    key: K,
+    next: LandingFilterValues[K],
+  ) {
+    if (key === 'zip') {
+      setProfileFilter('zip', next as string)
+      return
+    }
+    if (key === 'radius') {
+      setProfileFilter('radius', next as string)
+      return
+    }
+
+    const list = next as string[]
+
+    if (key === 'find') {
+      const mapped = list.map((label) => {
+        if (label === 'Service') return 'service'
+        if (label === 'Profile') return 'profile'
+        if (label === 'Office') return 'agency'
+        return label
+      })
+      setProfileFilter('find', joinCsv(mapped))
+      return
+    }
+
+    if (key === 'psp') {
+      applyPspSelection(list)
+      return
+    }
+
+    if (key === 'representation') {
+      setProfileFilters((prev) => ({
+        ...prev,
+        representation: joinCsv(list),
+        financing: '',
+      }))
+      setError('')
+      return
+    }
+
+    const heroKey =
+      key === 'references' ? 'referral' : (key as keyof HeroFiltersState)
+    setProfileFilter(heroKey, joinCsv(list) as HeroFiltersState[typeof heroKey])
+  }
+
   function setProfileFilterList(key: keyof HeroFiltersState, next: string[]) {
     if (key === 'find') {
       const mapped = next.map((label) => {
@@ -121,18 +209,7 @@ export function useRegisterPspForm() {
       return
     }
     if (key === 'pspCategory') {
-      setProfileFilter('pspCategory', joinCsv(next))
-      const stillAgent = next.some(
-        (value) => value === 'Agent' || value.startsWith('Agent > '),
-      )
-      if (!stillAgent) {
-        setProfileFilters((prev) => ({
-          ...prev,
-          pspCategory: joinCsv(next),
-          representation: '',
-          financing: '',
-        }))
-      }
+      applyPspSelection(next)
       return
     }
     if (key === 'representation') {
@@ -728,6 +805,7 @@ export function useRegisterPspForm() {
     distance,
     setProfileFilter,
     setProfileFilterList,
+    applyLandingFilterChange,
     update,
     setHasAllergy,
     addEmergencyContact,

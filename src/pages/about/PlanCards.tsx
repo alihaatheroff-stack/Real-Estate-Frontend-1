@@ -18,7 +18,7 @@ export function PlanCards() {
             key={plan.id}
             className={cn(
               'flex flex-col items-center rounded-lg bg-white px-6 py-8 text-center shadow-[0_10px_32px_rgba(15,23,42,0.06)]',
-              plan.featured && 'shadow-[0_16px_40px_rgba(27,107,79,0.14)]',
+              plan.featured && 'shadow-[0_16px_40px_rgba(11,31,58,0.14)]',
             )}
           >
             <p className="font-display text-4xl font-bold tracking-tight text-ink">

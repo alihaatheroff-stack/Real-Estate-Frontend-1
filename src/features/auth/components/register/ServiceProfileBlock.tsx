@@ -1,56 +1,89 @@
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
-import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import { RangeSlider } from '@/components/ui/RangeSlider'
-import { REGISTER_FIND_OPTIONS } from '@/features/auth/model/registerPsp'
 import type {
   AddressFields,
   FormOfPaymentMethodEntry,
   FormOfPaymentMethodField,
 } from '@/features/auth/model/registerPsp'
 import {
-  ENGLISH_LEVEL_OPTIONS,
   SERVICE_DISTANCE_MAX,
   SERVICE_DISTANCE_MIN,
   type HeroFiltersState,
+  type LandingFilterValues,
   AR_MEASUREMENT_TOOLS_OPTIONS,
-  CLIENT_EXPERIENCE_TREE,
-  CLIENT_MOTIVE_OPTIONS,
   EDUCATION_ARCHIVE_OPTIONS,
-  FIELD_TREE,
-  LANGUAGE_BY_LETTER,
+  ENGLISH_LEVEL_OPTIONS,
+  LandingFilterFields,
   PAYMENT_METHODS_TREE,
   PAYMENT_PACKET_OPTIONS,
   PAYMENT_TERMS_OPTIONS,
-  PRICE_DEMOGRAPHY_OPTIONS,
-  PROPERTY_CONDITION_OPTIONS,
-  PSP_BY_LETTER,
-  PSP_NESTED_TREES,
-  REPRESENTATION_TOP_TREE,
-  SALE_TYPE_TREE,
   TIER_SELECTION_OPTIONS,
-  TITLE_OPTIONS,
-  VACANCY_OPTIONS,
-  YOUR_EXPERIENCE_OPTIONS,
   splitCsv,
 } from '@/features/search'
+import { RegisterFilterMenuProvider } from '@/features/search/components/HeroFilterSelect'
 import { FormOfPaymentMethodsBlock } from './formOfPayment'
 import { FormSection } from './registerUi'
-import {
-  ProfileFilterGroup,
-  RegisterFilterSelect,
-  WillingToTrainSelect,
-} from './serviceProfileControls'
+import { ProfileFilterGroup, RegisterFilterSelect } from './serviceProfileControls'
+
+function toLandingValues(filters: HeroFiltersState): LandingFilterValues {
+  const findLabels = splitCsv(filters.find).map((value) => {
+    if (value === 'service') return 'Service'
+    if (value === 'profile') return 'Profile'
+    if (value === 'agency') return 'Office'
+    return value
+  })
+
+  return {
+    role: splitCsv(filters.role),
+    find: findLabels,
+    psp: splitCsv(filters.pspCategory),
+    representation: splitCsv(filters.representation),
+    financing: splitCsv(filters.financing),
+    field: splitCsv(filters.field),
+    clientExperience: splitCsv(filters.clientExperience),
+    condition: splitCsv(filters.condition),
+    vacancy: splitCsv(filters.vacancy),
+    propertyTitle: splitCsv(filters.propertyTitle),
+    saleType: splitCsv(filters.saleType),
+    tagSkill: splitCsv(filters.tagSkill),
+    yourExperience: splitCsv(filters.yourExperience),
+    experienceLevel: splitCsv(filters.experienceLevel),
+    motive: splitCsv(filters.motive),
+    language: splitCsv(filters.language),
+    percentageShare: splitCsv(filters.percentageShare),
+    willingToTrain: splitCsv(filters.willingToTrain),
+    formOfPayment: splitCsv(filters.formOfPayment),
+    references: splitCsv(filters.referral),
+    priceBand: splitCsv(filters.priceBand),
+    institution: splitCsv(filters.institution),
+    purchaseExperience: splitCsv(filters.purchaseExperience),
+    loanExperience: splitCsv(filters.loanExperience),
+    whichService: splitCsv(filters.whichService),
+    govAgencies: splitCsv(filters.govAgencies),
+    charge: splitCsv(filters.charge),
+    income: splitCsv(filters.income),
+    dti: splitCsv(filters.dti),
+    ltv: splitCsv(filters.ltv),
+    loanTypes: splitCsv(filters.loanTypes),
+    loanRateType: splitCsv(filters.loanRateType),
+    prepaymentPenalty: splitCsv(filters.prepaymentPenalty),
+    timeDuration: splitCsv(filters.timeDuration),
+    lengthToClose: splitCsv(filters.lengthToClose),
+    creditCheck: splitCsv(filters.creditCheck),
+    prSqFt: splitCsv(filters.prSqFt),
+    proof: splitCsv(filters.proof),
+    legalTitle: splitCsv(filters.legalTitle),
+    zip: filters.zip,
+    radius: filters.radius,
+  }
+}
 
 export function ServiceProfileBlock({
   step = 5,
   profileFilters,
   setProfileFilter,
   setProfileFilterList,
-  findLabels,
-  selectedPsp,
-  selectedFields,
-  representation,
-  showRepresentation,
+  applyLandingFilterChange,
   distance,
   formOfPaymentMethods,
   businessName,
@@ -67,11 +100,10 @@ export function ServiceProfileBlock({
     value: HeroFiltersState[K],
   ) => void
   setProfileFilterList: (key: keyof HeroFiltersState, next: string[]) => void
-  findLabels: string[]
-  selectedPsp: string[]
-  selectedFields: string[]
-  representation: string[]
-  showRepresentation: boolean
+  applyLandingFilterChange: <K extends keyof LandingFilterValues>(
+    key: K,
+    next: LandingFilterValues[K],
+  ) => void
   distance: number
   formOfPaymentMethods: FormOfPaymentMethodEntry[]
   businessName: string
@@ -87,144 +119,28 @@ export function ServiceProfileBlock({
 }) {
   return (
     <FormSection title="Service profile" step={step}>
+      <RegisterFilterMenuProvider>
       <div className="flex flex-col gap-3">
-        <ProfileFilterGroup title="Role & category">
-          <RegisterFilterSelect
-            label="Role:"
-            placeholder="Ex. (Profile, Office)"
-            options={REGISTER_FIND_OPTIONS}
-            value={findLabels.filter((label) => label !== 'Service')}
-            onChange={(next) => setProfileFilterList('find', next)}
-          />
-
-          <RegisterFilterSelect
-            label="A-Z Psp: "
-            placeholder="Ex. (Agent, Architect, Real Estate, etc.,)"
-            optionsByLetter={PSP_BY_LETTER}
-            nestedTrees={PSP_NESTED_TREES}
-            showLetterSuggest
-            value={selectedPsp}
-            onChange={(next) => setProfileFilterList('pspCategory', next)}
-            invalid={pspCategoryInvalid}
-          />
-
-          {showRepresentation ? (
-            <RegisterFilterSelect
-              label="Representation's: "
-              placeholder="Ex. (Selling, Buying, Leasing, etc.,)"
-              tree={REPRESENTATION_TOP_TREE}
-              value={representation}
-              onChange={(next) => setProfileFilterList('representation', next)}
-            />
-          ) : null}
-        </ProfileFilterGroup>
-
-        <ProfileFilterGroup title="Property focus">
-          <RegisterFilterSelect
-            label="Price Demography: "
-            placeholder="Ex. (Affordable, Mid-Range, Luxury etc.,)"
-            options={PRICE_DEMOGRAPHY_OPTIONS}
-            value={splitCsv(profileFilters.priceBand)}
-            onChange={(next) => setProfileFilterList('priceBand', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Field Specialty: "
-            placeholder="Ex. (Commercial, Agriculture, etc.,)"
-            tree={FIELD_TREE}
-            value={selectedFields}
-            onChange={(next) => setProfileFilterList('field', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Property Condition Specialty:"
-            placeholder="Ex. (New Construction, Burned down, etc.,)"
-            options={PROPERTY_CONDITION_OPTIONS}
-            value={splitCsv(profileFilters.condition)}
-            onChange={(next) => setProfileFilterList('condition', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Vacancy Specialty:"
-            placeholder="Ex. (Vacant, Tenant-Occupied, etc.,)"
-            options={VACANCY_OPTIONS}
-            value={splitCsv(profileFilters.vacancy)}
-            onChange={(next) => setProfileFilterList('vacancy', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Title Experiences:"
-            placeholder="Ex. (Partnership, Tenancy, Sole,  etc.,)"
-            options={TITLE_OPTIONS}
-            value={splitCsv(profileFilters.propertyTitle)}
-            onChange={(next) => setProfileFilterList('propertyTitle', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Sale Type Experience:"
-            placeholder="Ex. (Standard, Clear, Lien, etc.,)"
-            tree={SALE_TYPE_TREE}
-            value={splitCsv(profileFilters.saleType)}
-            onChange={(next) => setProfileFilterList('saleType', next)}
-          />
-        </ProfileFilterGroup>
-
-        <ProfileFilterGroup title="Experience">
-          <RegisterFilterSelect
-            label="Experience:"
-            placeholder="Ex. (Beginner, Intermediate, Expert etc.,)"
-            tree={CLIENT_EXPERIENCE_TREE}
-            value={splitCsv(profileFilters.clientExperience)}
-            onChange={(next) => setProfileFilterList('clientExperience', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Recipient Experience:"
-            placeholder="Ex. (Expert, Intermediate, Beginner, etc.,)"
-            options={YOUR_EXPERIENCE_OPTIONS}
-            value={splitCsv(profileFilters.yourExperience)}
-            onChange={(next) => setProfileFilterList('yourExperience', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Motive Experience:"
-            placeholder="Ex. (A.Have to, D.Wasting Time, etc.,)"
-            options={CLIENT_MOTIVE_OPTIONS}
-            value={splitCsv(profileFilters.motive)}
-            onChange={(next) => setProfileFilterList('motive', next)}
-          />
-
-          <RegisterFilterSelect
-            label="Language Experience:"
-            placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
-            optionsByLetter={LANGUAGE_BY_LETTER}
-            value={splitCsv(profileFilters.language)}
-            onChange={(next) => setProfileFilterList('language', next)}
-          />
-
-          <RegisterFilterSelect
-            label="English Level:"
-            placeholder="Ex. (Low, Middle, High, etc.,)"
-            options={ENGLISH_LEVEL_OPTIONS.map((option) => option.label)}
-            value={splitCsv(profileFilters.englishLevel)}
-            onChange={(next) => setProfileFilterList('englishLevel', next)}
-          />
-
-          <ReferralShareInput
-            showQaMark
-            label="Referral Share:"
-            name="percentageShare"
-            value={profileFilters.percentageShare}
-            onChange={(value) => setProfileFilter('percentageShare', value)}
-          />
-
-          <WillingToTrainSelect
-            value={profileFilters.willingToTrain}
-            onChange={(value) => setProfileFilter('willingToTrain', value)}
-          />
-        </ProfileFilterGroup>
-
-        <ProfileFilterGroup title="Tools & education">
+        <LandingFilterFields
+          hideLocation
+          pspInvalid={pspCategoryInvalid}
+          value={toLandingValues(profileFilters)}
+          onChange={applyLandingFilterChange}
+          groupSections={(sections) => (
+            <>
+              <ProfileFilterGroup title="Role & category">{sections.role}</ProfileFilterGroup>
+              <ProfileFilterGroup title="Property focus">{sections.property}</ProfileFilterGroup>
+              <ProfileFilterGroup title="Experience">
+                {sections.experience}
+                <RegisterFilterSelect
+                  label="English Level:"
+                  placeholder="Ex. (Low, Middle, High, etc.,)"
+                  options={ENGLISH_LEVEL_OPTIONS.map((option) => option.label)}
+                  value={splitCsv(profileFilters.englishLevel)}
+                  onChange={(next) => setProfileFilterList('englishLevel', next)}
+                />
+              </ProfileFilterGroup>
+              <ProfileFilterGroup title="Tools & education">
           <RegisterFilterSelect
             label="EDUCATION + ARCHIVE + video playlists based on search:"
             placeholder="Ex. (Negotiation's, Hiring Appraisers)"
@@ -241,9 +157,9 @@ export function ServiceProfileBlock({
             value={splitCsv(profileFilters.arMeasurementTools)}
             onChange={(next) => setProfileFilterList('arMeasurementTools', next)}
           />
-        </ProfileFilterGroup>
-
-        <ProfileFilterGroup title="Payments & terms">
+              </ProfileFilterGroup>
+              <ProfileFilterGroup title="Payments & terms">
+                {sections.payments}
           <RegisterFilterSelect
             label="Payment Methods:"
             placeholder="Ex. (Cash, Credit)"
@@ -284,24 +200,27 @@ export function ServiceProfileBlock({
             onUpdate={onUpdateFormOfPaymentMethod}
             onRemove={onRemoveFormOfPaymentMethod}
           />
-        </ProfileFilterGroup>
-
-        <ProfileFilterGroup title="Service area">
-          <div className="space-y-2">
-            <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted">
-              Mile Radius
-              <FieldQaMark field="Mile Radius" />
-            </span>
-            <p className="text-sm text-muted">Distance: {distance} miles</p>
-            <RangeSlider
-              min={SERVICE_DISTANCE_MIN}
-              max={SERVICE_DISTANCE_MAX}
-              value={distance}
-              onChange={(value) => setProfileFilter('radius', String(value))}
-            />
-          </div>
-        </ProfileFilterGroup>
+              </ProfileFilterGroup>
+              <ProfileFilterGroup title="Service area">
+                <div className="space-y-2">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted">
+                    Mile Radius
+                    <FieldQaMark field="Mile Radius" />
+                  </span>
+                  <p className="text-sm text-muted">Distance: {distance} miles</p>
+                  <RangeSlider
+                    min={SERVICE_DISTANCE_MIN}
+                    max={SERVICE_DISTANCE_MAX}
+                    value={distance}
+                    onChange={(value) => setProfileFilter('radius', String(value))}
+                  />
+                </div>
+              </ProfileFilterGroup>
+            </>
+          )}
+        />
       </div>
+      </RegisterFilterMenuProvider>
     </FormSection>
   )
 }

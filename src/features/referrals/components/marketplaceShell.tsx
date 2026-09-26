@@ -176,7 +176,7 @@ export function MarketplaceSearchButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex h-12 shrink-0 items-center justify-center rounded-xl bg-freeio px-6 text-sm font-semibold text-white transition hover:brightness-95',
+        'inline-flex h-12 shrink-0 items-center justify-center rounded-xl bg-[#0b1f3a] px-6 text-sm font-semibold text-white transition hover:brightness-95',
         className,
       )}
     >

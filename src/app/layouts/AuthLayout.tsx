@@ -8,7 +8,7 @@ function AuthLogo({ showTagline = false }: { showTagline?: boolean }) {
     <Link to={PATHS.home} className="flex min-w-0 shrink-0 items-center gap-3">
       <span
         aria-hidden
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand text-xs font-extrabold tracking-wide text-white sm:h-11 sm:w-11 sm:text-sm"
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0b1f3a] text-xs font-extrabold tracking-wide text-white sm:h-11 sm:w-11 sm:text-sm"
       >
         RE
       </span>

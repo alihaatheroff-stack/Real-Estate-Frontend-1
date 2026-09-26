@@ -104,7 +104,7 @@ export const FEATURED_AD_EMPLOYERS: Employer[] = [
     id: 'ad-office-northstar',
     name: 'Northstar Inspection Group',
     logoInitials: 'NI',
-    logoColor: '#1B6B4F',
+    logoColor: '#0b1f3a',
     tagline: 'Pre-offer inspections for buyer desks',
     category: 'construction-trade',
     city: 'Fresno',

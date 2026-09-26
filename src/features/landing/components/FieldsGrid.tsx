@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Section } from '@/components/layout/Section'
 import { SectionHeading } from '@/components/layout/SectionHeading'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { PROPERTY_FIELDS } from '@/features/search'
 import { PATHS } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
@@ -14,13 +15,15 @@ type FieldsGridProps = {
 export function FieldsGrid({ embedded = false, className }: FieldsGridProps) {
   const content = (
     <div className={cn(embedded && 'mt-2', className)}>
-      <SectionHeading
-
-        title="Explore all Real Fields"
-        size={embedded ? 'subsection' : 'section'}
-        className="w-full [&>div]:max-w-none"
-      />
-      <div className="flex gap-4 overflow-x-auto pb-1 lg:gap-5">
+      <ScrollReveal>
+        <SectionHeading
+          title="Explore all Real Fields"
+          size={embedded ? 'subsection' : 'section'}
+          className="w-full [&>div]:max-w-none"
+        />
+      </ScrollReveal>
+      <ScrollReveal delay={90}>
+        <div className="flex gap-4 overflow-x-auto pb-1 lg:gap-5">
         {PROPERTY_FIELDS.map((field) => (
           <Link
             key={field.id}
@@ -39,7 +42,8 @@ export function FieldsGrid({ embedded = false, className }: FieldsGridProps) {
             </p>
           </Link>
         ))}
-      </div>
+        </div>
+      </ScrollReveal>
     </div>
   )
 

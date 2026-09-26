@@ -51,7 +51,7 @@ function FeedMedia({
           <img src={imageUrl} alt="" className="max-h-[420px] w-full object-cover" />
         )
       ) : (
-        <div className="flex h-[280px] w-full items-center justify-center bg-[linear-gradient(135deg,#d8efe6_0%,#c5ddd2_100%)] text-sm text-ink-soft">
+        <div className="flex h-[280px] w-full items-center justify-center bg-[linear-gradient(135deg,#E7EAF1_0%,#C5CCD6_100%)] text-sm text-ink-soft">
           Your image appears here
         </div>
       )}
@@ -139,7 +139,7 @@ function PlacementAdCreative({
             <img src={imageUrl} alt="" className="h-full w-full object-cover" />
           )
         ) : (
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,#d8efe6_0%,#c5ddd2_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,#E7EAF1_0%,#C5CCD6_100%)]" />
         )}
         <span className="absolute left-2 top-2 z-[3] rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-semibold text-ink shadow-sm">
           Ad

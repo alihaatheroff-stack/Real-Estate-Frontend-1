@@ -12,11 +12,14 @@ import {
   Trash2,
   Video,
 } from 'lucide-react'
+import { CallSession, type CallEndResult } from '@/features/network/components/messages/CallSession'
+import { primeCallAudio, requestCallMedia, type CallMode } from '@/features/network/components/messages/callMedia'
+import { callLogLabel } from '@/features/network/components/messages/callLog'
 import { ConversationAvatar } from '@/features/network/components/messages/ConversationAvatar'
 import { getChatIdentity, getMe, getMessageAuthor } from '@/features/network/components/messages/chatIdentity'
 import { MessageComposer } from '@/features/network/components/messages/MessageComposer'
 import { MemberAvatar } from '@/features/network/components/shared/MemberAvatar'
-import type { ChatAttachment, ChatMessage, NetworkChat } from '@/features/network/data/types'
+import type { ChatAttachment, ChatCallLog, ChatMessage, NetworkChat } from '@/features/network/data/types'
 import { useNicknameVersion, useNicknames } from '@/features/network/model/nicknames'
 import { cn } from '@/shared/lib/cn'
 
@@ -31,6 +34,7 @@ export function ChatThread({
   listCollapsed,
   onExpandList,
   onOpenInfo,
+  onLogCall,
 }: {
   chat: NetworkChat
   messages: ChatMessage[]
@@ -42,6 +46,7 @@ export function ChatThread({
   listCollapsed?: boolean
   onExpandList?: () => void
   onOpenInfo?: () => void
+  onLogCall?: (call: ChatCallLog) => void
 }) {
   useNicknameVersion()
   const { getNickname, setNickname, clearNickname } = useNicknames()
@@ -51,6 +56,11 @@ export function ChatThread({
   const moreRef = useRef<HTMLDivElement>(null)
   const [moreOpen, setMoreOpen] = useState(false)
   const [nicknameOpen, setNicknameOpen] = useState(false)
+  const [call, setCall] = useState<{
+    mode: CallMode
+    audio: AudioContext | null
+    media: ReturnType<typeof requestCallMedia>
+  } | null>(null)
   const visibleMessages = messages.filter((message) => !message.deletedForMe)
   const showTyping = Boolean(chat.typing && identity.member && !visibleMessages.at(-1)?.fromMe)
   const canNickname = chat.kind === 'direct' && Boolean(chat.memberId)
@@ -68,6 +78,20 @@ export function ChatThread({
     document.addEventListener('mousedown', onPointerDown)
     return () => document.removeEventListener('mousedown', onPointerDown)
   }, [moreOpen])
+
+  function startCall(mode: CallMode) {
+    setCall({ mode, audio: primeCallAudio(), media: requestCallMedia(mode) })
+  }
+
+  function finishCall(result: CallEndResult) {
+    setCall(null)
+    if (result.outcome === 'failed') return
+    onLogCall?.({
+      mode: result.mode,
+      outcome: result.outcome,
+      durationSec: result.durationSec,
+    })
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -120,10 +144,10 @@ export function ChatThread({
           </button>
         </div>
         <div className="flex items-center gap-0.5 text-brand">
-          <IconButton label="Call">
+          <IconButton label="Voice call" onClick={() => startCall('voice')}>
             <Phone className="size-[18px]" />
           </IconButton>
-          <IconButton label="Video">
+          <IconButton label="Video call" onClick={() => startCall('video')}>
             <Video className="size-[18px]" />
           </IconButton>
           <div ref={moreRef} className="relative">
@@ -178,6 +202,9 @@ export function ChatThread({
         </div>
 
         {visibleMessages.map((message) => {
+          if (message.callLog) {
+            return <CallLogRow key={message.id} message={message} />
+          }
           const author = message.fromMe ? me : getMessageAuthor(chat, message.fromMemberId)
           const authorNickname = author && !message.fromMe ? getNickname(author.id) : undefined
           return (
@@ -227,6 +254,34 @@ export function ChatThread({
           }}
         />
       ) : null}
+
+      {call ? (
+        <CallSession
+          mode={call.mode}
+          title={identity.title}
+          subtitle={identity.realName ? identity.realName : identity.subtitle}
+          avatarSrc={identity.isGroup ? identity.groupAvatar : identity.member?.avatar}
+          audio={call.audio}
+          media={call.media}
+          onEnd={finishCall}
+        />
+      ) : null}
+    </div>
+  )
+}
+
+function CallLogRow({ message }: { message: ChatMessage }) {
+  const log = message.callLog
+  if (!log) return null
+  const Icon = log.mode === 'video' ? Video : Phone
+  const cancelled = log.outcome === 'cancelled'
+  return (
+    <div className="flex justify-center">
+      <div className="flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium shadow-sm ring-1 ring-black/[0.04]">
+        <Icon className={cn('size-3.5', cancelled ? 'text-red-500' : 'text-brand')} />
+        <span className={cancelled ? 'text-red-600' : 'text-ink'}>{callLogLabel(log)}</span>
+        <span className="text-[11px] text-muted">{message.time}</span>
+      </div>
     </div>
   )
 }

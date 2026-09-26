@@ -4,6 +4,7 @@ import { ChevronDown, GraduationCap, LayoutDashboard, LogOut, Menu, X } from 'lu
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/layout/Container'
 import { AdvertiseMenu } from '@/components/layout/AdvertiseMenu'
+import { NewsHeaderLink } from '@/components/layout/NewsHeaderLink'
 import { CallsMenu } from '@/components/layout/CallsMenu'
 import { WritingMenu } from '@/components/layout/WritingMenu'
 import { FavoritesMenu } from '@/components/layout/FavoritesMenu'
@@ -106,7 +107,7 @@ export function SiteHeader({
         >
           <span
             aria-hidden
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-brand sm:h-12 sm:w-12"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#0b1f3a] sm:h-12 sm:w-12"
           />
           <span className="min-w-0 leading-tight">
             <span className="block font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
@@ -129,6 +130,7 @@ export function SiteHeader({
 
         <div className="flex items-center gap-0.5 sm:gap-1">
           <div className="hidden items-center gap-0.5 sm:flex">
+            <NewsHeaderLink />
             <WritingMenu locked={!isAuthenticated} />
             <AdvertiseMenu />
             <CallsMenu locked={!isAuthenticated} />
@@ -271,6 +273,10 @@ export function SiteHeader({
               )
             })}
             <div className="mt-2 flex items-center justify-center gap-1 border-t border-line pt-3">
+              <NewsHeaderLink
+                iconClassName="h-5 w-5"
+                onNavigate={() => setOpen(false)}
+              />
               <WritingMenu locked={!isAuthenticated} />
               <AdvertiseMenu />
               <CallsMenu locked={!isAuthenticated} />

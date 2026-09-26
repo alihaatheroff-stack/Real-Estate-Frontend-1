@@ -26,6 +26,7 @@ import {
   CLIENT_TRUST_POINTS,
 } from '@/features/landing/data/clientHire'
 import { cn } from '@/shared/lib/cn'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 
 const BENEFIT_ICONS: LucideIcon[] = [
   ShieldCheck,
@@ -92,7 +93,7 @@ export function ClientHireSection() {
           aria-hidden
           className="absolute inset-0 bg-gradient-to-r from-freeio-navy via-freeio-navy/88 to-freeio-navy/45"
         />
-        <div className="relative z-[1] mx-auto flex min-h-[22rem] w-full max-w-[90rem] flex-col justify-end px-4 py-10 sm:min-h-[26rem] sm:px-6 sm:py-14 lg:px-8">
+        <ScrollReveal className="relative z-[1] mx-auto flex min-h-[22rem] w-full max-w-[90rem] flex-col justify-end px-4 py-10 sm:min-h-[26rem] sm:px-6 sm:py-14 lg:px-8">
           <SectionEyebrow>Hire</SectionEyebrow>
           <h2 className="mt-3 max-w-3xl font-display text-3xl font-semibold tracking-tight text-white sm:text-5xl md:text-6xl">
             From Tradesmen to Professionals
@@ -101,25 +102,25 @@ export function ClientHireSection() {
             Quality work and comparative pricing — hire verified providers with escrow
             protection, GPS matching, and clear upfront costs.
           </p>
-        </div>
+        </ScrollReveal>
       </div>
 
       {/* What we offer — image service cards */}
       <div className="mx-auto w-full max-w-[90rem] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="mb-8 max-w-2xl sm:mb-10">
+        <ScrollReveal className="mb-8 max-w-2xl sm:mb-10">
           <SectionEyebrow>Service Features</SectionEyebrow>
           <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink sm:text-4xl">
             What We Offer Clients
           </h3>
-        </div>
+        </ScrollReveal>
 
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {CLIENT_HIRE_BENEFITS.map((benefit, index) => {
             const Icon = BENEFIT_ICONS[index] ?? Sparkles
             return (
+              <ScrollReveal key={benefit.title} delay={Math.min(index, 5) * 70} className="h-full">
               <article
-                key={benefit.title}
-                className="group border border-line bg-white shadow-[0_12px_40px_rgba(11,31,58,0.06)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.12)]"
+                className="group h-full border border-line bg-white shadow-[0_12px_40px_rgba(11,31,58,0.06)] transition hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(11,31,58,0.12)]"
               >
                 <div className="relative aspect-[16/11] overflow-hidden">
                   <img
@@ -142,6 +143,7 @@ export function ClientHireSection() {
                   <p className="text-sm leading-relaxed text-muted">{benefit.description}</p>
                 </div>
               </article>
+              </ScrollReveal>
             )
           })}
         </div>
@@ -150,7 +152,7 @@ export function ClientHireSection() {
       {/* Why choose us — split image + checklist */}
       <div className="bg-freeio-wash">
         <div className="mx-auto grid w-full max-w-[90rem] gap-0 lg:grid-cols-2">
-          <div className="relative min-h-[22rem] overflow-hidden lg:min-h-full">
+          <ScrollReveal className="relative min-h-[22rem] overflow-hidden lg:min-h-full">
             <img
               src={CLIENT_HIRE_VERIFIED_IMAGE}
               alt="Verified professional meeting a client"
@@ -166,9 +168,9 @@ export function ClientHireSection() {
                 Verified service categories
               </p>
             </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="flex flex-col justify-center px-4 py-12 sm:px-8 sm:py-16 lg:px-12">
+          <ScrollReveal delay={90} className="flex flex-col justify-center px-4 py-12 sm:px-8 sm:py-16 lg:px-12">
             <SectionEyebrow>Why Choose Us</SectionEyebrow>
             <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink sm:text-4xl">
               Verified & Trusted
@@ -181,17 +183,17 @@ export function ClientHireSection() {
             <div className="mt-8">
               <FeatureList items={CLIENT_TRUST_POINTS} />
             </div>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
 
       {/* Awards strip */}
       <div className="bg-freeio-navy">
         <div className="mx-auto grid w-full max-w-[90rem] gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
-          {CLIENT_HIRE_AWARDS.map((award) => (
+          {CLIENT_HIRE_AWARDS.map((award, index) => (
+            <ScrollReveal key={award.title} delay={index * 70} className="h-full">
             <article
-              key={award.title}
-              className="bg-freeio-navy px-6 py-8 text-center transition hover:bg-freeio-navy/80"
+              className="h-full bg-freeio-navy px-6 py-8 text-center transition hover:bg-freeio-navy/80"
             >
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-accent/50 text-accent">
                 <BadgeCheck className="h-5 w-5" />
@@ -203,6 +205,7 @@ export function ClientHireSection() {
                 {award.subtitle}
               </p>
             </article>
+            </ScrollReveal>
           ))}
         </div>
       </div>
@@ -228,8 +231,9 @@ export function ClientHireSection() {
             image: CLIENT_HIRE_PAYMENT_IMAGE,
             items: [...CLIENT_PAYMENT_PACKETS, ...CLIENT_PAYMENT_META],
           },
-        ].map((panel) => (
-          <article key={panel.title} className="relative min-h-[22rem] overflow-hidden">
+        ].map((panel, index) => (
+          <ScrollReveal key={panel.title} delay={index * 90} className="h-full">
+          <article className="relative h-full min-h-[22rem] overflow-hidden">
             <img
               src={panel.image}
               alt=""
@@ -250,13 +254,14 @@ export function ClientHireSection() {
               </div>
             </div>
           </article>
+          </ScrollReveal>
         ))}
       </div>
 
       {/* Bottom CTA strip with side image */}
       <div className="border-t border-line bg-white">
         <div className="mx-auto grid w-full max-w-[90rem] lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="flex flex-col justify-center px-4 py-10 sm:px-8 sm:py-14 lg:px-12">
+          <ScrollReveal className="flex flex-col justify-center px-4 py-10 sm:px-8 sm:py-14 lg:px-12">
             <SectionEyebrow>Ready to Hire</SectionEyebrow>
             <h3 className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink sm:text-4xl">
               Start your journey with industry experts
@@ -273,8 +278,8 @@ export function ClientHireSection() {
                 Compare Providers
               </span>
             </div>
-          </div>
-          <div className="relative min-h-[16rem] overflow-hidden lg:min-h-full">
+          </ScrollReveal>
+          <ScrollReveal delay={90} variant="fade" className="relative min-h-[16rem] overflow-hidden lg:min-h-full">
             <img
               src={CLIENT_HIRE_SIDE_IMAGE}
               alt="Construction project in progress"
@@ -284,7 +289,7 @@ export function ClientHireSection() {
               aria-hidden
               className={cn('absolute inset-0 bg-freeio-navy/20')}
             />
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

@@ -1,4 +1,6 @@
+import type { ReactNode } from 'react'
 import { RangeSlider } from '@/components/ui/RangeSlider'
+import { LandingInfoMarksContext } from '@/features/glossary/infoMarksContext'
 import { HeroFilterSelect } from '@/features/search/components/HeroFilterSelect'
 import {
   CHARGE_TREE,
@@ -153,6 +155,20 @@ type LandingFilterFieldsProps = {
   hideSearchBy?: boolean
   /** Advertisement renders A–Z PSP at the top of its own panel. */
   hidePsp?: boolean
+  /** Landing hero: exclamation marks that explain why each question is asked. */
+  showInfoMarks?: boolean
+  /** Register: highlight A–Z PSP when the category is required and empty. */
+  pspInvalid?: boolean
+  /**
+   * Register: place the same fields into Role, Property, Experience, and Payments
+   * groups instead of one flat stack. Landing keeps the flat order.
+   */
+  groupSections?: (sections: {
+    role: ReactNode
+    property: ReactNode
+    experience: ReactNode
+    payments: ReactNode
+  }) => ReactNode
 }
 
 /**
@@ -180,6 +196,9 @@ export function LandingFilterFields({
   stopBeforeLanguage = false,
   hideSearchBy = false,
   hidePsp = false,
+  showInfoMarks = false,
+  pspInvalid = false,
+  groupSections,
 }: LandingFilterFieldsProps) {
   const profile = getPspFilterProfile(value.psp)
   const isExecutive = profile === 'executive'
@@ -271,6 +290,7 @@ export function LandingFilterFields({
   const searchByField = (
     <HeroFilterSelect
       compact
+      singleSelect
       selectedPrefix={selectedPrefix}
       highlightSelected={highlightSelected}
       label="Search By: "
@@ -285,6 +305,7 @@ export function LandingFilterFields({
     <HeroFilterSelect
       compact
       highlightSelected={highlightSelected}
+      invalid={pspInvalid}
       label="A-Z Psp's: "
       placeholder="Ex. (Architect, Lawn Service, etc)"
       optionsByLetter={PSP_BY_LETTER}
@@ -549,31 +570,22 @@ export function LandingFilterFields({
     </>
   ) : null
 
-  /** 16 categories under Real Estate / Executive (order from filter-s-comparison). */
-  const profileCategoryFields = showProfileFilters ? (
+  const representationField = showRepresentation ? (
+    <HeroFilterSelect
+      compact
+      showSuggest={isRealEstate}
+      selectedPrefix={selectedPrefix}
+      highlightSelected={highlightSelected}
+      label="Representation's:"
+      placeholder="Ex. (Selling, Buying, Leasing, etc.,)"
+      tree={representationTree}
+      value={value.representation}
+      onChange={(next) => onChange('representation', next)}
+    />
+  ) : null
+
+  const profileClientExperience = showProfileFilters ? (
     <>
-      {/* 2. Representation */}
-      {showRepresentation ? (
-        <HeroFilterSelect
-          compact
-          showSuggest={isRealEstate}
-          selectedPrefix={selectedPrefix}
-          highlightSelected={highlightSelected}
-          label={
-            isExecutive
-              ? "Representation's:"
-              : "Representation's:"
-          }
-          placeholder="Ex. (Selling, Buying, Leasing, etc.,)"
-          tree={representationTree}
-          value={value.representation}
-          onChange={(next) => onChange('representation', next)}
-        />
-      ) : null}
-
-      {/* Field — forums already places Fields above A–Z */}
-      {searchByAfterFields ? null : fieldsField}
-
       {/* 5. Client Experience */}
       <HeroFilterSelect
         compact
@@ -599,7 +611,13 @@ export function LandingFilterFields({
           onChange={(next) => onExperienceLevelChange?.(next)}
         />
       ) : null}
+    </>
+  ) : null
 
+  const profileFields = showProfileFilters && !searchByAfterFields ? fieldsField : null
+
+  const profilePropertyCore = showProfileFilters ? (
+    <>
       {/* 6. Property Condition */}
       <HeroFilterSelect
         compact
@@ -669,7 +687,11 @@ export function LandingFilterFields({
         value={value.tagSkill}
         onChange={(next) => onChange('tagSkill', next)}
       />
+    </>
+  ) : null
 
+  const profileExperienceTail = showProfileFilters ? (
+    <>
       {/* 10. Experience Level + Your Experience */}
       {hideRecipientExperience ? null : (
         <>
@@ -751,7 +773,13 @@ export function LandingFilterFields({
         value={value.willingToTrain}
         onChange={(next) => onChange('willingToTrain', next)}
       />
+        </>
+      )}
+    </>
+  ) : null
 
+  const profilePayments = showProfileFilters && !stopBeforeLanguage ? (
+    <>
       {/* 14. Form Of Payment */}
       <HeroFilterSelect
         compact
@@ -775,7 +803,11 @@ export function LandingFilterFields({
         value={value.references}
         onChange={(next) => onChange('references', next)}
       />
+    </>
+  ) : null
 
+  const profilePropertyTail = showProfileFilters && !stopBeforeLanguage ? (
+    <>
       {/* Price Demography — just before Zipcode */}
       <HeroFilterSelect
         compact
@@ -790,8 +822,19 @@ export function LandingFilterFields({
 
       {/* Zipcode + Mile Radius */}
       {locationFields}
-        </>
-      )}
+    </>
+  ) : null
+
+  /** 16 categories under Real Estate / Executive (order from filter-s-comparison). */
+  const profileCategoryFields = showProfileFilters ? (
+    <>
+      {representationField}
+      {profileFields}
+      {profileClientExperience}
+      {profilePropertyCore}
+      {profileExperienceTail}
+      {profilePayments}
+      {profilePropertyTail}
     </>
   ) : null
 
@@ -1015,12 +1058,14 @@ export function LandingFilterFields({
     </>
   ) : null
 
-  /** Non–Real Estate / Executive / Mortgage / Trades: shared core filters. */
-  const genericCategoryFields =
-    !showProfileFilters && !showMortgageFilters && !showTradesFilters ? (
-      <>
-        {searchByAfterFields ? null : fieldsField}
+  const showGeneric =
+    !showProfileFilters && !showMortgageFilters && !showTradesFilters
 
+  const genericFields = showGeneric && !searchByAfterFields ? fieldsField : null
+
+  /** Non–Real Estate / Executive / Mortgage / Trades: shared core filters. */
+  const genericExperienceHead = showGeneric ? (
+      <>
         <HeroFilterSelect
           compact
           selectedPrefix={selectedPrefix}
@@ -1042,10 +1087,14 @@ export function LandingFilterFields({
             placeholder="Ex ( 1= Low, 10=High)"
             options={[...EXPERIENCE_LEVEL_OPTIONS]}
             value={experienceLevel}
-            onChange={(next) => onExperienceLevelChange?.(next)}
-          />
+          onChange={(next) => onExperienceLevelChange?.(next)}
+        />
         ) : null}
+      </>
+    ) : null
 
+  const genericPropertyCore = showGeneric ? (
+      <>
         <HeroFilterSelect
           compact
           selectedPrefix={selectedPrefix}
@@ -1091,7 +1140,11 @@ export function LandingFilterFields({
           value={value.saleType}
           onChange={(next) => onChange('saleType', next)}
         />
+      </>
+    ) : null
 
+  const genericExperienceTail = showGeneric ? (
+      <>
         {hideRecipientExperience ? null : (
           <>
             <HeroFilterSelect
@@ -1154,7 +1207,12 @@ export function LandingFilterFields({
           value={value.percentageShare}
           onChange={(next) => onChange('percentageShare', next)}
         />
+          </>
+        )}
+      </>
+    ) : null
 
+  const genericPayments = showGeneric && !stopBeforeLanguage ? (
         <HeroFilterSelect
           compact
           selectedPrefix={selectedPrefix}
@@ -1165,7 +1223,10 @@ export function LandingFilterFields({
           value={value.formOfPayment}
           onChange={(next) => onChange('formOfPayment', next)}
         />
+    ) : null
 
+  const genericPropertyTail = showGeneric && !stopBeforeLanguage ? (
+      <>
         <HeroFilterSelect
           compact
           selectedPrefix={selectedPrefix}
@@ -1178,20 +1239,84 @@ export function LandingFilterFields({
         />
 
         {locationFields}
-          </>
-        )}
       </>
     ) : null
 
-  return (
-    <div className="flex flex-col gap-1">
+  const genericCategoryFields = showGeneric ? (
+    <>
+      {genericFields}
+      {genericExperienceHead}
+      {genericPropertyCore}
+      {genericExperienceTail}
+      {genericPayments}
+      {genericPropertyTail}
+    </>
+  ) : null
+
+  const headerFields = (
+    <>
       {searchByAfterFields ? null : roleField}
       {searchByAfterFields || hideSearchBy ? null : searchByField}
       {searchByAfterFields ? fieldsField : hidePsp ? null : pspField}
       {searchByAfterFields && !hidePsp ? pspField : null}
       {searchByAfterFields ? roleField : null}
       {searchByAfterFields && !hideSearchBy ? searchByField : null}
+    </>
+  )
 
+  const propertyFields = showMortgageFilters
+    ? mortgageCategoryFields
+    : showTradesFilters
+      ? tradesCategoryFields
+      : showProfileFilters
+        ? (
+            <>
+              {profileFields}
+              {profilePropertyCore}
+              {profilePropertyTail}
+            </>
+          )
+        : (
+            <>
+              {genericFields}
+              {genericPropertyCore}
+              {genericPropertyTail}
+            </>
+          )
+
+  const experienceFields = showProfileFilters ? (
+    <>
+      {profileClientExperience}
+      {profileExperienceTail}
+    </>
+  ) : showGeneric ? (
+    <>
+      {genericExperienceHead}
+      {genericExperienceTail}
+    </>
+  ) : null
+
+  const paymentFields = showProfileFilters
+    ? profilePayments
+    : showGeneric
+      ? genericPayments
+      : null
+
+  const fields = groupSections ? (
+    groupSections({
+      role: (
+        <div className="flex flex-col gap-1">
+          {headerFields}
+          {showProfileFilters ? representationField : null}
+        </div>
+      ),
+      property: <div className="flex flex-col gap-1">{propertyFields}</div>,
+      experience: <div className="flex flex-col gap-1">{experienceFields}</div>,
+      payments: <div className="flex flex-col gap-1">{paymentFields}</div>,
+    })
+  ) : (
+    <div className="flex flex-col gap-1">
+      {headerFields}
       {showMortgageFilters
         ? mortgageCategoryFields
         : showProfileFilters
@@ -1200,5 +1325,13 @@ export function LandingFilterFields({
             ? tradesCategoryFields
             : genericCategoryFields}
     </div>
+  )
+
+  if (!showInfoMarks) return fields
+
+  return (
+    <LandingInfoMarksContext.Provider value={true}>
+      {fields}
+    </LandingInfoMarksContext.Provider>
   )
 }

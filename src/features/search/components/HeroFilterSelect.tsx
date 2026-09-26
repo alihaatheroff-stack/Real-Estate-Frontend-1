@@ -1,8 +1,30 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react'
 import { ChevronDown, ChevronUp, GripVertical, Plus, Send, X } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { InfoExclamation } from '@/components/ui/InfoExclamation'
+import { glossaryForCategory } from '@/features/glossary/glossary'
+import { LandingInfoMarksContext } from '@/features/glossary/infoMarksContext'
 import { cn } from '@/shared/lib/cn'
 import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
+
+const RegisterFilterMenuContext = createContext(false)
+
+/** Register only: in-flow menu, priority list, and dotted leaders after each option. */
+export function RegisterFilterMenuProvider({ children }: { children: ReactNode }) {
+  return (
+    <RegisterFilterMenuContext.Provider value={true}>
+      {children}
+    </RegisterFilterMenuContext.Provider>
+  )
+}
 
 type HeroFilterSelectProps = {
   label: string
@@ -23,6 +45,8 @@ type HeroFilterSelectProps = {
   inlineMenu?: boolean
   /** Show trailing info icon for QA / why-this-question help. */
   showQaMark?: boolean
+  /** Landing: circled info mark on the question label only. */
+  showInfoMarks?: boolean
   /** Open the menu on hover and close when the pointer leaves. */
   openOnHover?: boolean
   /** Keep the Ex. placeholder in the trigger even when values are selected. */
@@ -346,7 +370,7 @@ function OptionRow({
           onClick={onToggle}
           data-option-key={optionKey ?? item}
           className={cn(
-            'min-w-0 flex-1 whitespace-normal break-words py-2 pr-2.5 text-left text-sm leading-snug text-ink',
+            'min-w-0 flex-1 whitespace-normal break-words py-2 pr-1 text-left text-sm leading-snug text-ink',
             checked && 'font-medium',
             hovered && 'underline decoration-ink underline-offset-4',
           )}
@@ -431,7 +455,7 @@ function GroupHeadingRow({
           <span
             className={cn(
               'whitespace-normal break-words',
-              dottedLeader ? 'min-w-0 flex-1' : 'shrink-0',
+              dottedLeader ? 'w-max max-w-[70%] shrink' : 'shrink-0',
               hovered && 'underline decoration-ink underline-offset-4',
             )}
           >
@@ -439,7 +463,7 @@ function GroupHeadingRow({
           </span>
           {dottedLeader ? (
             <span
-              className="mt-2.5 min-w-[2rem] flex-1 border-b border-dotted border-ink/45"
+              className="mt-2.5 h-px min-w-[1.25rem] flex-1 self-center border-b border-dotted border-ink/45"
               aria-hidden
             />
           ) : null}
@@ -480,7 +504,15 @@ function GroupHeadingRow({
   )
 }
 
-function LinkRow({ item, href, compact = false }: { item: string; href: string; compact?: boolean }) {
+function LinkRow({
+  item,
+  href,
+  compact = false,
+}: {
+  item: string
+  href: string
+  compact?: boolean
+}) {
   return (
     <div
       className={cn(
@@ -800,7 +832,16 @@ export function HeroFilterSelect({
   selectedPrefix,
   highlightSelected = false,
   hideLabel = false,
+  showInfoMarks = false,
 }: HeroFilterSelectProps) {
+  const registerMenu = useContext(RegisterFilterMenuContext)
+  const useInlineMenu = inlineMenu || registerMenu
+  const useQaMark = showQaMark || registerMenu
+  const useOpenOnHover = openOnHover || registerMenu
+  const useAlwaysPlaceholder = alwaysShowPlaceholder || registerMenu
+  const usePriorityPanel = showPriorityPanel || registerMenu
+  const infoFromContext = useContext(LandingInfoMarksContext)
+  const infoMarks = showInfoMarks || infoFromContext
   const [open, setOpen] = useState(false)
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -834,10 +875,10 @@ export function HeroFilterSelect({
     setHoveredKey(row?.dataset.optionKey ?? null)
   }
 
-  const selectedText = showPriorityPanel
+  const selectedText = usePriorityPanel
     ? formatPreferenceSummary(value)
     : value.map(preferenceLabel).join(', ')
-  const summary = alwaysShowPlaceholder
+  const summary = useAlwaysPlaceholder
     ? placeholder
     : value.length > 0
       ? selectedPrefix
@@ -853,7 +894,7 @@ export function HeroFilterSelect({
     const childTree = nestedTrees[item]
     const checked = value.includes(item)
     const hasNest = Boolean(childTree?.length)
-    const dottedLeader = inlineMenu
+    const dottedLeader = usePriorityPanel
 
     if (!hasNest) {
       return (
@@ -864,7 +905,7 @@ export function HeroFilterSelect({
           compact={compact}
           optionKey={item}
           hovered={hoveredKey === item}
-          singleSelect={singleSelect}
+          singleSelect={singleSelect && !registerMenu}
           onToggle={() => pickOption(item)}
         />
       )
@@ -901,7 +942,7 @@ export function HeroFilterSelect({
     : null
 
   // Register fields keep the title inside the same bordered shell as the trigger.
-  const labelInsideShell = compact && inlineMenu && !hideLabel
+  const labelInsideShell = compact && useInlineMenu && !hideLabel
   // Landing + register: one visible box for placeholder and open options.
   const unifiedShell = compact
 
@@ -922,10 +963,11 @@ export function HeroFilterSelect({
         labelInsideShell && (dense ? 'px-2 pt-1' : 'px-2 pt-2'),
       )}
     >
-      <span className={cn(compact && !wrapLabel && 'truncate', wrapLabel && 'whitespace-normal')}>
+      <span className={cn('min-w-0', (wrapLabel || infoMarks) && 'whitespace-normal')}>
         {label}
       </span>
-      {showQaMark ? <FieldQaMark field={label} /> : null}
+      {useQaMark ? <FieldQaMark field={label} /> : null}
+      {infoMarks ? <InfoExclamation entry={glossaryForCategory(label)} className="mt-0.5" /> : null}
     </label>
   )
 
@@ -942,7 +984,7 @@ export function HeroFilterSelect({
         className,
       )}
       onMouseEnter={
-        openOnHover
+        useOpenOnHover
           ? () => {
             window.clearTimeout(closeTimerRef.current)
             setOpen(true)
@@ -1008,7 +1050,7 @@ export function HeroFilterSelect({
           aria-expanded={open}
           onClick={() => {
             window.clearTimeout(closeTimerRef.current)
-            if (openOnHover) {
+            if (useOpenOnHover) {
               if (open) {
                 setOpen(false)
                 return
@@ -1033,7 +1075,7 @@ export function HeroFilterSelect({
                   : dense
                     ? 'h-7 items-center overflow-hidden py-0'
                     : 'h-9 items-center overflow-hidden py-0',
-                alwaysShowPlaceholder || value.length === 0
+                useAlwaysPlaceholder || value.length === 0
                   ? 'text-ink-soft'
                   : value.length > 0 && !invalid && highlightSelected
                     ? 'font-medium text-[#6495ED]'
@@ -1079,7 +1121,7 @@ export function HeroFilterSelect({
               <span className="min-w-0 flex-1 whitespace-normal break-words leading-snug">
                 {summary}
               </span>
-            ) : alwaysShowPlaceholder || value.length === 0 ? (
+            ) : useAlwaysPlaceholder || value.length === 0 ? (
               <FittedEtcText
                 text={summary}
                 className="block w-full min-w-0 overflow-hidden whitespace-nowrap leading-none"
@@ -1094,7 +1136,7 @@ export function HeroFilterSelect({
             <ChevronUp
               className={cn(
                 'shrink-0',
-                value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
+                value.length > 0 && wrapLabel && !useAlwaysPlaceholder && 'mt-1',
                 compact
                   ? cn(
                       dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
@@ -1109,7 +1151,7 @@ export function HeroFilterSelect({
             <ChevronDown
               className={cn(
                 'shrink-0',
-                value.length > 0 && wrapLabel && !alwaysShowPlaceholder && 'mt-1',
+                value.length > 0 && wrapLabel && !useAlwaysPlaceholder && 'mt-1',
                 compact
                   ? cn(
                       dense ? 'h-3 w-3' : 'h-3.5 w-3.5',
@@ -1135,11 +1177,11 @@ export function HeroFilterSelect({
                 ? 'relative mt-0 rounded-none border-0 bg-white shadow-none ring-0'
                 : cn(
                   'mt-0.5 rounded-md border border-black bg-white shadow-md',
-                  inlineMenu ? 'relative' : 'absolute left-0 right-0 top-full',
+                  useInlineMenu ? 'relative' : 'absolute left-0 right-0 top-full',
                 ),
             )}
           >
-          {showPriorityPanel ? (
+          {usePriorityPanel ? (
             <div className="grid grid-cols-1 sm:grid-cols-2">
               <p className="px-3 py-2 text-[11px] font-bold leading-snug text-ink">
                 Select in order of preference. First pick is 1.
@@ -1189,7 +1231,7 @@ export function HeroFilterSelect({
                       value={value}
                       onChange={onChange}
                       compact={compact}
-                      dottedLeader={inlineMenu}
+                      dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
                     />
                     {suggestRow}
@@ -1198,7 +1240,7 @@ export function HeroFilterSelect({
                       value={value}
                       onChange={onChange}
                       compact={compact}
-                      dottedLeader={inlineMenu}
+                      dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
                     />
                   </>
@@ -1209,7 +1251,7 @@ export function HeroFilterSelect({
                       value={value}
                       onChange={onChange}
                       compact={compact}
-                      dottedLeader={inlineMenu}
+                      dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
                     />
                     {suggestRow}
@@ -1268,7 +1310,7 @@ export function HeroFilterSelect({
                 )
               }
 
-              if (compact && showPriorityPanel) {
+              if (compact && usePriorityPanel) {
                 return (
                   <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2 sm:gap-0">
                     <div className="min-w-0">{optionsPane}</div>

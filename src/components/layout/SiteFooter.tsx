@@ -20,7 +20,7 @@ export function SiteFooter({
   advertiseHref,
 }: SiteFooterProps) {
   return (
-    <footer className="border-t border-line bg-ink text-paper">
+    <footer className="border-t border-line bg-[#0b1f3a] text-paper">
       <Container className="grid max-w-none gap-5 px-3 py-6 sm:grid-cols-2 sm:px-4 lg:grid-cols-4 lg:px-5">
         <div className="space-y-2 lg:col-span-1">
           <p className="font-display text-2xl font-extrabold">{SITE.name}</p>

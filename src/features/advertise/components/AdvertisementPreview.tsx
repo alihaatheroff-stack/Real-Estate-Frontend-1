@@ -166,7 +166,7 @@ export function AdvertisementPreview({
                     />
                   )
                 ) : (
-                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#d8efe6_0%,#eef2f0_50%,#c5ddd2_100%)]" />
+                  <div className="absolute inset-0 bg-[linear-gradient(135deg,#E7EAF1_0%,#eef2f0_50%,#C5CCD6_100%)]" />
                 )}
 
                 {referralPercent ? (

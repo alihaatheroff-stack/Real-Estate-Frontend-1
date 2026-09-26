@@ -247,7 +247,7 @@ export function HeroFilterPanel({
       )}
     >
       <div className="landing-scroll-pane max-h-[28.5rem] overflow-x-hidden overflow-y-auto px-1.5 pt-1 pb-1.5">
-        <LandingFilterFields value={values} onChange={handleChange} />
+        <LandingFilterFields showInfoMarks value={values} onChange={handleChange} />
       </div>
 
       <div className="relative z-30 shrink-0 space-y-1 border-t border-ink/15 bg-white/95 px-1.5 pb-1.5 pt-1.5">

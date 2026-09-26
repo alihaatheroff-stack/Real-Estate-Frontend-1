@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowUpRight, Award, BadgeCheck, MapPin } from 'lucide-react'
 import { Section } from '@/components/layout/Section'
 import { SectionHeading } from '@/components/layout/SectionHeading'
+import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { Button } from '@/components/ui/Button'
 import { AWARD_WINNERS } from '@/features/landing/data/awardWinners'
 import { PATHS, providerPath } from '@/app/router/paths'
@@ -21,7 +22,8 @@ export function ReferralAwards({
 }: ReferralAwardsProps) {
   const content = (
     <div className={cn(embedded && 'mt-2', className)}>
-      <div className={cn('flex gap-4 overflow-x-auto pb-1 lg:gap-5', showHeading && 'mb-6')}>
+      <ScrollReveal>
+        <div className={cn('flex gap-4 overflow-x-auto pb-1 lg:gap-5', showHeading && 'mb-6')}>
         {AWARD_WINNERS.map((winner) => (
           <article
             key={winner.id}
@@ -83,26 +85,31 @@ export function ReferralAwards({
             </Link>
           </article>
         ))}
-      </div>
+        </div>
+      </ScrollReveal>
       {showHeading ? (
-        <SectionHeading
-          eyebrow="Awards"
-          title="Reward earners"
-          description="PSPs recognized for referral volume, mentorship, and standout deal work across the network."
-          size={embedded ? 'subsection' : 'section'}
-          className="mb-0 w-full [&>div]:max-w-none"
-        />
+        <ScrollReveal delay={80}>
+          <SectionHeading
+            eyebrow="Awards"
+            title="Reward earners"
+            description="PSPs recognized for referral volume, mentorship, and standout deal work across the network."
+            size={embedded ? 'subsection' : 'section'}
+            className="mb-0 w-full [&>div]:max-w-none"
+          />
+        </ScrollReveal>
       ) : null}
 
-      <div className="mt-5 flex justify-end">
+      <ScrollReveal delay={120}>
+        <div className="mt-5 flex justify-end">
         <Link
           to={PATHS.profileResults}
           className="inline-flex items-center gap-1.5 font-display text-sm font-semibold tracking-tight text-brand underline underline-offset-4 transition hover:text-brand-dark"
         >
           See Entire List
           <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
-        </Link>
-      </div>
+          </Link>
+        </div>
+      </ScrollReveal>
     </div>
   )
 

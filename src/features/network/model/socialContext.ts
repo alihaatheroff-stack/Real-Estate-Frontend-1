@@ -1,5 +1,12 @@
 import { createContext } from 'react'
-import type { ChatAttachment, NetworkChat, NetworkNote, NetworkPost, PostAudience } from '@/features/network/data/types'
+import type {
+  ChatAttachment,
+  ChatCallLog,
+  NetworkChat,
+  NetworkNote,
+  NetworkPost,
+  PostAudience,
+} from '@/features/network/data/types'
 
 export type FriendRequestAction = 'accepted' | 'declined'
 
@@ -34,6 +41,7 @@ export type NetworkSocialValue = {
   ) => void
   markChatRead: (chatId: string) => void
   sendChatMessage: (chatId: string, payload: { text: string; attachments: ChatAttachment[] }) => void
+  logChatCall: (chatId: string, call: ChatCallLog) => void
   deleteChatMessage: (chatId: string, messageId: string, mode: 'me' | 'everyone') => void
   createGroupChat: (input: { name: string; memberIds: string[] }) => string
   updateGroupChat: (
