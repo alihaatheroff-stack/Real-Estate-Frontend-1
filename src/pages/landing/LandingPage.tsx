@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import {
   ClientFieldsMarquee,
   ClientHireSection,
+  LandingFaqSection,
   LandingHero,
   // NewsUpdatesSection, // temporarily hidden
   ReferralsSection,
@@ -56,6 +57,7 @@ export function LandingPage() {
         {hero}
         <ClientFieldsMarquee />
         <ClientHireSection />
+        <LandingFaqSection />
       </>
     )
   }
@@ -70,6 +72,7 @@ export function LandingPage() {
         <ReferralsSection />
         <LoggedInCrowdfundingSection />
         <LoggedInNetworkSection />
+        <LandingFaqSection />
       </>
     )
   }
@@ -80,6 +83,7 @@ export function LandingPage() {
       <ReferralsSection />
       <CrowdfundingTeaser />
       <NetworkPreview />
+      <LandingFaqSection />
     </>
   )
 }

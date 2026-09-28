@@ -844,14 +844,35 @@
   outline: none;
 }
 
+.settings-paste-menu--underline>button {
+  color: var(--color-muted);
+}
+
 .settings-paste-menu--underline>button:hover,
-.settings-paste-menu--underline>button:focus-visible,
-.settings-paste-menu--underline>button[data-active='true'] {
+.settings-paste-menu--underline>button:focus-visible {
   background-color: transparent;
   color: var(--color-brand);
   text-decoration: underline;
   text-underline-offset: 3px;
   border-radius: 0;
+}
+
+.settings-paste-menu--underline>button[data-active='true'] {
+  background-color: transparent;
+  color: #0ea5e9;
+  font-weight: 700;
+  border-radius: 0;
+}
+
+.settings-paste-menu--underline>button[data-active='true']:hover,
+.settings-paste-menu--underline>button[data-active='true']:focus-visible {
+  color: #0284c7;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.settings-paste-menu--underline>button[data-nested='true'] {
+  padding-left: 2rem;
 }
 
 .settings-paste-menu>button:first-child:hover,

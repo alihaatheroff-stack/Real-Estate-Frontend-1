@@ -73,7 +73,7 @@ export function ServiceCard({
             aria-label={saved ? 'Remove from saved' : 'Save service'}
             aria-pressed={saved}
             onClick={onToggleSave}
-            className="absolute right-2 top-2 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+            className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
           >
             <Heart
               className={cn('h-4 w-4', saved && 'fill-rose-500 text-rose-500')}
@@ -176,7 +176,7 @@ export function ServiceCard({
             aria-label={saved ? 'Remove from saved' : 'Save service'}
             aria-pressed={saved}
             onClick={onToggleSave}
-            className="absolute right-2 top-2 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+            className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
           >
             <Heart
               className={cn('h-4 w-4', saved && 'fill-rose-500 text-rose-500')}

@@ -67,7 +67,7 @@ export function HeroSlideshow({ activeIndex, onChange }: HeroSlideshowProps) {
         type="button"
         aria-label="Previous slide"
         onClick={() => go(-1)}
-        className="absolute left-[calc(clamp(7.5rem,11vw,11rem)/2)] top-[calc((100%-2.25rem)/2)] z-[8] hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
+        className="absolute left-[calc(clamp(7.5rem,11vw,11rem)/2)] top-1/2 z-[8] hidden -translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
       >
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
@@ -75,7 +75,7 @@ export function HeroSlideshow({ activeIndex, onChange }: HeroSlideshowProps) {
         type="button"
         aria-label="Next slide"
         onClick={() => go(1)}
-        className="absolute right-[calc(clamp(7.5rem,11vw,11rem)/2)] top-[calc((100%-2.25rem)/2)] z-[8] hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
+        className="absolute right-[calc(clamp(7.5rem,11vw,11rem)/2)] top-1/2 z-[8] hidden translate-x-1/2 -translate-y-1/2 rounded-full border border-black/10 bg-white p-1 text-ink shadow-soft transition hover:scale-105 hover:bg-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 xl:inline-flex"
       >
         <ChevronRight className="h-3.5 w-3.5" />
       </button>

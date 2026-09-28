@@ -79,7 +79,7 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
         />
 
         {featured ? (
-          <span className="absolute -left-8 top-4 w-28 -rotate-45 bg-brand py-1 text-center text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+          <span className="absolute -left-10 top-7 z-[1] flex w-40 -rotate-45 items-center justify-center bg-brand py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
             Featured
           </span>
         ) : null}
@@ -98,7 +98,7 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
               favorite.toggleSave()
             }
           }}
-          className="absolute right-2 top-2 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+          className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
           aria-label={favorite.saved ? 'Remove from saved' : 'Save service'}
           aria-pressed={favorite.saved}
         >
@@ -113,7 +113,7 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
         <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
           {service.category}
         </p>
-        <h3 className="line-clamp-2 min-h-[2.75rem] text-[15px] font-bold leading-snug text-ink group-hover:text-brand">
+        <h3 className="line-clamp-2 min-h-[3.4rem] text-[19px] font-bold leading-snug text-ink group-hover:text-brand">
           {service.title}
         </h3>
 

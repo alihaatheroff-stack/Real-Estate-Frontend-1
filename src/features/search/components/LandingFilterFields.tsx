@@ -577,7 +577,7 @@ export function LandingFilterFields({
       selectedPrefix={selectedPrefix}
       highlightSelected={highlightSelected}
       label="Representation's:"
-      placeholder="Ex. (Selling, Buying, Leasing, etc.,)"
+      placeholder="Ex. (Selling, Leasing, Consulting, Buying, Investment, etc.,)"
       tree={representationTree}
       value={value.representation}
       onChange={(next) => onChange('representation', next)}
@@ -589,6 +589,7 @@ export function LandingFilterFields({
       {/* 5. Client Experience */}
       <HeroFilterSelect
         compact
+        wrapLabel
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label={resolvedExperienceLabel}
@@ -1068,6 +1069,7 @@ export function LandingFilterFields({
       <>
         <HeroFilterSelect
           compact
+          wrapLabel
           selectedPrefix={selectedPrefix}
           highlightSelected={highlightSelected}
           label={experienceLabel ?? 'Client Experience:'}

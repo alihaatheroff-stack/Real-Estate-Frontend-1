@@ -2,7 +2,6 @@ import { STOCK } from '@/features/network/data/members'
 import type {
   NetworkArticle,
   NetworkEvent,
-  NetworkGroup,
   NetworkListing,
 } from '@/features/network/data/types'
 
@@ -15,76 +14,17 @@ export {
   type ForumSortId,
 } from '@/features/network/data/forums'
 
-export const NETWORK_GROUPS: NetworkGroup[] = [
-  {
-    id: 'g-dealdesk',
-    name: 'Central Valley Deal Desk',
-    cover: STOCK.tower,
-    members: 1840,
-    privacy: 'Private',
-    category: 'Off-market',
-    description:
-      'Quiet room for OM shares, partner asks, and capital stacks. No public blasting — vouch for guests.',
-    lastActive: '4m ago',
-    memberIds: ['maya', 'james', 'david', 'nina', 'amara', 'rigo'],
-  },
-  {
-    id: 'g-gc',
-    name: 'Valley GC Roundtable',
-    cover: STOCK.build,
-    members: 612,
-    privacy: 'Public',
-    category: 'Trades',
-    description: 'Crew availability, material pricing, and who can actually start this month.',
-    lastActive: '22m ago',
-    memberIds: ['noah', 'carlos', 'chris', 'david'],
-  },
-  {
-    id: 'g-lenders',
-    name: 'DSCR & Private Lenders',
-    cover: STOCK.desk,
-    members: 908,
-    privacy: 'Private',
-    category: 'Capital',
-    description: 'Rate reality, not brochures. Brokers and capital partners who close files.',
-    lastActive: '1h ago',
-    memberIds: ['jordan', 'james', 'maya'],
-  },
-  {
-    id: 'g-multifamily',
-    name: 'Fresno Multifamily Operators',
-    cover: STOCK.condos,
-    members: 1244,
-    privacy: 'Public',
-    category: 'Operators',
-    description: 'Occupancy, vendors, insurance, and the unglamorous work that makes deals work.',
-    lastActive: '3h ago',
-    memberIds: ['amara', 'ryan', 'aisha', 'sarah'],
-  },
-  {
-    id: 'g-design',
-    name: 'Design that Sells',
-    cover: STOCK.interior,
-    members: 430,
-    privacy: 'Public',
-    category: 'Creative',
-    description: 'Staging, photography, and finish palettes with a return attached.',
-    lastActive: '6h ago',
-    memberIds: ['elena', 'leah', 'aisha'],
-  },
-  {
-    id: 'g-breakfast',
-    name: 'Thursday Investor Breakfast',
-    cover: STOCK.meeting,
-    members: 276,
-    privacy: 'Private',
-    category: 'Events',
-    description: 'The in-person circle. First-timers need a member voucher.',
-    lastActive: '1d ago',
-    memberIds: ['chris', 'marcus', 'olivia', 'nina'],
-  },
-]
-
+export {
+  NETWORK_GROUPS,
+  getGroup,
+  getSeedGroup,
+  filterGroups,
+  sortGroups,
+  recommendGroups,
+  canManageGroup,
+  canModerateGroup,
+  roleLabel,
+} from '@/features/network/data/groups'
 
 export const NETWORK_ARTICLES: NetworkArticle[] = [
   {
@@ -365,10 +305,6 @@ export const NETWORK_LISTINGS: NetworkListing[] = [
     category: 'Creative',
   },
 ]
-
-export function getGroup(id: string) {
-  return NETWORK_GROUPS.find((group) => group.id === id)
-}
 
 export function getArticle(id: string) {
   return NETWORK_ARTICLES.find((article) => article.id === id)

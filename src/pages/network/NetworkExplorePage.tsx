@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PATHS, networkGroupPath } from '@/app/router/paths'
+import { PATHS } from '@/app/router/paths'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
 import { MemberCard } from '@/features/network/components/shared/MemberCard'
 import { NetworkPageFrame } from '@/features/network/components/shell/NetworkPageFrame'
-import { NETWORK_EVENTS, NETWORK_GROUPS } from '@/features/network/data/community'
+import { GroupCard } from '@/features/network/components/groups/GroupCard'
+import { NETWORK_EVENTS } from '@/features/network/data/community'
 import { NETWORK_MEMBERS, getCurrentMember, getMember } from '@/features/network/data/members'
+import { useNetworkGroups } from '@/features/network/model/useNetworkGroups'
 
 export function NetworkExplorePage() {
   const me = getCurrentMember()
+  const { groups } = useNetworkGroups()
   const [query, setQuery] = useState('')
   const people = useMemo(
     () =>
@@ -17,6 +20,21 @@ export function NetworkExplorePage() {
         return hay.includes(query.trim().toLowerCase())
       }),
     [me.id, query],
+  )
+
+  const exploreGroups = useMemo(
+    () =>
+      groups
+        .filter((group) => !group.archived)
+        .filter((group) => {
+          const needle = query.trim().toLowerCase()
+          if (!needle) return true
+          return `${group.name} ${group.description} ${group.category} ${group.geography}`
+            .toLowerCase()
+            .includes(needle)
+        })
+        .slice(0, 4),
+    [groups, query],
   )
 
   return (
@@ -61,21 +79,8 @@ export function NetworkExplorePage() {
             </Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
-            {NETWORK_GROUPS.slice(0, 4).map((group) => (
-              <Link
-                key={group.id}
-                to={networkGroupPath(group.id)}
-                className="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/[0.04]"
-              >
-                <img src={group.cover} alt="" className="h-28 w-full object-cover" />
-                <div className="p-4">
-                  <p className="font-semibold text-ink">{group.name}</p>
-                  <p className="mt-1 text-xs text-muted">
-                    {group.privacy} · {group.members.toLocaleString()} members · {group.lastActive}
-                  </p>
-                  <p className="mt-2 line-clamp-2 text-sm text-muted">{group.description}</p>
-                </div>
-              </Link>
+            {exploreGroups.map((group) => (
+              <GroupCard key={group.id} group={group} compact />
             ))}
           </div>
         </section>

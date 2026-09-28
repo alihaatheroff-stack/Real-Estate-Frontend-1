@@ -130,9 +130,8 @@ export function adBannerPlacementFor(_id?: string): AdBannerPlacement {
 export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardProps>(
   function FeaturedAgentAdCard(
     {
-      ad,
+      ad: _ad,
       provider,
-      bannerPlacement = 'bottom-right',
       active,
       selected,
       onSelect,
@@ -147,8 +146,6 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
 
     const locationLabel = formatProviderLocation(provider)
     const href = providerPath(provider.id)
-    const usesCornerRibbon = isCornerRibbonPlacement(bannerPlacement)
-    const contentFlush = bannerPlacement !== 'top-left'
     const interactive = Boolean(onSelect)
     const draft = useMemo(() => referralProviderFavoriteDraft(provider), [provider])
     const favorite = useFavoriteToggle(draft)
@@ -162,89 +159,87 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
     }
 
     return (
-      <article
-        ref={ref}
-        role={interactive ? 'button' : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        aria-pressed={interactive ? selected : undefined}
-        aria-label={interactive ? `Show ${provider.name} on the map` : undefined}
-        onMouseEnter={onHover ? () => onHover(provider.id) : undefined}
-        onMouseLeave={onHover ? () => onHover(null) : undefined}
-        onClick={onSelect ? () => onSelect(provider.id) : undefined}
-        onKeyDown={interactive ? handleKeyDown : undefined}
-        className={cn(
-          'relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#b7d8f0] bg-[#eef7fd] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)]',
-          interactive && 'cursor-pointer transition',
-          interactive &&
-            (selected || active
-              ? 'border-freeio shadow-[0_12px_36px_rgba(91,187,123,0.18)]'
-              : 'hover:border-freeio/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]'),
-        )}
-      >
-        {usesCornerRibbon ? <AdCornerRibbon placement={bannerPlacement} /> : null}
-        {bannerPlacement === 'watermark' ? <AdWatermark /> : null}
-
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            favorite.toggleSave()
+      <div className="relative h-full w-full">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[16px] font-bold uppercase tracking-[0.28em] text-brand drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[18px]"
+          style={{
+            writingMode: 'vertical-rl',
+            transform: 'translateY(-50%) rotate(180deg)',
           }}
-          className="absolute right-3 top-3 z-20 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
-          aria-label={favorite.saved ? `Remove ${provider.name} from favorites` : `Save ${provider.name} to favorites`}
-          aria-pressed={favorite.saved}
         >
-          <Heart
-            className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
-            strokeWidth={2.2}
-          />
-        </button>
+          Advertiser
+        </span>
 
-        <div className="relative z-[1] flex h-full flex-col">
-          <div
-            className={
-              contentFlush
-                ? 'flex items-start gap-4'
-                : 'flex items-start gap-4 pl-5 sm:pl-6'
+        <article
+          ref={ref}
+          role={interactive ? 'button' : undefined}
+          tabIndex={interactive ? 0 : undefined}
+          aria-pressed={interactive ? selected : undefined}
+          aria-label={
+            interactive ? `Sponsored listing: show ${provider.name} on the map` : undefined
+          }
+          onMouseEnter={onHover ? () => onHover(provider.id) : undefined}
+          onMouseLeave={onHover ? () => onHover(null) : undefined}
+          onClick={onSelect ? () => onSelect(provider.id) : undefined}
+          onKeyDown={interactive ? handleKeyDown : undefined}
+          className={cn(
+            'relative flex h-full w-full flex-col rounded-2xl border bg-white p-5 transition',
+            interactive && 'cursor-pointer',
+            selected || active
+              ? 'border-brand shadow-soft ring-2 ring-brand/20'
+              : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-brand/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
+          )}
+        >
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              favorite.toggleSave()
+            }}
+            className="absolute right-3 top-3 z-10 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
+            aria-label={
+              favorite.saved
+                ? `Remove ${provider.name} from favorites`
+                : `Save ${provider.name} to favorites`
             }
+            aria-pressed={favorite.saved}
           >
+            <Heart
+              className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
+              strokeWidth={2.2}
+            />
+          </button>
+
+          <div className="flex items-start gap-4">
             <Link
               to={href}
               onClick={(event) => event.stopPropagation()}
-              className={contentFlush ? 'shrink-0' : 'mt-9 shrink-0'}
+              className="shrink-0"
             >
               <img
                 src={provider.image}
                 alt={provider.name}
-                className={
-                  contentFlush
-                    ? 'h-20 w-20 rounded-full border-2 border-black object-cover sm:h-24 sm:w-24'
-                    : 'h-24 w-24 rounded-full border-2 border-black object-cover sm:h-28 sm:w-28'
-                }
+                className="h-20 w-20 rounded-full border-2 border-black object-cover sm:h-24 sm:w-24"
                 loading="lazy"
               />
             </Link>
 
             <div className="min-w-0 flex-1 pr-7">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#2563eb]">
-                <span className="underline">Sponsored</span>
-                {' · '}
-                {ad.label}
-              </p>
               {provider.company ? (
-                <p className="mt-1 text-sm font-bold leading-snug text-freeio-ink underline">
+                <p className="text-sm font-bold leading-snug text-freeio-ink underline">
                   {provider.company}
                 </p>
               ) : null}
               {provider.licenseNo ? (
                 <p className="mt-0.5 text-sm text-freeio-muted">
-                  License no: {provider.licenseNo}
+                  License #: {provider.licenseNo}
                 </p>
               ) : null}
               <Link
                 to={href}
                 onClick={(event) => event.stopPropagation()}
-                className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-freeio"
+                className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-[#0b1f3a]"
               >
                 {provider.name}
               </Link>
@@ -293,7 +288,7 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
             </div>
           </div>
 
-          <p className="mt-4 flex-1 text-sm leading-relaxed text-freeio-muted">
+          <p className="mt-4 line-clamp-3 min-h-[3.75rem] flex-1 text-sm leading-relaxed text-freeio-muted">
             {provider.about}
           </p>
 
@@ -301,15 +296,15 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
             <Link
               to={href}
               onClick={(event) => event.stopPropagation()}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#eff6ff]"
+              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#0b1f3a] px-4 text-sm font-semibold text-[#0b1f3a] transition hover:bg-[#0b1f3a]/10"
             >
               View Profile
               <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
-        </div>
-        <FavoriteActionDialogs favorite={favorite} />
-      </article>
+          <FavoriteActionDialogs favorite={favorite} />
+        </article>
+      </div>
     )
   },
 )

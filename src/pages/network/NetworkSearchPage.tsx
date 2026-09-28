@@ -1,16 +1,17 @@
 import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { networkGroupPath } from '@/app/router/paths'
+import { useSearchParams } from 'react-router-dom'
 import { MemberCard } from '@/features/network/components/shared/MemberCard'
 import { NetworkCard } from '@/features/network/components/shared/NetworkCard'
 import { NetworkPageFrame } from '@/features/network/components/shell/NetworkPageFrame'
-import { NETWORK_GROUPS } from '@/features/network/data/community'
+import { GroupCard } from '@/features/network/components/groups/GroupCard'
 import { NETWORK_MEMBERS, getCurrentMember } from '@/features/network/data/members'
+import { useNetworkGroups } from '@/features/network/model/useNetworkGroups'
 
 export function NetworkSearchPage() {
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
   const me = getCurrentMember()
+  const { groups: allGroups } = useNetworkGroups()
 
   const people = useMemo(() => {
     const needle = q.trim().toLowerCase()
@@ -24,11 +25,14 @@ export function NetworkSearchPage() {
 
   const groups = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    return NETWORK_GROUPS.filter((group) => {
+    return allGroups.filter((group) => {
+      if (group.archived) return false
       if (!needle) return true
-      return `${group.name} ${group.description} ${group.category}`.toLowerCase().includes(needle)
+      return `${group.name} ${group.description} ${group.category} ${group.geography} ${group.tags.join(' ')}`
+        .toLowerCase()
+        .includes(needle)
     })
-  }, [q])
+  }, [q, allGroups])
 
   return (
     <NetworkPageFrame hideRight>
@@ -57,21 +61,17 @@ export function NetworkSearchPage() {
 
         <section>
           <h2 className="mb-3 text-lg font-semibold">Groups · {groups.length}</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {groups.map((group) => (
-              <Link
-                key={group.id}
-                to={networkGroupPath(group.id)}
-                className="overflow-hidden rounded-xl bg-white shadow-sm"
-              >
-                <img src={group.cover} alt="" className="h-28 w-full object-cover" />
-                <div className="p-4">
-                  <p className="font-semibold">{group.name}</p>
-                  <p className="text-xs text-muted">{group.members.toLocaleString()} members</p>
-                </div>
-              </Link>
-            ))}
-          </div>
+          {groups.length === 0 ? (
+            <NetworkCard>
+              <p className="text-sm text-muted">No groups match this search.</p>
+            </NetworkCard>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {groups.map((group) => (
+                <GroupCard key={group.id} group={group} compact />
+              ))}
+            </div>
+          )}
         </section>
       </div>
     </NetworkPageFrame>

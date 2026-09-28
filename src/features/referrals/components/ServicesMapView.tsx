@@ -106,37 +106,48 @@ export function ServicesMapView({
       rootClassName="flex h-full min-h-0 flex-1 flex-col overflow-hidden"
       splitRowClassName="flex min-h-0 flex-1 overflow-hidden"
       asideClassName="bg-paper lg:w-1/2"
-      toolbarClassName="relative z-30 flex items-start justify-between gap-3 bg-paper px-4 py-4 sm:px-5"
+      toolbarClassName="relative z-30 flex flex-col gap-2 bg-paper px-4 py-4 sm:px-5"
       showMapBarClassName="border-t border-line p-3 lg:hidden"
       mapPanelClassName="min-w-0 lg:w-1/2"
       mapInnerClassName="absolute inset-0 overflow-hidden bg-mist"
       toolbarStart={
-        <div className="min-w-0 flex-1 flex-col items-start gap-2 flex">
-          <ResultsFilterButton onClick={() => setFiltersOpen(true)} />
-          <p className="text-base text-muted">
-            {count === 0 ? (
-              'No results'
-            ) : (
-              <>
-                Showing{' '}
-                <span className="font-semibold text-ink">
-                  {pageStart} – {pageEnd}
-                </span>{' '}
-                of <span className="font-semibold text-ink">{count}</span> results
-              </>
-            )}
-            {q ? (
-              <span className="mt-1 block text-sm">
-                <Link to={PATHS.home} className="text-brand hover:underline">
-                  Home
-                </Link>
-                {' · '}“{q}”
-              </span>
-            ) : null}
-          </p>
+        <div className="flex w-full min-w-0 flex-col gap-2">
+          <div className="grid grid-cols-3 items-center gap-3">
+            <div className="justify-self-start">
+              <ResultsFilterButton variant="underline" onClick={() => setFiltersOpen(true)} />
+            </div>
+            <p className="justify-self-center text-center text-sm text-muted sm:text-base">
+              {count === 0 ? (
+                'No results'
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="font-semibold text-ink">
+                    {pageStart} – {pageEnd}
+                  </span>{' '}
+                  of <span className="font-semibold text-ink">{count}</span> results
+                </>
+              )}
+            </p>
+            <div className="justify-self-end">
+              <ServiceSortSelect
+                value={sort}
+                onChange={onSortChange}
+                variant="underline"
+              />
+            </div>
+          </div>
+          {q ? (
+            <p className="text-sm text-muted">
+              <Link to={PATHS.home} className="text-brand hover:underline">
+                Home
+              </Link>
+              {' · '}“{q}”
+            </p>
+          ) : null}
         </div>
       }
-      toolbarEnd={<ServiceSortSelect value={sort} onChange={onSortChange} />}
+      toolbarEnd={null}
       list={
         count === 0 ? (
           <div className="rounded-2xl border border-dashed border-line bg-mist/50 p-10 text-center">
@@ -146,7 +157,7 @@ export function ServicesMapView({
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="mx-auto grid w-full max-w-[34rem] gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5 sm:px-1">
             {feedItems.map((item) =>
               item.kind === 'ad' ? (
                 <FeaturedServiceAdCard

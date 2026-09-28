@@ -6,6 +6,7 @@ import { NetworkHeader } from '@/features/network/components/shell/NetworkHeader
 import { NetworkLeftNav } from '@/features/network/components/shell/NetworkLeftNav'
 import { NetworkMobileNav } from '@/features/network/components/shell/NetworkMobileNav'
 import { NetworkSocialProvider } from '@/features/network/model/NetworkSocialContext'
+import { NetworkGroupsProvider } from '@/features/network/model/GroupsProvider'
 import { useIsAuthenticated } from '@/features/auth'
 import { cn } from '@/shared/lib/cn'
 
@@ -88,7 +89,8 @@ export function NetworkLayout() {
 
   return (
     <NetworkSocialProvider>
-      <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
+      <NetworkGroupsProvider>
+        <div className="network-shell flex h-dvh max-h-dvh flex-col overflow-hidden bg-[#F0F2F5]">
         <NetworkHeader
           onOpenMenu={showSidebar ? () => setMenuOpen(true) : undefined}
           showNetworkMenu={showSidebar}
@@ -174,7 +176,8 @@ export function NetworkLayout() {
             </div>
           </div>
         ) : null}
-      </div>
+        </div>
+      </NetworkGroupsProvider>
     </NetworkSocialProvider>
   )
 }

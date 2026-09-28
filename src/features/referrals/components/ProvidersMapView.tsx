@@ -171,7 +171,7 @@ export function ProvidersMapView({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 items-stretch gap-4">
+          <div className="mx-auto grid w-full auto-rows-fr grid-cols-2 items-stretch gap-x-6 gap-y-5 sm:px-1">
             {feedItems.map((item) =>
               item.kind === 'ad' ? (
                 <FeaturedAgentAdCard

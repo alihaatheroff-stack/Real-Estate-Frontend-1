@@ -10,7 +10,6 @@ export type HeroAd = {
 
 const stock = (id: string) => `/images/stock/photo-${id}.jpg`
 
-/** Several advertisers can share one corner. The rail scrolls through every ad in the slot. */
 export const TOP_LEFT_ADS: HeroAd[] = [
   {
     id: 'tl-1',
@@ -55,6 +54,97 @@ export const BOTTOM_LEFT_ADS: HeroAd[] = [
     title: 'Metro Keys',
     subtitle: 'Urban sales',
     image: stock('1564013799919-ab600027ffc6'),
+    href: PATHS.advertise,
+  },
+]
+
+/**
+ * Inner-right 2-column promo cards — sits beside the far-right tall ads
+ * (Wix / reference placement).
+ */
+export const RIGHT_PROMO_CARDS: HeroAd[] = [
+  {
+    id: 'rp-1',
+    title: '50% Referrals',
+    subtitle: 'Partner spotlight',
+    image: stock('1600596542815-ffad4c1539a9'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-2',
+    title: 'Harbor Homes',
+    subtitle: 'Coastal listings',
+    image: stock('1600585154340-be6161a56a0c'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-3',
+    title: 'Skyline Group',
+    subtitle: 'Commercial towers',
+    image: stock('1486406146926-c627a92ad1ab'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-4',
+    title: 'Title Desk',
+    subtitle: 'Closing support',
+    image: stock('1450101499163-c8848c66ca85'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-5',
+    title: 'InspectPro',
+    subtitle: 'Home inspections',
+    image: stock('1449844908441-8829872d2607'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-6',
+    title: 'Coastal Escrow',
+    subtitle: 'Fast closings',
+    image: stock('1600566753190-17f0baa2a6c3'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-7',
+    title: 'Summit Staging',
+    subtitle: 'Show-ready homes',
+    image: stock('1616486338812-3dadae4b4ace'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-8',
+    title: 'Pine Mortgage',
+    subtitle: 'Local lenders',
+    image: stock('1560518883-ce09059eeffa'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-9',
+    title: 'Atlas Renovations',
+    subtitle: 'Value-add crews',
+    image: stock('1503387762-592deb58ef4e'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-10',
+    title: 'Oak & Pine',
+    subtitle: 'Estate agents',
+    image: stock('1600607687939-ce8a6c25118c'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-11',
+    title: 'Metro Keys',
+    subtitle: 'Urban sales',
+    image: stock('1564013799919-ab600027ffc6'),
+    href: PATHS.advertise,
+  },
+  {
+    id: 'rp-12',
+    title: 'Lux Realty',
+    subtitle: 'Of California',
+    image: stock('1613490493576-7fde63acd811'),
     href: PATHS.advertise,
   },
 ]

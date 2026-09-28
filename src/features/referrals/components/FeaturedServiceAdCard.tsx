@@ -1,40 +1,26 @@
-import { forwardRef, useMemo, type KeyboardEvent } from 'react'
+import { forwardRef, useMemo, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, CircleDollarSign, Heart, MapPin, Star } from 'lucide-react'
+import { Heart, Star } from 'lucide-react'
 import { formatCurrency, formatRating } from '@/shared/lib/format'
-import { providerPath, servicePath } from '@/app/router/paths'
+import { providerPath } from '@/app/router/paths'
 import { FavoriteActionDialogs } from '@/features/favorites/FavoriteActionDialogs'
 import {
   referralServiceFavoriteDraft,
   useFavoriteToggle,
 } from '@/features/favorites/useFavoriteToggle'
-import {
-  AdCornerRibbon,
-  AdWatermark,
-  isCornerRibbonPlacement,
-  type AdBannerPlacement,
-} from '@/features/referrals/components/FeaturedAgentAdCard'
+import type { AdBannerPlacement } from '@/features/referrals/components/FeaturedAgentAdCard'
 import { getProviderForService } from '@/features/referrals/api/repository'
 import type { ServiceResultAd } from '@/features/referrals/data/serviceResultAds'
 import type { Service } from '@/entities/provider/types'
 import { cn } from '@/shared/lib/cn'
 
-const US_STATE_NAMES: Record<string, string> = {
-  CA: 'California',
-  FL: 'Florida',
-  TX: 'Texas',
-  WA: 'Washington',
-}
-
-function formatProviderLocation(city: string, state: string, country?: string) {
-  const stateName = US_STATE_NAMES[state] ?? state
-  const region = country === 'United States' || !country ? 'North America' : country
-  return `${city}, ${stateName}, ${region}`
-}
+const FALLBACK_IMAGE =
+  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
 
 type FeaturedServiceAdCardProps = {
   ad: ServiceResultAd
   service: Service
+  /** Kept for call-site compatibility; ads use the vertical side label. */
   bannerPlacement?: AdBannerPlacement
   active?: boolean
   selected?: boolean
@@ -45,9 +31,8 @@ type FeaturedServiceAdCardProps = {
 export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCardProps>(
   function FeaturedServiceAdCard(
     {
-      ad,
+      ad: _ad,
       service,
-      bannerPlacement = 'bottom-right',
       active,
       selected,
       onSelect,
@@ -56,186 +41,131 @@ export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCa
     ref,
   ) {
     const provider = getProviderForService(service)
-    const href = servicePath(service.id)
-    const profileHref = provider ? providerPath(provider.id) : href
-    const usesCornerRibbon = isCornerRibbonPlacement(bannerPlacement)
-    const contentFlush = bannerPlacement !== 'top-left'
+    const [imageSrc, setImageSrc] = useState(service.image)
     const draft = useMemo(
       () => referralServiceFavoriteDraft(service, provider),
       [provider, service],
     )
     const favorite = useFavoriteToggle(draft)
-    const locationLabel = provider
-      ? formatProviderLocation(provider.city, provider.state, provider.country)
-      : null
-    const rateLabel = provider
-      ? provider.hourlyRateMin != null && provider.hourlyRateMax != null
-        ? `$${provider.hourlyRateMin} - $${provider.hourlyRateMax} / hr`
-        : `Starting at ${formatCurrency(service.startingPrice)}`
-      : `Starting at ${formatCurrency(service.startingPrice)}`
+
+    function selectOnMap(event?: { stopPropagation?: () => void }) {
+      event?.stopPropagation?.()
+      onSelect(service.id)
+    }
 
     function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault()
-        onSelect(service.id)
+        selectOnMap()
       }
     }
 
     return (
-      <article
-        ref={ref}
-        role="button"
-        tabIndex={0}
-        aria-pressed={selected}
-        aria-label={`Sponsored listing: show ${service.title} on the map`}
-        onMouseEnter={() => onHover(service.id)}
-        onMouseLeave={() => onHover(null)}
-        onClick={() => onSelect(service.id)}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          'relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-[#b7d8f0] bg-[#eef7fd] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition',
-          selected || active
-            ? 'border-freeio shadow-[0_12px_36px_rgba(91,187,123,0.18)]'
-            : 'hover:border-freeio/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
-        )}
-      >
-        {usesCornerRibbon ? <AdCornerRibbon placement={bannerPlacement} /> : null}
-        {bannerPlacement === 'watermark' ? <AdWatermark /> : null}
-
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            favorite.toggleSave()
+      <div className="relative h-full">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[16px] font-bold uppercase tracking-[0.28em] text-brand drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[18px]"
+          style={{
+            writingMode: 'vertical-rl',
+            transform: 'translateY(-50%) rotate(180deg)',
           }}
-          className="absolute right-3 top-3 z-20 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
-          aria-label={
-            favorite.saved ? `Remove ${service.title} from favorites` : `Save ${service.title} to favorites`
-          }
-          aria-pressed={favorite.saved}
         >
-          <Heart
-            className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
-            strokeWidth={2.2}
-          />
-        </button>
+          Advertiser
+        </span>
 
-        <div className="relative z-[1] flex h-full flex-col">
-          <div
-            className={
-              contentFlush ? 'flex items-start gap-4' : 'flex items-start gap-4 pl-5 sm:pl-6'
-            }
-          >
-            {provider ? (
-              <Link
-                to={profileHref}
-                onClick={(event) => event.stopPropagation()}
-                className={contentFlush ? 'shrink-0' : 'mt-9 shrink-0'}
-              >
-                <img
-                  src={provider.image}
-                  alt={provider.name}
-                  className={
-                    contentFlush
-                      ? 'h-20 w-20 rounded-full border-2 border-black object-cover sm:h-24 sm:w-24'
-                      : 'h-24 w-24 rounded-full border-2 border-black object-cover sm:h-28 sm:w-28'
-                  }
-                  loading="lazy"
-                />
-              </Link>
-            ) : null}
+        <article
+          ref={ref}
+          role="button"
+          tabIndex={0}
+          aria-pressed={selected}
+          aria-label={`Sponsored listing: show ${service.title} on the map`}
+          onClick={() => selectOnMap()}
+          onKeyDown={handleKeyDown}
+          onMouseEnter={() => onHover(service.id)}
+          onMouseLeave={() => onHover(null)}
+          className={cn(
+            'group flex h-full cursor-pointer flex-col overflow-hidden rounded-[18px] border bg-paper text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+            selected
+              ? 'border-brand shadow-soft ring-2 ring-brand/20'
+              : active
+                ? 'border-accent shadow-soft ring-2 ring-accent/25'
+                : 'border-line/80 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
+          )}
+        >
+          <div className="relative aspect-[4/3] overflow-hidden bg-mist">
+            <img
+              src={imageSrc}
+              alt={service.title}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={() => setImageSrc(FALLBACK_IMAGE)}
+            />
 
-            <div className="min-w-0 flex-1 pr-7">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#2563eb]">
-                <span className="underline">Sponsored</span>
-                {' · '}
-                {ad.label}
-              </p>
-              {provider?.company ? (
-                <p className="mt-1 text-sm font-bold leading-snug text-freeio-ink underline">
-                  {provider.company}
-                </p>
-              ) : null}
-              {provider?.licenseNo ? (
-                <p className="mt-0.5 text-sm text-freeio-muted">License no: {provider.licenseNo}</p>
-              ) : null}
-              <Link
-                to={profileHref}
-                onClick={(event) => event.stopPropagation()}
-                className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-freeio"
-              >
-                {provider?.name ?? service.title}
-              </Link>
-              {provider?.dreNo ? (
-                <p className="mt-0.5 text-sm text-freeio-muted">CA DRE: {provider.dreNo}</p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="mt-3 space-y-2 text-sm text-freeio-muted">
-            {provider?.title ? (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Role:</span> {provider.title}
-              </p>
-            ) : (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Service:</span> {service.title}
-              </p>
-            )}
-            {(provider?.languages?.length ?? 0) > 0 ? (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Languages:</span>{' '}
-                {provider!.languages.join(', ')}
-              </p>
-            ) : null}
-            {provider ? (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Serving Across:</span>{' '}
-                {US_STATE_NAMES[provider.state] ?? provider.state}
-              </p>
-            ) : null}
-            <div className="flex items-center gap-x-2">
-              <span className="inline-flex shrink-0 items-center gap-1.5">
-                <Star className="h-3.5 w-3.5 shrink-0 fill-freeio-star text-freeio-star" />
-                <span className="font-semibold text-freeio-ink">{formatRating(service.rating)}</span>
-              </span>
-              {locationLabel ? (
-                <span className="inline-flex min-w-0 items-center gap-1.5">
-                  <MapPin className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" />
-                  <span className="whitespace-nowrap">{locationLabel}</span>
-                </span>
-              ) : null}
-            </div>
-            <div className="flex items-center gap-x-2">
-              {provider ? (
-                <span className="shrink-0 font-semibold text-freeio-ink">
-                  Referrals: {provider.referralShare}%
-                </span>
-              ) : null}
-              <span className="inline-flex items-center gap-1.5">
-                <CircleDollarSign className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" />
-                <span className="whitespace-nowrap">{rateLabel}</span>
-              </span>
-            </div>
-          </div>
-
-          <p className="mt-4 flex-1 text-sm leading-relaxed text-freeio-muted">
-            {service.description}
-          </p>
-
-          <div className="mt-auto pt-4">
-            <Link
-              to={href}
-              onClick={(event) => event.stopPropagation()}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#eff6ff]"
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                favorite.toggleSave()
+              }}
+              className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+              aria-label={
+                favorite.saved
+                  ? `Remove ${service.title} from favorites`
+                  : `Save ${service.title} to favorites`
+              }
+              aria-pressed={favorite.saved}
             >
-              View Service
-              <ArrowUpRight className="h-4 w-4" />
-            </Link>
+              <Heart
+                className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
+                strokeWidth={2.2}
+              />
+            </button>
           </div>
-        </div>
-        <FavoriteActionDialogs favorite={favorite} />
-      </article>
+
+          <div className="flex flex-1 flex-col gap-2 p-4">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+              {service.category}
+            </p>
+            <h3 className="line-clamp-2 min-h-[3.4rem] text-[19px] font-bold leading-snug text-ink group-hover:text-brand">
+              {service.title}
+            </h3>
+
+            <div className="inline-flex items-center gap-1 text-sm text-ink">
+              <Star className="h-4 w-4 fill-accent text-accent" />
+              <span className="font-semibold">{formatRating(service.rating)}</span>
+              <span className="text-muted">({service.reviewCount} Reviews)</span>
+            </div>
+
+            <div className="mt-auto flex items-end justify-between gap-2 border-t border-line/70 pt-3">
+              <div className="flex min-w-0 items-center gap-2">
+                {provider ? (
+                  <>
+                    <img
+                      src={provider.image}
+                      alt={provider.name}
+                      className="h-8 w-8 shrink-0 rounded-full object-cover"
+                    />
+                    <Link
+                      to={providerPath(provider.id)}
+                      onClick={(event) => event.stopPropagation()}
+                      className="truncate text-sm font-medium text-ink hover:text-brand hover:underline"
+                    >
+                      {provider.name}
+                    </Link>
+                  </>
+                ) : null}
+              </div>
+              <div className="shrink-0 text-right">
+                <p className="text-[11px] text-muted">Starting at:</p>
+                <p className="text-base font-bold text-ink">
+                  {formatCurrency(service.startingPrice)}
+                </p>
+              </div>
+            </div>
+          </div>
+          <FavoriteActionDialogs favorite={favorite} />
+        </article>
+      </div>
     )
   },
 )

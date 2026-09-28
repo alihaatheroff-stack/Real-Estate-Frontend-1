@@ -58,16 +58,45 @@ export type NetworkPost = {
   likedByMe?: boolean
 }
 
+export type GroupMemberRole = 'owner' | 'admin' | 'moderator' | 'member'
+
+export type GroupMembershipStatus = 'active' | 'pending'
+
+export type GroupMembership = {
+  memberId: string
+  role: GroupMemberRole
+  status: GroupMembershipStatus
+  /** Epoch ms — used for “latest / earliest joined” sorts */
+  joinedAt: number
+}
+
 export type NetworkGroup = {
   id: string
   name: string
   cover: string
   members: number
   privacy: 'Public' | 'Private'
+  /** Primary label shown on cards (often mirrors industry). */
   category: string
   description: string
+  /** Longer about copy for the group page. */
+  about: string
   lastActive: string
+  /** Epoch ms for “recently active” sort */
+  lastActiveAt: number
+  /** Epoch ms for “recently created” sort */
+  createdAt: number
+  industry: string
+  professionalRole: string
+  geography: string
+  strategy: string
+  interest: string
+  tags: string[]
+  rules: string[]
+  memberships: GroupMembership[]
+  /** Derived convenience list of active member ids */
   memberIds: string[]
+  archived?: boolean
 }
 
 export type NetworkForumThreadFilters = {

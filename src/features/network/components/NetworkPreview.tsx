@@ -19,7 +19,7 @@ const PREVIEW_ICONS: Record<NetworkPreviewIcon, ComponentType<{ className?: stri
 
 export function NetworkPreview() {
   return (
-    <Section id="network" className="scroll-mt-24 bg-mist/70 pt-8 sm:pt-10" containerClassName="max-w-none">
+    <Section id="network" className="scroll-mt-24 bg-mist/70 pt-8 pb-8 sm:pt-10 sm:pb-10" containerClassName="max-w-none">
       <ScrollReveal className="mb-6 w-full space-y-2">
         <h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
           3. Network

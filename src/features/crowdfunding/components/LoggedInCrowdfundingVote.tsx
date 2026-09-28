@@ -131,7 +131,9 @@ function FilterOptionLabel({ option }: { option: FilterOption }) {
     <span className="inline-flex items-center gap-1.5">
       {option.icon === 'price' ? <SortPriceIcon /> : null}
       {option.icon === 'date' ? <SortDateIcon /> : null}
-      <span>{option.label}</span>
+      <span className="group-hover:underline group-focus-visible:underline decoration-brand underline-offset-[3px]">
+        {option.label}
+      </span>
     </span>
   )
 }
@@ -414,7 +416,8 @@ function FilterSelect({
   }, [underline, open])
 
   function pick(next: string) {
-    onChange(next)
+    // Underline menus toggle: click again to clear selection.
+    onChange(underline && next === value ? 'all' : next)
     if (underline) setOpen(false)
   }
 
@@ -492,7 +495,7 @@ function FilterSelect({
               aria-selected={option.value === value}
               data-active={option.value === value ? 'true' : undefined}
               onClick={() => pick(option.value)}
-              className={underline ? 'whitespace-nowrap' : undefined}
+              className={underline ? 'group whitespace-nowrap' : undefined}
             >
               <FilterOptionLabel option={option} />
             </button>

@@ -21,7 +21,7 @@ export function LandingHero({ filters, onChange, toSearchParams }: LandingHeroPr
       <HeroSlideshow activeIndex={activeIndex} onChange={setActiveIndex} />
       <HeroAdRails />
 
-      <div className="absolute bottom-0 left-0 top-0 z-[7] flex items-start px-2 pb-[4.75rem] pt-1.5 sm:px-3 sm:pb-20 lg:left-[clamp(7.5rem,11vw,11rem)] lg:px-2 xl:right-[clamp(7.5rem,11vw,11rem)]">
+      <div className="absolute bottom-0 left-0 top-0 z-[7] flex items-start px-2 pb-[4.75rem] pt-1.5 sm:px-3 sm:pb-20 lg:left-[clamp(7.5rem,11vw,11rem)] lg:px-2 xl:right-[clamp(18.5rem,26vw,25rem)]">
         <HeroFilterPanel
           filters={filters}
           onChange={onChange}

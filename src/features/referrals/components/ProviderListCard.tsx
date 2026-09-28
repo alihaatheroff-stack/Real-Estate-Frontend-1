@@ -64,10 +64,10 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
         onClick={() => onSelect(provider.id)}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative flex h-full cursor-pointer flex-col rounded-2xl border bg-white p-5 transition',
+          'relative flex h-full w-full cursor-pointer flex-col rounded-2xl border bg-white p-5 transition',
           selected || active
-            ? 'border-[#0b1f3a] shadow-[0_12px_36px_rgba(11,31,58,0.18)]'
-            : 'border-freeio-border-soft shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-[#0b1f3a]/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
+            ? 'border-brand shadow-soft ring-2 ring-brand/20'
+            : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-brand/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
         )}
       >
         <button
@@ -107,7 +107,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             ) : null}
             {provider.licenseNo ? (
               <p className="mt-0.5 text-sm text-freeio-muted">
-                License no: {provider.licenseNo}
+                License #: {provider.licenseNo}
               </p>
             ) : null}
             <Link
@@ -160,7 +160,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
           </div>
         </div>
 
-        <p className="mt-4 flex-1 text-sm leading-relaxed text-freeio-muted">
+        <p className="mt-4 line-clamp-3 min-h-[3.75rem] flex-1 text-sm leading-relaxed text-freeio-muted">
           {provider.about}
         </p>
 

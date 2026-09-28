@@ -12,6 +12,7 @@ export { TopProvidersSection } from '@/features/landing/components/TopProvidersS
 export { NewsUpdatesSection } from '@/features/landing/components/NewsUpdatesSection'
 export { ClientHireSection } from '@/features/landing/components/ClientHireSection'
 export { ClientFieldsMarquee } from '@/features/landing/components/ClientFieldsMarquee'
+export { LandingFaqSection } from '@/features/landing/components/LandingFaqSection'
 export { ReferralMemberHub } from '@/features/landing/components/ReferralMemberHub'
 export { ProfilePortraitStrip } from '@/features/landing/components/ProfilePortraitStrip'
 export { MemberActivitySection } from '@/features/landing/components/MemberActivitySection'
