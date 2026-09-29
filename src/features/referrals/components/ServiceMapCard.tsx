@@ -11,10 +11,10 @@ import {
   useFavoriteToggle,
 } from '@/features/favorites/useFavoriteToggle'
 import { getProviderForService } from '@/features/referrals/api/repository'
+import { PROFILE_RESULT_CARD_FRAME } from '@/features/referrals/components/FeaturedAgentAdCard'
 import { providerPath } from '@/app/router/paths'
 
-const FALLBACK_IMAGE =
-  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
+const FALLBACK_IMAGE = '/images/services/townhouse-exteriors.png'
 
 type ServiceMapCardProps = {
   service: Service
@@ -61,19 +61,20 @@ export const ServiceMapCard = forwardRef<HTMLElement, ServiceMapCardProps>(funct
       onMouseEnter={() => onHover(service.id)}
       onMouseLeave={() => onHover(null)}
       className={cn(
-        'group flex h-full cursor-pointer flex-col overflow-hidden rounded-[18px] border bg-paper text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+        PROFILE_RESULT_CARD_FRAME,
+        'group cursor-pointer text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
         selected
-          ? 'border-brand shadow-soft ring-2 ring-brand/20'
+          ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
           : active
-            ? 'border-accent shadow-soft ring-2 ring-accent/25'
-            : 'border-line/80 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
+            ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+            : 'border-line/80 hover:-translate-y-0.5 hover:border-sky-500 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
       )}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-mist">
         <img
           src={imageSrc}
           alt={service.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
           loading="lazy"
           onError={() => setImageSrc(FALLBACK_IMAGE)}
         />

@@ -31,6 +31,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
   const [notes, setNotes] = useState<NetworkNote[]>(() => sortNotes(NETWORK_NOTES))
   const [friendResponses, setFriendResponses] = useState<Record<string, FriendRequestAction>>({})
   const [followingIds, setFollowingIds] = useState<string[]>(() => getCurrentMember().friendIds)
+  const [sentFriendRequestIds, setSentFriendRequestIds] = useState<string[]>([])
 
   const addPost = useCallback(
     (input: {
@@ -410,6 +411,16 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
     setFollowingIds((current) =>
       current.includes(memberId) ? current.filter((id) => id !== memberId) : [...current, memberId],
     )
+    setSentFriendRequestIds((current) => current.filter((id) => id !== memberId))
+  }, [])
+
+  const sendFriendRequest = useCallback((memberId: string) => {
+    if (!memberId || memberId === CURRENT_MEMBER_ID) return
+    setSentFriendRequestIds((current) => (current.includes(memberId) ? current : [...current, memberId]))
+  }, [])
+
+  const cancelFriendRequest = useCallback((memberId: string) => {
+    setSentFriendRequestIds((current) => current.filter((id) => id !== memberId))
   }, [])
 
   const unreadMessageCount = useMemo(
@@ -425,6 +436,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       unreadMessageCount,
       friendResponses,
       followingIds,
+      sentFriendRequestIds,
       addPost,
       deletePost,
       toggleLike,
@@ -441,6 +453,8 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       togglePinNote,
       respondToFriendRequest,
       toggleFollow,
+      sendFriendRequest,
+      cancelFriendRequest,
     }),
     [
       posts,
@@ -449,6 +463,7 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       unreadMessageCount,
       friendResponses,
       followingIds,
+      sentFriendRequestIds,
       addPost,
       deletePost,
       toggleLike,
@@ -465,6 +480,8 @@ export function NetworkSocialProvider({ children }: { children: ReactNode }) {
       togglePinNote,
       respondToFriendRequest,
       toggleFollow,
+      sendFriendRequest,
+      cancelFriendRequest,
     ],
   )
 

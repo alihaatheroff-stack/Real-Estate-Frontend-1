@@ -120,16 +120,19 @@ export function ProvidersMapView({
   return (
     <ResultsSplitView
       rootClassName="flex h-full min-h-0 flex-1 flex-col overflow-hidden"
+      splitRowClassName="flex min-h-0 flex-1 overflow-hidden"
       asideClassName="bg-freeio-wash lg:w-[48%]"
-      toolbarClassName="flex items-start justify-between gap-3 border-b border-line bg-white px-4 py-4 sm:px-5"
+      toolbarClassName="relative z-30 flex flex-col gap-2 bg-paper px-4 py-4 sm:px-5"
       showMapBarClassName="border-t border-line bg-white p-3 lg:hidden"
       mapPanelClassName="bg-mist lg:w-[52%]"
       mapInnerClassName="absolute inset-0 overflow-hidden bg-mist"
       toolbarStart={
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-1">
-          <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-            <ResultsFilterButton onClick={() => setFiltersOpen(true)} />
-            <p className="text-base text-muted">
+        <div className="flex w-full min-w-0 flex-col gap-2">
+          <div className="grid grid-cols-3 items-center gap-3">
+            <div className="justify-self-start">
+              <ResultsFilterButton variant="underline" onClick={() => setFiltersOpen(true)} />
+            </div>
+            <p className="justify-self-center text-center text-sm text-muted underline underline-offset-[3px] sm:text-base">
               {count === 0 ? (
                 'No results'
               ) : (
@@ -143,6 +146,15 @@ export function ProvidersMapView({
                 </>
               )}
             </p>
+            <div className="justify-self-end">
+              <ResultsSortMenu
+                options={PROVIDER_SORT_OPTIONS}
+                value={sort}
+                onChange={onSortChange}
+                clearValue="default"
+                variant="underline"
+              />
+            </div>
           </div>
           {q ? (
             <p className="text-sm text-muted">
@@ -154,14 +166,7 @@ export function ProvidersMapView({
           ) : null}
         </div>
       }
-      toolbarEnd={
-        <ResultsSortMenu
-          options={PROVIDER_SORT_OPTIONS}
-          value={sort}
-          onChange={onSortChange}
-          clearValue="default"
-        />
-      }
+      toolbarEnd={null}
       list={
         count === 0 ? (
           <div className="rounded-2xl border border-dashed border-line bg-white p-10 text-center">
@@ -171,7 +176,7 @@ export function ProvidersMapView({
             </p>
           </div>
         ) : (
-          <div className="mx-auto grid w-full auto-rows-fr grid-cols-2 items-stretch gap-x-6 gap-y-5 sm:px-1">
+          <div className="mx-auto grid w-full auto-rows-fr grid-cols-2 items-stretch gap-x-6 gap-y-5 pl-5 sm:gap-x-8 sm:pl-6 sm:pr-1">
             {feedItems.map((item) =>
               item.kind === 'ad' ? (
                 <FeaturedAgentAdCard

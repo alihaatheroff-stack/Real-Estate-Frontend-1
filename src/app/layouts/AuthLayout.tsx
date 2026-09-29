@@ -1,28 +1,7 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
-import { SITE } from '@/shared/config/site'
+import { SiteLogo } from '@/components/layout/SiteLogo'
 import { cn } from '@/shared/lib/cn'
-
-function AuthLogo({ showTagline = false }: { showTagline?: boolean }) {
-  return (
-    <Link to={PATHS.home} className="flex min-w-0 shrink-0 items-center gap-3">
-      <span
-        aria-hidden
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0b1f3a] text-xs font-extrabold tracking-wide text-white sm:h-11 sm:w-11 sm:text-sm"
-      >
-        RE
-      </span>
-      <span className="min-w-0 leading-tight">
-        <span className="block font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl">
-          {SITE.name}
-        </span>
-        {showTagline ? (
-          <span className="block text-xs text-muted sm:text-sm">{SITE.tagline}</span>
-        ) : null}
-      </span>
-    </Link>
-  )
-}
 
 export function AuthLayout() {
   const { pathname } = useLocation()
@@ -37,7 +16,13 @@ export function AuthLayout() {
             !isRegister && 'mx-auto max-w-2xl',
           )}
         >
-          <AuthLogo showTagline={isRegister} />
+          <SiteLogo
+            to={PATHS.home}
+            showTagline={isRegister}
+            className="gap-3"
+            markClassName="h-10 w-10 sm:h-11 sm:w-11"
+            titleClassName="text-xl sm:text-2xl"
+          />
         </div>
       </header>
       {isRegister ? (

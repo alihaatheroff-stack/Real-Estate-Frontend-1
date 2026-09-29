@@ -14,7 +14,7 @@ import { OrdersMenu } from '@/components/layout/OrdersMenu'
 import { GuestAuthPopover } from '@/components/layout/GuestAuthPopover'
 import { ProfileMenu, GuestAccountMenu } from '@/components/layout/ProfileMenu'
 import { PATHS } from '@/app/router/paths'
-import { SITE } from '@/shared/config/site'
+import { SiteLogo } from '@/components/layout/SiteLogo'
 import { cn } from '@/shared/lib/cn'
 import {
   isCrowdfundingNavItem,
@@ -101,23 +101,7 @@ export function SiteHeader({
   return (
     <header className="sticky top-0 z-50 shrink-0 border-b border-line/70 bg-paper/85 backdrop-blur-md">
       <Container className="flex h-[4.75rem] max-w-none items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4 lg:px-5">
-        <Link
-          to={homeHref}
-          className="flex min-w-0 shrink-0 items-center gap-2.5"
-        >
-          <span
-            aria-hidden
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#0b1f3a] sm:h-12 sm:w-12"
-          />
-          <span className="min-w-0 leading-tight">
-            <span className="block font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-              {SITE.name}
-            </span>
-            <span className="hidden truncate text-[11px] text-muted sm:block">
-              {SITE.tagline}
-            </span>
-          </span>
-        </Link>
+        <SiteLogo to={homeHref} />
 
         <SiteModuleNav
           className="hidden lg:flex"

@@ -366,6 +366,9 @@ type ResultsSortMenuProps<T extends string> = {
   clearValue: T
   /** When true, show the active option after “Sort by:”. */
   showSelectedLabel?: boolean
+  /** `underline` matches the service results toolbar style. */
+  variant?: 'box' | 'underline'
+  className?: string
 }
 
 /** Hover select-style sort control used by provider and employer map views. */
@@ -375,12 +378,15 @@ export function ResultsSortMenu<T extends string>({
   onChange,
   clearValue,
   showSelectedLabel = false,
+  variant = 'box',
+  className,
 }: ResultsSortMenuProps<T>) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const selectedLabel = options.find((option) => option.value === value)?.label
   const triggerLabel =
     showSelectedLabel && selectedLabel ? `Sort by: ${selectedLabel}` : 'Sort by'
+  const underline = variant === 'underline'
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
@@ -404,10 +410,76 @@ export function ResultsSortMenu<T extends string>({
     setOpen((next) => !next)
   }
 
+  if (underline) {
+    return (
+      <div className={cn('inline-flex items-center gap-1.5 text-sm', className)}>
+        <span className="shrink-0 whitespace-nowrap font-semibold text-ink">Sort By:</span>
+        <div ref={rootRef} className="relative z-20 w-auto min-w-0">
+          <button
+            type="button"
+            onClick={() => setOpen((prev) => !prev)}
+            aria-label="Sort by"
+            aria-expanded={open}
+            aria-haspopup="listbox"
+            className="inline-flex min-w-24 max-w-[14rem] items-center justify-between gap-1.5 border-0 border-b-2 border-ink/35 bg-transparent py-0.5 text-left text-sm font-semibold leading-none text-ink outline-none transition hover:border-brand"
+          >
+            <span
+              className={cn(
+                'min-w-0 truncate',
+                selectedLabel && value !== clearValue
+                  ? 'text-sky-500'
+                  : 'font-medium text-ink/55',
+              )}
+            >
+              {selectedLabel && value !== clearValue ? selectedLabel : '\u00a0'}
+            </span>
+            <span
+              aria-hidden
+              className={cn(
+                'mb-0.5 shrink-0 text-[9px] leading-none transition',
+                open && 'rotate-180',
+              )}
+            >
+              ▼
+            </span>
+          </button>
+          <div
+            className={cn(
+              'settings-paste-menu settings-paste-menu--underline network-thin-scroll right-0 mt-1 max-h-56 w-max min-w-[10rem] overflow-y-auto',
+              open ? 'is-open z-[60]' : 'pointer-events-none',
+            )}
+            role="listbox"
+            aria-label="Sort options"
+          >
+            {options.map((option) => {
+              const checked = value === option.value
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="option"
+                  aria-selected={checked}
+                  data-active={checked ? 'true' : undefined}
+                  onClick={() => {
+                    onChange(checked ? clearValue : option.value)
+                    setOpen(false)
+                  }}
+                  className="group whitespace-nowrap"
+                >
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       ref={rootRef}
-      className={cn('results-sort-select shrink-0', open && 'is-open')}
+      className={cn('results-sort-select shrink-0', open && 'is-open', className)}
     >
       <button
         type="button"

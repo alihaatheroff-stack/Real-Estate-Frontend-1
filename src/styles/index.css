@@ -170,6 +170,39 @@
     pointer-events: none !important;
   }
 
+  .services-map .leaflet-bottom.leaflet-left {
+    bottom: 0.75rem;
+    left: 0.75rem;
+  }
+
+  .services-map .leaflet-control-zoom {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 20px rgb(15 31 26 / 0.12);
+  }
+
+  .services-map .leaflet-control-zoom a {
+    width: 2.5rem;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    font-size: 1.125rem;
+    color: var(--color-ink);
+    background: var(--color-paper);
+    border-bottom-color: var(--color-line);
+  }
+
+  .services-map .leaflet-control-zoom a:hover {
+    color: var(--color-brand);
+    background: var(--color-mist);
+  }
+
+  .services-map .leaflet-control-zoom a.leaflet-disabled {
+    color: var(--color-muted);
+    background: var(--color-paper);
+  }
+
   .range-slider::-webkit-slider-thumb {
     appearance: none;
     height: 18px;

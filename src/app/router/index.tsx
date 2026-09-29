@@ -7,6 +7,7 @@ import { NetworkLayout } from '@/app/layouts/NetworkLayout'
 import { PATHS } from '@/app/router/paths'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { CrowdfundingExplorePage } from '@/pages/crowdfunding/CrowdfundingExplorePage'
+import { CrowdfundingProfilePage } from '@/pages/crowdfunding/CrowdfundingProfilePage'
 import { LcreCrowdfundingPage } from '@/pages/crowdfunding/LcreCrowdfundingPage'
 import {
   CrowdfundingArticleDetailPage,
@@ -61,6 +62,7 @@ import { AboutPage } from '@/pages/about/AboutPage'
 import { AdvertisePage } from '@/pages/advertise/AdvertisePage'
 import { NewsPage } from '@/pages/news/NewsPage'
 import { GlossaryPage } from '@/pages/glossary/GlossaryPage'
+import { HirePage } from '@/pages/hire/HirePage'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import {
   DashboardAboutPage,
@@ -101,6 +103,10 @@ export const router = createBrowserRouter([
             path: PATHS.lcreCrowdfunding,
             element: <LcreCrowdfundingPage />,
           },
+          {
+            path: PATHS.crowdfundingProfile,
+            element: <CrowdfundingProfilePage />,
+          },
           { path: PATHS.crowdfundingArticles, element: <CrowdfundingArticlesPage /> },
           { path: PATHS.crowdfundingArticle, element: <CrowdfundingArticleDetailPage /> },
           { path: PATHS.crowdfundingForums, element: <CrowdfundingForumsPage /> },
@@ -134,6 +140,10 @@ export const router = createBrowserRouter([
           {
             path: PATHS.glossary,
             element: <GlossaryPage />,
+          },
+          {
+            path: PATHS.hire,
+            element: <HirePage />,
           },
           {
             path: PATHS.shop,

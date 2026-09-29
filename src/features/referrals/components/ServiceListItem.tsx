@@ -38,7 +38,7 @@ export const ServiceListItem = forwardRef<HTMLButtonElement, ServiceListItemProp
           <img
             src={service.image}
             alt={service.title}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover object-center"
             loading="lazy"
           />
           {service.badges[0] ? (

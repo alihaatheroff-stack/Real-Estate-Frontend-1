@@ -19,7 +19,7 @@ import { NotificationsMenu } from '@/components/layout/NotificationsMenu'
 import { OrdersMenu } from '@/components/layout/OrdersMenu'
 import { GuestAccountMenu, ProfileMenu } from '@/components/layout/ProfileMenu'
 import { SiteModuleNav } from '@/components/layout/SiteModuleNav'
-import { SITE } from '@/shared/config/site'
+import { SiteLogo } from '@/components/layout/SiteLogo'
 import { signOut, useIsAuthenticated } from '@/features/auth'
 
 export function NetworkHeader({
@@ -35,23 +35,10 @@ export function NetworkHeader({
     <header className="relative sticky top-0 z-50 border-b border-black/5 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
       <div className="flex h-[4.75rem] w-full items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4">
         <div className="flex min-w-0 items-center gap-8 lg:gap-12">
-          <Link
+          <SiteLogo
             to={PATHS.home}
-            className="flex min-w-0 shrink-0 items-center gap-2.5"
-          >
-            <span
-              aria-hidden
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#0b1f3a] sm:h-12 sm:w-12"
-            />
-            <span className="min-w-0 leading-tight">
-              <span className="block font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-                {SITE.name}
-              </span>
-              <span className="hidden truncate text-[11px] text-muted sm:block">
-                {SITE.tagline}
-              </span>
-            </span>
-          </Link>
+            titleClassName="text-2xl sm:text-3xl"
+          />
 
           <SiteModuleNav
             compact

@@ -1,21 +1,22 @@
 import { forwardRef, useMemo, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { Heart, Star } from 'lucide-react'
-import { formatCurrency, formatRating } from '@/shared/lib/format'
+import { Heart } from 'lucide-react'
 import { providerPath } from '@/app/router/paths'
 import { FavoriteActionDialogs } from '@/features/favorites/FavoriteActionDialogs'
 import {
   referralServiceFavoriteDraft,
   useFavoriteToggle,
 } from '@/features/favorites/useFavoriteToggle'
-import type { AdBannerPlacement } from '@/features/referrals/components/FeaturedAgentAdCard'
+import {
+  PROFILE_RESULT_CARD_FRAME,
+  type AdBannerPlacement,
+} from '@/features/referrals/components/FeaturedAgentAdCard'
 import { getProviderForService } from '@/features/referrals/api/repository'
 import type { ServiceResultAd } from '@/features/referrals/data/serviceResultAds'
 import type { Service } from '@/entities/provider/types'
 import { cn } from '@/shared/lib/cn'
 
-const FALLBACK_IMAGE =
-  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
+const FALLBACK_IMAGE = '/images/services/townhouse-exteriors.png'
 
 type FeaturedServiceAdCardProps = {
   ad: ServiceResultAd
@@ -31,7 +32,7 @@ type FeaturedServiceAdCardProps = {
 export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCardProps>(
   function FeaturedServiceAdCard(
     {
-      ad: _ad,
+      ad,
       service,
       active,
       selected,
@@ -61,10 +62,10 @@ export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCa
     }
 
     return (
-      <div className="relative h-full">
+      <div className="relative h-full w-full">
         <span
           aria-hidden
-          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[16px] font-bold uppercase tracking-[0.28em] text-brand drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[18px]"
+          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[15px] font-bold uppercase tracking-[0.22em] text-sky-500 drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[17px]"
           style={{
             writingMode: 'vertical-rl',
             transform: 'translateY(-50%) rotate(180deg)',
@@ -84,22 +85,27 @@ export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCa
           onMouseEnter={() => onHover(service.id)}
           onMouseLeave={() => onHover(null)}
           className={cn(
-            'group flex h-full cursor-pointer flex-col overflow-hidden rounded-[18px] border bg-paper text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
+            PROFILE_RESULT_CARD_FRAME,
+            'cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
             selected
-              ? 'border-brand shadow-soft ring-2 ring-brand/20'
+              ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
               : active
-                ? 'border-accent shadow-soft ring-2 ring-accent/25'
-                : 'border-line/80 hover:-translate-y-0.5 hover:border-brand/25 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
+                ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+                : 'border-line/80 hover:-translate-y-0.5 hover:border-sky-500 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
           )}
         >
-          <div className="relative aspect-[4/3] overflow-hidden bg-mist">
+          <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-mist">
             <img
               src={imageSrc}
               alt={service.title}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
               loading="lazy"
               onError={() => setImageSrc(FALLBACK_IMAGE)}
             />
+
+            <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold leading-none text-ink shadow-sm">
+              Ad
+            </span>
 
             <button
               type="button"
@@ -107,7 +113,7 @@ export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCa
                 event.stopPropagation()
                 favorite.toggleSave()
               }}
-              className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+              className="absolute right-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
               aria-label={
                 favorite.saved
                   ? `Remove ${service.title} from favorites`
@@ -122,47 +128,69 @@ export const FeaturedServiceAdCard = forwardRef<HTMLElement, FeaturedServiceAdCa
             </button>
           </div>
 
-          <div className="flex flex-1 flex-col gap-2 p-4">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
-              {service.category}
+          <div className="grid min-h-0 flex-1 grid-cols-2 items-start gap-x-2.5 gap-y-1 border-t border-line/70 px-3 py-2.5 text-[11px] leading-[1.35] text-ink sm:gap-x-3 sm:px-3.5 sm:text-[12px]">
+            <div className="flex h-24 min-w-0 items-start sm:h-[6.5rem]">
+              <img
+                src={ad.companyLogo}
+                alt={ad.companyName}
+                className="h-full w-full object-contain object-left object-top"
+                loading="lazy"
+              />
+            </div>
+
+            <div className="flex h-16 min-w-0 items-start sm:h-[4.5rem]">
+              {provider ? (
+                <Link
+                  to={providerPath(provider.id)}
+                  onClick={(event) => event.stopPropagation()}
+                  className="block size-14 shrink-0 overflow-hidden rounded-md border border-line sm:size-16"
+                >
+                  <img
+                    src={provider.image}
+                    alt={provider.name}
+                    className="h-full w-full object-cover object-top"
+                    loading="lazy"
+                  />
+                </Link>
+              ) : null}
+            </div>
+
+            <p className="min-w-0 truncate font-bold text-[#0b1f3a]">{ad.companyName}</p>
+            {provider ? (
+              <Link
+                to={providerPath(provider.id)}
+                onClick={(event) => event.stopPropagation()}
+                className="min-w-0 truncate font-bold text-[#0b1f3a] hover:underline"
+              >
+                {provider.name}
+              </Link>
+            ) : (
+              <p className="min-w-0 truncate font-bold text-[#0b1f3a]">{service.title}</p>
+            )}
+
+            <p className="min-w-0 truncate text-[10px] text-muted sm:text-[11px]">
+              {ad.companyTagline ?? '\u00A0'}
             </p>
-            <h3 className="line-clamp-2 min-h-[3.4rem] text-[19px] font-bold leading-snug text-ink group-hover:text-brand">
-              {service.title}
-            </h3>
+            <p className="min-w-0 truncate text-[10px] text-muted sm:text-[11px]">
+              {provider?.title ?? service.category}
+            </p>
 
-            <div className="inline-flex items-center gap-1 text-sm text-ink">
-              <Star className="h-4 w-4 fill-accent text-accent" />
-              <span className="font-semibold">{formatRating(service.rating)}</span>
-              <span className="text-muted">({service.reviewCount} Reviews)</span>
-            </div>
+            <p className="min-w-0 truncate text-muted">License #: {ad.companyLicenseNo}</p>
+            <p className="min-w-0 truncate text-muted">
+              {provider?.licenseNo ? `License # ${provider.licenseNo}` : '\u00A0'}
+            </p>
 
-            <div className="mt-auto flex items-end justify-between gap-2 border-t border-line/70 pt-3">
-              <div className="flex min-w-0 items-center gap-2">
-                {provider ? (
-                  <>
-                    <img
-                      src={provider.image}
-                      alt={provider.name}
-                      className="h-8 w-8 shrink-0 rounded-full object-cover"
-                    />
-                    <Link
-                      to={providerPath(provider.id)}
-                      onClick={(event) => event.stopPropagation()}
-                      className="truncate text-sm font-medium text-ink hover:text-brand hover:underline"
-                    >
-                      {provider.name}
-                    </Link>
-                  </>
-                ) : null}
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-[11px] text-muted">Starting at:</p>
-                <p className="text-base font-bold text-ink">
-                  {formatCurrency(service.startingPrice)}
-                </p>
-              </div>
-            </div>
+            <p className="min-w-0 truncate text-muted">Phone: {ad.companyPhone}</p>
+            <p className="min-w-0 truncate text-muted">
+              {provider?.phone ? `Phone: ${provider.phone}` : '\u00A0'}
+            </p>
+
+            <p className="min-w-0 line-clamp-2 text-muted">{ad.companyAddress}</p>
+            <p className="min-w-0" aria-hidden>
+              {'\u00A0'}
+            </p>
           </div>
+
           <FavoriteActionDialogs favorite={favorite} />
         </article>
       </div>

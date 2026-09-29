@@ -13,6 +13,7 @@ import {
 import { EmployerFiltersDrawer } from '@/features/referrals/components/EmployerFiltersDrawer'
 import { EmployerMapCard } from '@/features/referrals/components/EmployerMapCard'
 import { EmployersMap } from '@/features/referrals/components/EmployersMap'
+import { FeaturedEmployerAdCard } from '@/features/referrals/components/FeaturedEmployerAdCard'
 import { adBannerPlacementFor } from '@/features/referrals/components/FeaturedAgentAdCard'
 import {
   pickEmployerResultAds,
@@ -76,7 +77,9 @@ function EmployersListSkeleton({ layout }: { layout: LayoutMode }) {
   return (
     <div
       className={cn(
-        layout === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2' : 'flex flex-col gap-3',
+        layout === 'grid'
+          ? 'mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1'
+          : 'flex flex-col gap-3',
       )}
       aria-busy="true"
       aria-live="polite"
@@ -85,24 +88,30 @@ function EmployersListSkeleton({ layout }: { layout: LayoutMode }) {
         <div
           key={index}
           className={cn(
-            'animate-pulse rounded-2xl border border-freeio-border-soft bg-white',
-            layout === 'grid' ? 'h-[280px]' : 'h-[96px]',
+            'animate-pulse overflow-hidden rounded-2xl border border-line/80 bg-white',
+            layout === 'grid' ? 'flex flex-col' : 'h-[96px]',
           )}
         >
-          <div className="flex gap-3 p-4">
-            <div className="h-14 w-14 rounded-2xl bg-freeio-hover" />
-            <div className="flex-1 space-y-2 pt-1">
-              <div className="h-3 w-24 rounded bg-freeio-hover" />
-              <div className="h-4 w-3/4 rounded bg-freeio-hover" />
-              <div className="h-3 w-full rounded bg-freeio-hover" />
-            </div>
-          </div>
           {layout === 'grid' ? (
-            <div className="mx-4 mt-2 grid grid-cols-2 gap-2">
-              <div className="h-14 rounded-xl bg-freeio-hover" />
-              <div className="h-14 rounded-xl bg-freeio-hover" />
+            <>
+              <div className="aspect-[4/3] bg-mist" />
+              <div className="space-y-2 p-4">
+                <div className="h-3 w-24 rounded bg-freeio-hover" />
+                <div className="h-5 w-3/4 rounded bg-freeio-hover" />
+                <div className="h-4 w-1/2 rounded bg-freeio-hover" />
+                <div className="mt-2 h-10 rounded bg-freeio-hover" />
+              </div>
+            </>
+          ) : (
+            <div className="flex gap-3 p-4">
+              <div className="h-14 w-14 rounded-xl bg-freeio-hover" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-3 w-24 rounded bg-freeio-hover" />
+                <div className="h-4 w-3/4 rounded bg-freeio-hover" />
+                <div className="h-3 w-full rounded bg-freeio-hover" />
+              </div>
             </div>
-          ) : null}
+          )}
         </div>
       ))}
       <span className="sr-only">Loading employer results</span>
@@ -334,7 +343,7 @@ export function EmployersMapView({
           <ul
             className={cn(
               layout === 'grid'
-                ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4'
+                ? 'mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1'
                 : 'flex flex-col gap-3',
             )}
           >
@@ -346,28 +355,38 @@ export function EmployersMapView({
                   className="animate-[section-rise_0.4s_ease-out_both]"
                   style={{ animationDelay: `${Math.min(index, 7) * 35}ms` }}
                 >
-                  <EmployerMapCard
-                    ref={(element) => {
-                      itemRefs.current[employer.id] = element
-                    }}
-                    employer={employer}
-                    compact={layout === 'list'}
-                    advertisement={item.kind === 'ad'}
-                    bannerPlacement={
-                      item.kind === 'ad'
-                        ? layout === 'list'
-                          ? 'top-right'
-                          : adBannerPlacementFor(employer.id)
-                        : undefined
-                    }
-                    selected={selectedId === employer.id}
-                    active={hoveredId === employer.id}
-                    onSelect={(id) => {
-                      setSelectedId(id)
-                      openEmployer(id)
-                    }}
-                    onHover={setHoveredId}
-                  />
+                  {item.kind === 'ad' && layout === 'grid' ? (
+                    <FeaturedEmployerAdCard
+                      ref={(element) => {
+                        itemRefs.current[employer.id] = element
+                      }}
+                      ad={item.ad}
+                      employer={employer}
+                      bannerPlacement={adBannerPlacementFor(employer.id)}
+                      selected={selectedId === employer.id}
+                      active={hoveredId === employer.id}
+                      onSelect={(id) => {
+                        setSelectedId(id)
+                        openEmployer(id)
+                      }}
+                      onHover={setHoveredId}
+                    />
+                  ) : (
+                    <EmployerMapCard
+                      ref={(element) => {
+                        itemRefs.current[employer.id] = element
+                      }}
+                      employer={employer}
+                      compact={layout === 'list'}
+                      selected={selectedId === employer.id}
+                      active={hoveredId === employer.id}
+                      onSelect={(id) => {
+                        setSelectedId(id)
+                        openEmployer(id)
+                      }}
+                      onHover={setHoveredId}
+                    />
+                  )}
                 </li>
               )
             })}

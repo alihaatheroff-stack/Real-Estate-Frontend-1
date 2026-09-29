@@ -64,7 +64,7 @@ export function ServiceCard({
             <img
               src={service.image}
               alt={service.title}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-[1.03]"
               loading="lazy"
             />
           </Link>
@@ -167,7 +167,7 @@ export function ServiceCard({
             <img
               src={service.image}
               alt={service.title}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
               loading="lazy"
             />
           </Link>
@@ -249,7 +249,7 @@ export function ServiceCard({
         <img
           src={service.image}
           alt={service.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">

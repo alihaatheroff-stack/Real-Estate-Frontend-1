@@ -1,10 +1,19 @@
 import type { Provider } from '@/entities/provider/types'
+import { AD_COMPANY_LOGOS } from '@/features/referrals/data/adCompanyLogos'
 import { pickPageAds } from '@/features/referrals/lib/resultFeedAds'
 
 export type ProfileResultAd = {
   id: string
   label: string
   providerId: string
+  /** Full-bleed photo above the company / person info block. */
+  coverImage: string
+  companyLogo: string
+  companyName: string
+  companyTagline?: string
+  companyLicenseNo: string
+  companyPhone: string
+  companyAddress: string
 }
 
 /**
@@ -40,8 +49,8 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
       'Keeps residential and light-commercial closings on track — timelines, disclosures, and calm handoffs between agents, lenders, and escrow.',
     languages: ['English', 'Hindi'],
     englishLevel: 'Fluent',
-    hourlyRateMin: 55,
-    hourlyRateMax: 95,
+    hourlyRateMin: 1500,
+    hourlyRateMax: 1500,
     joinedDate: 'Mar 2021',
     skills: ['Escrow Coordination', 'Disclosure Review', 'Closing Timeline'],
     gender: 'Female',
@@ -80,8 +89,8 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
       'Helps owners and investors challenge assessments and plan holding costs — clear numbers before you buy, refinance, or reposition an asset.',
     languages: ['English', 'Japanese'],
     englishLevel: 'Native Or Bilingual',
-    hourlyRateMin: 120,
-    hourlyRateMax: 180,
+    hourlyRateMin: 2800,
+    hourlyRateMax: 2800,
     joinedDate: 'Aug 2018',
     skills: ['Tax Appeals', 'Assessment Review', 'Acquisition Diligence'],
     gender: 'Male',
@@ -120,8 +129,8 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
       'Turns listings into scroll-stopping stills — interiors, exteriors, and twilight sets that help referral partners win the first showing.',
     languages: ['English', 'Spanish'],
     englishLevel: 'Native Or Bilingual',
-    hourlyRateMin: 85,
-    hourlyRateMax: 140,
+    hourlyRateMin: 2200,
+    hourlyRateMax: 2200,
     joinedDate: 'Apr 2020',
     skills: ['Interior Photography', 'Twilight Shots', 'Listing Edits'],
     gender: 'Female',
@@ -160,8 +169,8 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
       'Same-week pre-offer inspections with plain-language recaps — so buyers and referring agents know what is a deal-breaker before they write.',
     languages: ['English'],
     englishLevel: 'Native Or Bilingual',
-    hourlyRateMin: 95,
-    hourlyRateMax: 165,
+    hourlyRateMin: 1800,
+    hourlyRateMax: 1800,
     joinedDate: 'Jun 2017',
     skills: ['Residential Inspection', 'Roof & HVAC', 'Repair Estimates'],
     gender: 'Male',
@@ -174,28 +183,37 @@ export const FEATURED_AD_PROVIDERS: Provider[] = [
   },
 ]
 
-export const PROFILE_RESULT_ADS: ProfileResultAd[] = [
-  {
-    id: 'ad-featured-priya',
+const COVER_IMAGES = [
+  '/images/stock/photo-1560518883-ce09059eeffa.jpg',
+  '/images/stock/photo-1600585154340-be6161a56a0c.jpg',
+  '/images/stock/photo-1600596542815-ffad4c1539a9.jpg',
+  '/images/stock/photo-1564013799919-ab600027ffc6.jpg',
+] as const
+
+const PROVIDER_IDS = FEATURED_AD_PROVIDERS.map((provider) => provider.id)
+
+const AD_ADDRESSES = [
+  '214 Clovis Ave, Clovis, CA 93612',
+  '1455 E Shaw Ave, Fresno, CA 93710',
+  '840 Herndon Ave, Clovis, CA 93611',
+  '5050 N Palm Ave, Fresno, CA 93704',
+] as const
+
+export const PROFILE_RESULT_ADS: ProfileResultAd[] = AD_COMPANY_LOGOS.map((logo, index) => {
+  const providerId = PROVIDER_IDS[index % PROVIDER_IDS.length]!
+  return {
+    id: `ad-featured-profile-${logo.id}`,
     label: 'Featured Agent',
-    providerId: 'ad-priya-nair',
-  },
-  {
-    id: 'ad-featured-daniel',
-    label: 'Featured Agent',
-    providerId: 'ad-daniel-okada',
-  },
-  {
-    id: 'ad-featured-lena',
-    label: 'Featured Agent',
-    providerId: 'ad-lena-vargas',
-  },
-  {
-    id: 'ad-featured-marcus',
-    label: 'Featured Agent',
-    providerId: 'ad-marcus-hale',
-  },
-]
+    providerId,
+    coverImage: COVER_IMAGES[index % COVER_IMAGES.length]!,
+    companyLogo: logo.src,
+    companyName: logo.companyName,
+    companyTagline: logo.companyTagline,
+    companyLicenseNo: String(20_000_000 + logo.id * 11_137).padStart(8, '0'),
+    companyPhone: `+1-559-555-${String(200 + logo.id).padStart(4, '0')}`,
+    companyAddress: AD_ADDRESSES[index % AD_ADDRESSES.length]!,
+  }
+})
 
 export type ProfileResultAdSlot = {
   ad: ProfileResultAd

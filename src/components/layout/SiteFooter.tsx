@@ -23,7 +23,15 @@ export function SiteFooter({
     <footer className="border-t border-line bg-[#0b1f3a] text-paper">
       <Container className="grid max-w-none gap-5 px-3 py-6 sm:grid-cols-2 sm:px-4 lg:grid-cols-4 lg:px-5">
         <div className="space-y-2 lg:col-span-1">
-          <p className="font-display text-2xl font-extrabold">{SITE.name}</p>
+          <div className="flex items-center gap-2.5">
+            <img
+              src={SITE.logoSrc}
+              alt=""
+              aria-hidden
+              className="h-11 w-11 shrink-0 rounded-lg object-contain"
+            />
+            <p className="font-display text-2xl font-extrabold">{SITE.name}</p>
+          </div>
           <p className="text-sm leading-relaxed text-paper/70">{SITE.tagline}</p>
           <p className="text-sm text-paper/60">{SITE.description}</p>
         </div>

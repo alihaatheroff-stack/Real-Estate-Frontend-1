@@ -143,7 +143,7 @@ function EmployerMarkerPin({
               <img
                 src={employer.logoUrl}
                 alt={`${employer.name} logo`}
-                className="h-12 w-12 rounded-xl object-contain"
+                className="h-14 w-14 object-contain"
               />
             ) : (
               <span

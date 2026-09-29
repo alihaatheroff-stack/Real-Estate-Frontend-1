@@ -1,33 +1,17 @@
 ﻿import { forwardRef, useState, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  ArrowUpRight,
-  Briefcase,
-  Building2,
-  Heart,
-  MapPin,
-  Plus,
-  Star,
-  Users,
-} from 'lucide-react'
+import { Briefcase, Heart, MapPin, Star, Users } from 'lucide-react'
 import { formatRating } from '@/shared/lib/format'
 import type { Employer } from '@/entities/employer/types'
-import { employerPath } from '@/app/router/paths'
+import { employerEmployeesPath, employerPath } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
-import {
-  AdCornerRibbon,
-  AdWatermark,
-  isCornerRibbonPlacement,
-  type AdBannerPlacement,
-} from '@/features/referrals/components/FeaturedAgentAdCard'
+import { PROFILE_RESULT_CARD_FRAME } from '@/features/referrals/components/FeaturedAgentAdCard'
 
 type EmployerMapCardProps = {
   employer: Employer
   active?: boolean
   selected?: boolean
   compact?: boolean
-  advertisement?: boolean
-  bannerPlacement?: AdBannerPlacement
   onSelect: (id: string) => void
   onHover: (id: string | null) => void
 }
@@ -39,21 +23,32 @@ function categoryLabel(category: string) {
     .join(' ')
 }
 
-function CompanyLogo({ employer }: { employer: Employer }) {
+function LogoHero({ employer, zoomed = false }: { employer: Employer; zoomed?: boolean }) {
   if (employer.logoUrl) {
     return (
-      <img
-        src={employer.logoUrl}
-        alt=""
-        className="h-full w-full object-contain p-1.5"
-        loading="lazy"
-      />
+      <span
+        className={cn(
+          'flex h-full w-full items-center justify-center overflow-hidden',
+          zoomed ? 'p-0.5 sm:p-1' : 'p-1',
+        )}
+      >
+        <img
+          src={employer.logoUrl}
+          alt={employer.name}
+          className={cn(
+            'h-full w-full object-contain object-center',
+            zoomed &&
+              'scale-[1.28] transition duration-500 group-hover:scale-[1.34]',
+          )}
+          loading="lazy"
+        />
+      </span>
     )
   }
 
   return (
     <span
-      className="flex h-full w-full items-center justify-center text-sm font-bold tracking-wide text-white sm:text-base"
+      className="flex h-full w-full items-center justify-center text-4xl font-bold tracking-wide text-white sm:text-5xl"
       style={{ backgroundColor: employer.logoColor }}
       aria-hidden
     >
@@ -62,42 +57,16 @@ function CompanyLogo({ employer }: { employer: Employer }) {
   )
 }
 
-function HiringBadge({ openProjects }: { openProjects: number }) {
-  if (openProjects > 0) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-[#E8F6EE] px-2.5 py-1 text-[11px] font-semibold text-[#1B7A4A]">
-        <Plus className="h-3 w-3" strokeWidth={2.5} aria-hidden />
-        Actively hiring
-      </span>
-    )
-  }
-
-  return (
-    <span className="inline-flex items-center rounded-full bg-freeio-surface px-2.5 py-1 text-[11px] font-semibold text-freeio-muted">
-      No open projects
-    </span>
-  )
-}
-
 export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
   function EmployerMapCard(
-      { employer, active, selected, compact = false, advertisement = false, bannerPlacement = 'top-left', onSelect, onHover },
+    { employer, active, selected, compact = false, onSelect, onHover },
     ref,
   ) {
     const [saved, setSaved] = useState(false)
     const href = employerPath(employer.id)
     const projectLabel = employer.openProjects === 1 ? 'project' : 'projects'
-    const adBanner =
-      advertisement ? (
-        <>
-          {isCornerRibbonPlacement(bannerPlacement) ? (
-            <AdCornerRibbon placement={bannerPlacement} compact={compact} />
-          ) : null}
-          {bannerPlacement === 'watermark' ? <AdWatermark compact={compact} /> : null}
-        </>
-      ) : null
 
-    function openEmployer(event?: { stopPropagation?: () => void }) {
+    function selectOnMap(event?: { stopPropagation?: () => void }) {
       event?.stopPropagation?.()
       onSelect(employer.id)
     }
@@ -105,7 +74,7 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
     function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault()
-        openEmployer()
+        selectOnMap()
       }
     }
 
@@ -113,64 +82,69 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
       return (
         <article
           ref={ref}
-          role="link"
+          role="button"
           tabIndex={0}
-          aria-label={
-            advertisement
-              ? `Sponsored office: ${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
-              : `${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
-          }
-          onClick={() => openEmployer()}
+          aria-pressed={selected}
+          aria-label={`Show ${employer.name} on the map`}
+          onClick={() => selectOnMap()}
           onKeyDown={handleKeyDown}
           onMouseEnter={() => onHover(employer.id)}
           onMouseLeave={() => onHover(null)}
           className={cn(
-            'group relative flex h-full cursor-pointer items-center gap-4 overflow-hidden rounded-2xl border p-4 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
-            advertisement ? 'bg-[#eef7fd]' : 'bg-white',
+            'group flex h-full cursor-pointer items-center gap-3 overflow-hidden rounded-2xl border bg-white p-4 text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 sm:gap-4',
             selected
-              ? 'border-freeio shadow-[0_14px_40px_rgba(91,187,123,0.2)] ring-2 ring-freeio/25'
+              ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
               : active
-                ? 'border-freeio/50 shadow-[0_12px_36px_rgba(0,0,0,0.08)]'
-                : 'border-freeio-border-soft shadow-[0_8px_28px_rgba(0,0,0,0.04)] hover:border-freeio/40 hover:shadow-[0_14px_36px_rgba(0,0,0,0.09)]',
+                ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+                : 'border-line/80 hover:-translate-y-0.5 hover:border-sky-500 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
           )}
         >
-          {adBanner}
-          <div
-            className="flex h-14 w-14 shrink-0 overflow-hidden rounded-2xl"
-            style={{ backgroundColor: employer.logoUrl ? '#f3f4f6' : employer.logoColor }}
-          >
-            <CompanyLogo employer={employer} />
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-mist sm:h-[4.5rem] sm:w-[4.5rem]">
+            <LogoHero employer={employer} />
           </div>
+
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#FDECE8] px-2.5 py-1 text-[11px] font-semibold text-[#C45C3E]">
-                <Building2 className="h-3 w-3" aria-hidden />
-                {categoryLabel(employer.category)}
-              </span>
-              <HiringBadge openProjects={employer.openProjects} />
-            </div>
-            <p className="mt-1.5 truncate text-base font-bold text-freeio-ink">{employer.name}</p>
-            <p className="mt-0.5 truncate text-sm text-freeio-muted">{employer.tagline}</p>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-freeio-muted">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+              {categoryLabel(employer.category)}
+            </p>
+            <p className="mt-0.5 truncate text-base font-bold text-ink">{employer.name}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
               <span className="inline-flex items-center gap-1">
-                <MapPin className="h-3.5 w-3.5 text-freeio-subtle" aria-hidden />
+                <MapPin className="h-3.5 w-3.5" aria-hidden />
                 {employer.city}, {employer.state}
               </span>
-              <span className="inline-flex items-center gap-1 font-semibold text-freeio-ink">
-                <Star className="h-3.5 w-3.5 fill-freeio-star text-freeio-star" aria-hidden />
+              <span className="inline-flex items-center gap-1 font-semibold text-ink">
+                <Star className="h-3.5 w-3.5 fill-accent text-accent" aria-hidden />
                 {formatRating(employer.rating)}
-                <span className="font-normal text-freeio-subtle">({employer.reviewCount})</span>
+                <span className="font-normal text-muted">({employer.reviewCount})</span>
               </span>
             </div>
           </div>
-          <span
-            className={cn(
-              'hidden h-10 shrink-0 translate-y-8 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] sm:inline-flex',
-            )}
-          >
-            View company
-            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
-          </span>
+
+          <div className="ml-auto grid w-[11.5rem] shrink-0 grid-cols-2 gap-1.5 sm:w-[13.5rem] sm:gap-2 md:w-[15rem]">
+            <div className="rounded-xl bg-[#F3F6F8] px-2 py-1.5 sm:px-2.5 sm:py-2">
+              <p className="flex items-center gap-1 text-[9px] font-medium uppercase tracking-wide text-muted sm:text-[10px]">
+                <Briefcase className="h-3 w-3 shrink-0" aria-hidden />
+                <span className="truncate">In Queue</span>
+              </p>
+              <p className="mt-0.5 truncate text-xs font-bold tabular-nums text-ink sm:mt-1 sm:text-sm">
+                {employer.openProjects} {projectLabel}
+              </p>
+            </div>
+            <div className="rounded-xl bg-[#F3F6F8] px-2 py-1.5 sm:px-2.5 sm:py-2">
+              <p className="flex items-center gap-1 text-[9px] font-medium uppercase tracking-wide text-muted sm:text-[10px]">
+                <Users className="h-3 w-3 shrink-0" aria-hidden />
+                Team
+              </p>
+              <Link
+                to={employerEmployeesPath(employer.id)}
+                onClick={(event) => event.stopPropagation()}
+                className="mt-0.5 inline-block truncate text-xs font-bold text-ink underline underline-offset-2 hover:text-brand sm:mt-1 sm:text-sm"
+              >
+                {employer.employees}
+              </Link>
+            </div>
+          </div>
         </article>
       )
     }
@@ -178,108 +152,102 @@ export const EmployerMapCard = forwardRef<HTMLElement, EmployerMapCardProps>(
     return (
       <article
         ref={ref}
-        role="link"
+        role="button"
         tabIndex={0}
-        aria-label={
-          advertisement
-            ? `Sponsored office: ${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
-            : `${employer.name}, ${formatRating(employer.rating)} rating, ${employer.city}`
-        }
-        onClick={() => openEmployer()}
+        aria-pressed={selected}
+        aria-label={`Show ${employer.name} on the map`}
+        onClick={() => selectOnMap()}
         onKeyDown={handleKeyDown}
         onMouseEnter={() => onHover(employer.id)}
         onMouseLeave={() => onHover(null)}
         className={cn(
-          'group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border p-5 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-freeio/40',
-          advertisement ? 'border-[#b7d8f0] bg-[#eef7fd]' : 'bg-white',
+          PROFILE_RESULT_CARD_FRAME,
+          'group cursor-pointer text-left shadow-[0_6px_18px_rgb(15_31_26/0.06)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
           selected
-            ? 'border-freeio shadow-[0_14px_40px_rgba(91,187,123,0.2)] ring-2 ring-freeio/25'
+            ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
             : active
-              ? 'border-freeio/50 shadow-[0_12px_36px_rgba(0,0,0,0.08)]'
-              : 'border-freeio-border-soft shadow-[0_8px_28px_rgba(0,0,0,0.04)] hover:-translate-y-0.5 hover:border-freeio/40 hover:shadow-[0_14px_36px_rgba(0,0,0,0.09)]',
+              ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+              : 'border-line/80 hover:-translate-y-0.5 hover:border-sky-500 hover:shadow-[0_10px_28px_rgb(15_31_26/0.1)]',
         )}
       >
-        {adBanner}
-        <div className="flex items-start gap-3">
-          <Link
-            to={href}
-            onClick={(event) => event.stopPropagation()}
-            className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl sm:h-14 sm:w-14"
-            style={{ backgroundColor: employer.logoUrl ? '#f3f4f6' : employer.logoColor }}
-          >
-            <CompanyLogo employer={employer} />
-          </Link>
+        <div className="relative aspect-[4/3] overflow-hidden bg-mist">
+          <LogoHero employer={employer} zoomed />
 
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5 pr-8">
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#FDECE8] px-2.5 py-1 text-[11px] font-semibold text-[#C45C3E]">
-              <Building2 className="h-3 w-3" aria-hidden />
-              {categoryLabel(employer.category)}
-            </span>
-            <HiringBadge openProjects={employer.openProjects} />
-          </div>
-
-          <button
-            type="button"
-            aria-label={saved ? 'Remove from saved' : 'Save employer'}
+          <span
+            role="button"
+            tabIndex={0}
             onClick={(event) => {
               event.stopPropagation()
               setSaved((value) => !value)
             }}
-            className="absolute right-4 top-4 z-10 text-freeio-muted transition hover:text-freeio"
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                event.stopPropagation()
+                setSaved((value) => !value)
+              }
+            }}
+            className="absolute left-2.5 top-2.5 z-10 inline-flex items-center justify-center text-ink/70 drop-shadow-[0_1px_3px_rgb(255_255_255_/_0.8)] transition hover:scale-110 hover:text-rose-500"
+            aria-label={saved ? 'Remove from saved' : 'Save employer'}
+            aria-pressed={saved}
           >
-            <Heart className={cn('h-5 w-5', saved && 'fill-freeio text-freeio')} />
-          </button>
+            <Heart
+              className={cn('h-4 w-4', saved && 'fill-rose-500 text-rose-500')}
+              strokeWidth={2.2}
+            />
+          </span>
         </div>
 
-        <Link
-          to={href}
-          onClick={(event) => event.stopPropagation()}
-          className="mt-4 block truncate text-lg font-bold leading-snug text-freeio-ink transition group-hover:text-freeio"
-        >
-          {employer.name}
-        </Link>
+        <div className="flex flex-1 flex-col gap-2 p-4">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+            {categoryLabel(employer.category)}
+          </p>
+          <h3 className="line-clamp-2 min-h-[3.4rem] text-[19px] font-bold leading-snug text-ink group-hover:text-brand">
+            <Link
+              to={href}
+              onClick={(event) => event.stopPropagation()}
+              className="hover:underline"
+            >
+              {employer.name}
+            </Link>
+          </h3>
+          <p className="line-clamp-1 text-sm text-muted">{employer.tagline}</p>
 
-        <p className="mt-1 line-clamp-1 text-sm text-freeio-muted">{employer.tagline}</p>
+          <p className="inline-flex items-center gap-1.5 text-sm text-muted">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" aria-hidden />
+            {employer.city}, {employer.state}
+          </p>
 
-        <p className="mt-2.5 inline-flex items-center gap-1.5 text-sm text-freeio-muted">
-          <MapPin className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" aria-hidden />
-          {employer.city}, {employer.state}
-        </p>
+          <p className="inline-flex items-center gap-1 text-sm font-semibold text-ink">
+            <Star className="h-3.5 w-3.5 fill-accent text-accent" aria-hidden />
+            {formatRating(employer.rating)}
+            <span className="font-normal text-muted">({employer.reviewCount})</span>
+          </p>
 
-        <p className="mt-1.5 inline-flex items-center gap-1 text-sm font-semibold text-freeio-ink">
-          <Star className="h-3.5 w-3.5 fill-freeio-star text-freeio-star" aria-hidden />
-          {formatRating(employer.rating)}
-          <span className="font-normal text-freeio-subtle">({employer.reviewCount})</span>
-        </p>
-
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          <div className="rounded-xl bg-[#F3F6F8] px-3 py-2.5">
-            <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-freeio-subtle">
-              <Briefcase className="h-3.5 w-3.5" aria-hidden />
-              Open
-            </p>
-            <p className="mt-1 text-sm font-bold tabular-nums text-freeio-ink">
-              {employer.openProjects} {projectLabel}
-            </p>
+          <div className="mt-auto grid grid-cols-2 gap-2.5">
+            <div className="rounded-xl bg-[#F3F6F8] px-3 py-2.5">
+              <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted">
+                <Briefcase className="h-3.5 w-3.5" aria-hidden />
+                In Queue
+              </p>
+              <p className="mt-1 text-sm font-bold tabular-nums text-ink">
+                {employer.openProjects} {projectLabel}
+              </p>
+            </div>
+            <div className="rounded-xl bg-[#F3F6F8] px-3 py-2.5">
+              <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted">
+                <Users className="h-3.5 w-3.5" aria-hidden />
+                Team
+              </p>
+              <Link
+                to={employerEmployeesPath(employer.id)}
+                onClick={(event) => event.stopPropagation()}
+                className="mt-1 inline-block text-sm font-bold text-ink underline underline-offset-2 hover:text-brand"
+              >
+                {employer.employees}
+              </Link>
+            </div>
           </div>
-          <div className="rounded-xl bg-[#F3F6F8] px-3 py-2.5">
-            <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-freeio-subtle">
-              <Users className="h-3.5 w-3.5" aria-hidden />
-              Team
-            </p>
-            <p className="mt-1 text-sm font-bold text-freeio-ink">{employer.employees}</p>
-          </div>
-        </div>
-
-        <div className={cn('mt-auto pt-4', advertisement && 'pr-16 sm:pr-20')}>
-          <Link
-            to={href}
-            onClick={(event) => event.stopPropagation()}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#2563eb] px-4 text-sm font-semibold text-[#2563eb] transition hover:bg-[#eff6ff]"
-          >
-            View company
-            <ArrowUpRight className="h-4 w-4" aria-hidden />
-          </Link>
         </div>
       </article>
     )

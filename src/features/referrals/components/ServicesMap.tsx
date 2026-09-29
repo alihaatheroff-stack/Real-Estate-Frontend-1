@@ -34,8 +34,7 @@ type ServicesMapProps = {
 }
 
 const DEFAULT_CENTER: [number, number] = [36.7378, -119.7871]
-const FALLBACK_IMAGE =
-  '/images/stock/photo-1560518883-ce09059eeffa.jpg'
+const FALLBACK_IMAGE = '/images/services/townhouse-exteriors.png'
 
 function MapBounds({ markers }: { markers: ServiceMarker[] }) {
   const map = useMap()
@@ -130,7 +129,7 @@ function ServiceMarkerPin({
               <img
                 src={imageSrc}
                 alt={service.title}
-                className="aspect-[4/3] w-full object-cover"
+                className="aspect-[4/3] w-full object-cover object-center"
                 onError={() => setImageSrc(FALLBACK_IMAGE)}
               />
             </Link>

@@ -1,7 +1,6 @@
 import { forwardRef, useMemo, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, CircleDollarSign, Heart, MapPin, Star, Volume2 } from 'lucide-react'
-import { formatRating } from '@/shared/lib/format'
+import { Heart, Volume2 } from 'lucide-react'
 import { providerPath } from '@/app/router/paths'
 import { FavoriteActionDialogs } from '@/features/favorites/FavoriteActionDialogs'
 import {
@@ -11,21 +10,6 @@ import {
 import type { ProfileResultAd } from '@/features/referrals/data/profileResultAds'
 import type { Provider } from '@/entities/provider/types'
 import { cn } from '@/shared/lib/cn'
-
-const US_STATE_NAMES: Record<string, string> = {
-  CA: 'California',
-  FL: 'Florida',
-  TX: 'Texas',
-  WA: 'Washington',
-}
-
-function formatProviderLocation(provider: Provider) {
-  const stateName = US_STATE_NAMES[provider.state] ?? provider.state
-  const region = provider.country === 'United States' || !provider.country
-    ? 'North America'
-    : provider.country
-  return `${provider.city}, ${stateName}, ${region}`
-}
 
 export type AdBannerPlacement = 'top-left' | 'top-right' | 'bottom-right' | 'watermark'
 
@@ -127,10 +111,14 @@ export function adBannerPlacementFor(_id?: string): AdBannerPlacement {
   return 'bottom-right'
 }
 
+/** Shared footprint so ad + organic cards align in the results grid. */
+export const PROFILE_RESULT_CARD_FRAME =
+  'flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-white'
+
 export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardProps>(
   function FeaturedAgentAdCard(
     {
-      ad: _ad,
+      ad,
       provider,
       active,
       selected,
@@ -139,12 +127,6 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
     },
     ref,
   ) {
-    const rateLabel =
-      provider.hourlyRateMin != null && provider.hourlyRateMax != null
-        ? `$${provider.hourlyRateMin} - $${provider.hourlyRateMax} / hr`
-        : 'Rate on request'
-
-    const locationLabel = formatProviderLocation(provider)
     const href = providerPath(provider.id)
     const interactive = Boolean(onSelect)
     const draft = useMemo(() => referralProviderFavoriteDraft(provider), [provider])
@@ -162,7 +144,7 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
       <div className="relative h-full w-full">
         <span
           aria-hidden
-          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[16px] font-bold uppercase tracking-[0.28em] text-brand drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[18px]"
+          className="pointer-events-none absolute -left-5 top-1/2 z-20 select-none font-display text-[15px] font-bold uppercase tracking-[0.22em] text-sky-500 drop-shadow-[0_1px_1px_rgb(15_31_26_/_0.18)] sm:-left-6 sm:text-[17px]"
           style={{
             writingMode: 'vertical-rl',
             transform: 'translateY(-50%) rotate(180deg)',
@@ -184,124 +166,103 @@ export const FeaturedAgentAdCard = forwardRef<HTMLElement, FeaturedAgentAdCardPr
           onClick={onSelect ? () => onSelect(provider.id) : undefined}
           onKeyDown={interactive ? handleKeyDown : undefined}
           className={cn(
-            'relative flex h-full w-full flex-col rounded-2xl border bg-white p-5 transition',
+            PROFILE_RESULT_CARD_FRAME,
             interactive && 'cursor-pointer',
             selected || active
-              ? 'border-brand shadow-soft ring-2 ring-brand/20'
-              : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-brand/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
+              ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+              : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-sky-500 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
           )}
         >
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              favorite.toggleSave()
-            }}
-            className="absolute right-3 top-3 z-10 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
-            aria-label={
-              favorite.saved
-                ? `Remove ${provider.name} from favorites`
-                : `Save ${provider.name} to favorites`
-            }
-            aria-pressed={favorite.saved}
-          >
-            <Heart
-              className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
-              strokeWidth={2.2}
+          <div className="relative aspect-[4/3] shrink-0 overflow-hidden bg-mist">
+            <img
+              src={ad.coverImage}
+              alt=""
+              className="h-full w-full object-cover"
+              loading="lazy"
             />
-          </button>
 
-          <div className="flex items-start gap-4">
-            <Link
-              to={href}
-              onClick={(event) => event.stopPropagation()}
-              className="shrink-0"
+            <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold leading-none text-ink shadow-sm">
+              Ad
+            </span>
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                favorite.toggleSave()
+              }}
+              className="absolute right-2.5 top-2.5 z-10 inline-flex items-center justify-center text-white drop-shadow-[0_1px_3px_rgb(0_0_0_/_0.65)] transition hover:scale-110 hover:text-rose-500"
+              aria-label={
+                favorite.saved
+                  ? `Remove ${provider.name} from favorites`
+                  : `Save ${provider.name} to favorites`
+              }
+              aria-pressed={favorite.saved}
             >
+              <Heart
+                className={cn('h-4 w-4', favorite.saved && 'fill-rose-500 text-rose-500')}
+                strokeWidth={2.2}
+              />
+            </button>
+          </div>
+
+          <div className="grid min-h-0 flex-1 grid-cols-2 items-start gap-x-2.5 gap-y-1 border-t border-line/70 px-3 py-2.5 text-[11px] leading-[1.35] text-ink sm:gap-x-3 sm:px-3.5 sm:text-[12px]">
+            <div className="flex h-24 min-w-0 items-start sm:h-[6.5rem]">
               <img
-                src={provider.image}
-                alt={provider.name}
-                className="h-20 w-20 rounded-full border-2 border-black object-cover sm:h-24 sm:w-24"
+                src={ad.companyLogo}
+                alt={ad.companyName}
+                className="h-full w-full object-contain object-left object-top"
                 loading="lazy"
               />
-            </Link>
+            </div>
 
-            <div className="min-w-0 flex-1 pr-7">
-              {provider.company ? (
-                <p className="text-sm font-bold leading-snug text-freeio-ink underline">
-                  {provider.company}
-                </p>
-              ) : null}
-              {provider.licenseNo ? (
-                <p className="mt-0.5 text-sm text-freeio-muted">
-                  License #: {provider.licenseNo}
-                </p>
-              ) : null}
+            <div className="flex h-16 min-w-0 items-start sm:h-[4.5rem]">
               <Link
                 to={href}
                 onClick={(event) => event.stopPropagation()}
-                className="block text-sm font-bold leading-snug text-freeio-ink transition hover:text-[#0b1f3a]"
+                className="block size-14 shrink-0 overflow-hidden rounded-md border border-line sm:size-16"
               >
-                {provider.name}
+                <img
+                  src={provider.image}
+                  alt={provider.name}
+                  className="h-full w-full object-cover object-top"
+                  loading="lazy"
+                />
               </Link>
-              {provider.dreNo ? (
-                <p className="mt-0.5 text-sm text-freeio-muted">CA DRE: {provider.dreNo}</p>
-              ) : null}
             </div>
-          </div>
 
-          <div className="mt-3 space-y-2 text-sm text-freeio-muted">
-            {provider.title ? (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Role:</span> {provider.title}
-              </p>
-            ) : null}
-            {(provider.languages?.length ?? 0) > 0 ? (
-              <p className="text-freeio-ink">
-                <span className="font-semibold">Languages:</span>{' '}
-                {provider.languages.join(', ')}
-              </p>
-            ) : null}
-            <p className="text-freeio-ink">
-              <span className="font-semibold">Serving Across:</span>{' '}
-              {US_STATE_NAMES[provider.state] ?? provider.state}
-            </p>
-            <div className="flex items-center gap-x-2">
-              <span className="inline-flex shrink-0 items-center gap-1.5">
-                <Star className="h-3.5 w-3.5 shrink-0 fill-freeio-star text-freeio-star" />
-                <span className="font-semibold text-freeio-ink">
-                  {formatRating(provider.rating)}
-                </span>
-              </span>
-              <span className="inline-flex min-w-0 items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" />
-                <span className="whitespace-nowrap">{locationLabel}</span>
-              </span>
-            </div>
-            <div className="flex items-center gap-x-2">
-              <span className="shrink-0 font-semibold text-freeio-ink">
-                Referrals: {provider.referralShare}%
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <CircleDollarSign className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" />
-                <span className="whitespace-nowrap">{rateLabel}</span>
-              </span>
-            </div>
-          </div>
-
-          <p className="mt-4 line-clamp-3 min-h-[3.75rem] flex-1 text-sm leading-relaxed text-freeio-muted">
-            {provider.about}
-          </p>
-
-          <div className="mt-auto pt-4">
+            <p className="min-w-0 truncate font-bold text-[#0b1f3a]">{ad.companyName}</p>
             <Link
               to={href}
               onClick={(event) => event.stopPropagation()}
-              className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-[#0b1f3a] px-4 text-sm font-semibold text-[#0b1f3a] transition hover:bg-[#0b1f3a]/10"
+              className="min-w-0 truncate font-bold text-[#0b1f3a] hover:underline"
             >
-              View Profile
-              <ArrowUpRight className="h-4 w-4" />
+              {provider.name}
             </Link>
+
+            <p className="min-w-0 truncate text-[10px] text-muted sm:text-[11px]">
+              {ad.companyTagline ?? '\u00A0'}
+            </p>
+            <p className="min-w-0 truncate text-[10px] text-muted sm:text-[11px]">
+              {provider.title ?? '\u00A0'}
+            </p>
+
+            <p className="min-w-0 truncate text-muted">License #: {ad.companyLicenseNo}</p>
+            <p className="min-w-0 truncate text-muted">
+              {provider.licenseNo ? `License # ${provider.licenseNo}` : '\u00A0'}
+            </p>
+
+            <p className="min-w-0 truncate text-muted">Phone: {ad.companyPhone}</p>
+            <p className="min-w-0 truncate text-muted">
+              {provider.phone ? `Phone: ${provider.phone}` : '\u00A0'}
+            </p>
+
+            <p className="min-w-0 line-clamp-2 text-muted">{ad.companyAddress}</p>
+            <p className="min-w-0" aria-hidden>
+              {'\u00A0'}
+            </p>
           </div>
+
           <FavoriteActionDialogs favorite={favorite} />
         </article>
       </div>

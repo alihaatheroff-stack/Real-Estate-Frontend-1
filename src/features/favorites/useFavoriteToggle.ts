@@ -77,6 +77,21 @@ export function networkListingFavoriteDraft(listing: {
   }
 }
 
+export function crowdfundingProfileFavoriteDraft(profile: {
+  id: string
+  name: string
+  role: string
+  avatar: string
+}): SaveFavoriteDraft {
+  return {
+    itemId: `cf-profile:${profile.id}`,
+    module: 'crowdfunding',
+    title: profile.name,
+    subtitle: profile.role,
+    image: profile.avatar,
+  }
+}
+
 export function useFavoriteToggle(draft: SaveFavoriteDraft) {
   const isAuthenticated = useIsAuthenticated()
   const { isSaved } = useFavorites()

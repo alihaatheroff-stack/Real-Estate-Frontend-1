@@ -14,9 +14,10 @@ export type ModuleNavItem = {
 export type ModuleNavLink = { label: string; href: string }
 
 export function NavLabel({ index, label }: { index: number; label: string }) {
+  const showNumber = label !== 'About'
   return (
     <span className="inline-flex items-baseline gap-1 underline underline-offset-4">
-      <span className="tabular-nums">{index + 1}.</span>
+      {showNumber ? <span className="tabular-nums">{index + 1}.</span> : null}
       <span>{label}</span>
     </span>
   )

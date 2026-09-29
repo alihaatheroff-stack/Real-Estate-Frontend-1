@@ -1113,7 +1113,7 @@ export function LoggedInCrowdfundingVote() {
               <div className="justify-self-start">
                 <ResultsFilterButton variant="underline" onClick={() => setFiltersOpen(true)} />
               </div>
-              <p className="justify-self-center text-center text-sm text-muted sm:text-base">
+              <p className="justify-self-center text-center text-sm text-muted underline underline-offset-[3px] sm:text-base">
                 {venues.length === 0 ? (
                   'No venues'
                 ) : (

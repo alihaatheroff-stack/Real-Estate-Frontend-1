@@ -1,4 +1,4 @@
-import { PATHS } from '@/app/router/paths'
+import { PATHS, crowdfundingProfilePath } from '@/app/router/paths'
 
 export const REFERRALS_MENU = [
   { label: 'Service Results', href: PATHS.results },
@@ -15,6 +15,7 @@ export const REFERRALS_MENU = [
 export const CROWDFUNDING_MENU = [
   { label: 'Explore Priority Index', href: PATHS.crowdfunding },
   { label: 'LCRE Crowdfunding', href: PATHS.lcreCrowdfunding },
+  { label: 'Profile', href: crowdfundingProfilePath('rigo') },
   { label: 'Articles', href: PATHS.crowdfundingArticles },
   { label: 'Forums', href: PATHS.crowdfundingForums },
 ] as const
@@ -33,6 +34,7 @@ export const ABOUT_MENU = [
 ] as const
 
 export const MARKETING_NAV = [
+  { label: 'Hire', href: PATHS.hire },
   { label: 'Referral', href: PATHS.referrals, hasDropdown: true, menuOnly: true },
   { label: 'Crowdfund', href: PATHS.crowdfunding, hasDropdown: true },
   { label: 'Network', href: PATHS.network, hasDropdown: true },

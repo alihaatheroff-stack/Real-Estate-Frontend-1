@@ -1,6 +1,6 @@
 ﻿import { forwardRef, useMemo, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowUpRight, CircleDollarSign, Heart, MapPin, Star } from 'lucide-react'
+import { ArrowUpRight, Heart, MapPin, Star } from 'lucide-react'
 import { formatRating } from '@/shared/lib/format'
 import { providerPath } from '@/app/router/paths'
 import { FavoriteActionDialogs } from '@/features/favorites/FavoriteActionDialogs'
@@ -8,6 +8,7 @@ import {
   referralProviderFavoriteDraft,
   useFavoriteToggle,
 } from '@/features/favorites/useFavoriteToggle'
+import { PROFILE_RESULT_CARD_FRAME } from '@/features/referrals/components/FeaturedAgentAdCard'
 import type { Provider } from '@/entities/provider/types'
 import { cn } from '@/shared/lib/cn'
 
@@ -36,10 +37,12 @@ type ProviderListCardProps = {
 
 export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
   function ProviderListCard({ provider, active, selected, onSelect, onHover }, ref) {
-    const rateLabel =
-      provider.hourlyRateMin != null && provider.hourlyRateMax != null
-        ? `$${provider.hourlyRateMin} - $${provider.hourlyRateMax} / hr`
-        : 'Rate on request'
+    const hourlyRate =
+      provider.hourlyRateMax != null
+        ? Math.min(provider.hourlyRateMax, 4999)
+        : provider.hourlyRateMin != null
+          ? Math.min(provider.hourlyRateMin, 4999)
+          : null
 
     const locationLabel = formatProviderLocation(provider)
     const draft = useMemo(() => referralProviderFavoriteDraft(provider), [provider])
@@ -64,10 +67,11 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
         onClick={() => onSelect(provider.id)}
         onKeyDown={handleKeyDown}
         className={cn(
-          'relative flex h-full w-full cursor-pointer flex-col rounded-2xl border bg-white p-5 transition',
+          PROFILE_RESULT_CARD_FRAME,
+          'relative cursor-pointer p-5 transition',
           selected || active
-            ? 'border-brand shadow-soft ring-2 ring-brand/20'
-            : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-brand/40 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
+            ? 'border-sky-500 shadow-soft ring-2 ring-sky-500/25'
+            : 'border-line shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:border-sky-500 hover:shadow-[0_12px_36px_rgba(0,0,0,0.08)]',
         )}
       >
         <button
@@ -76,7 +80,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             event.stopPropagation()
             favorite.toggleSave()
           }}
-          className="absolute right-3 top-3 z-10 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
+          className="absolute left-3 top-3 z-10 inline-flex items-center justify-center text-muted transition hover:scale-110 hover:text-rose-500"
           aria-label={favorite.saved ? `Remove ${provider.name} from favorites` : `Save ${provider.name} to favorites`}
           aria-pressed={favorite.saved}
         >
@@ -99,7 +103,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             />
           </Link>
 
-          <div className="min-w-0 flex-1 pr-7">
+          <div className="min-w-0 flex-1">
             {provider.company ? (
               <p className="text-sm font-bold leading-snug text-freeio-ink underline">
                 {provider.company}
@@ -117,9 +121,6 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             >
               {provider.name}
             </Link>
-            {provider.dreNo ? (
-              <p className="mt-0.5 text-sm text-freeio-muted">CA DRE: {provider.dreNo}</p>
-            ) : null}
           </div>
         </div>
 
@@ -136,7 +137,7 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
             </p>
           ) : null}
           <p className="text-freeio-ink">
-            <span className="font-semibold">Serving Across:</span>{' '}
+            <span className="font-semibold">Geography:</span>{' '}
             {US_STATE_NAMES[provider.state] ?? provider.state}
           </p>
           <div className="flex items-center gap-x-2">
@@ -149,15 +150,13 @@ export const ProviderListCard = forwardRef<HTMLElement, ProviderListCardProps>(
               <span className="whitespace-nowrap">{locationLabel}</span>
             </span>
           </div>
-          <div className="flex items-center gap-x-2">
-            <span className="shrink-0 font-semibold text-freeio-ink">
-              Referrals: {provider.referralShare}%
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CircleDollarSign className="h-3.5 w-3.5 shrink-0 text-freeio-subtle" />
-              <span className="whitespace-nowrap">{rateLabel}</span>
-            </span>
-          </div>
+          <p className="text-freeio-ink">
+            <span className="font-semibold">Referrals:</span> {provider.referralShare}%
+          </p>
+          <p className="text-freeio-ink">
+            <span className="font-semibold">Hourly Rate:</span>{' '}
+            {hourlyRate != null ? `$${hourlyRate}/hr` : 'Rate on request'}
+          </p>
         </div>
 
         <p className="mt-4 line-clamp-3 min-h-[3.75rem] flex-1 text-sm leading-relaxed text-freeio-muted">

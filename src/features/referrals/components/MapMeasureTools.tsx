@@ -2,14 +2,10 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from 'react-dom'
 import { CircleMarker, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { LandPlot, Map, Mountain, MountainSnow, Ruler, Satellite, Spline, X } from 'lucide-react'
+import { LandPlot, Mountain, Ruler, Spline, X } from 'lucide-react'
 import { fetchElevationsMeters } from '@/features/referrals/lib/elevation'
-import {
-  MAP_BASEMAP_OPTIONS,
-  setMapBasemap,
-  useMapBasemap,
-  type MapBasemapId,
-} from '@/features/referrals/lib/mapBasemap'
+import { MapBasemapControl } from '@/features/referrals/components/MapBasemapControl'
+import { MapZoomPosition } from '@/features/referrals/components/MapZoomPosition'
 import {
   formatAreaDetail,
   formatDistanceDetail,
@@ -55,7 +51,6 @@ export function MapMeasureTools() {
   const [elevations, setElevations] = useState<number[]>([])
   const [elevationError, setElevationError] = useState<string | null>(null)
   const [elevationLoading, setElevationLoading] = useState(false)
-  const basemap = useMapBasemap()
 
   const active = tool != null && !finished
   const previewPoints = useMemo(() => {
@@ -253,14 +248,17 @@ export function MapMeasureTools() {
 
   const overlay = (
     <>
-      <div ref={menuRef} className="pointer-events-auto absolute right-3 top-3 z-[1100] sm:right-4 sm:top-4">
+      <div
+        ref={menuRef}
+        className="pointer-events-auto absolute right-3 top-3 z-[1100] flex flex-col items-end sm:right-4 sm:top-4"
+      >
         <button
           type="button"
           aria-expanded={menuOpen}
-          aria-label="Map layers and measure tools"
+          aria-label="Measure tools"
           onClick={() => setMenuOpen((open) => !open)}
           className={cn(
-            'inline-flex h-10 w-10 items-center justify-center rounded-xl border shadow-soft transition',
+            'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-soft transition',
             menuOpen || tool
               ? 'border-brand bg-brand text-white'
               : 'border-line bg-paper text-ink hover:border-brand hover:text-brand',
@@ -325,19 +323,6 @@ export function MapMeasureTools() {
               active={tool === 'elevation'}
               onClick={() => selectTool('elevation')}
             />
-            <p className="border-t border-line px-3 pb-1 pt-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-              Map view
-            </p>
-            {MAP_BASEMAP_OPTIONS.map((id) => (
-              <ToolRow
-                key={id}
-                icon={basemapIcon(id)}
-                label={basemapLabel(id)}
-                hint={basemap === id ? '✓' : ''}
-                active={basemap === id}
-                onClick={() => setMapBasemap(id)}
-              />
-            ))}
           </div>
         ) : null}
       </div>
@@ -387,6 +372,8 @@ export function MapMeasureTools() {
 
   return (
     <>
+      <MapBasemapControl />
+      <MapZoomPosition />
       {tool === 'area' && previewPoints.length >= 2 ? (
         previewPoints.length >= 3 ? (
           <Polygon positions={previewPoints} pathOptions={FILL_STYLE} interactive={false} />
@@ -405,18 +392,6 @@ export function MapMeasureTools() {
       {createPortal(overlay, map.getContainer())}
     </>
   )
-}
-
-function basemapLabel(id: MapBasemapId) {
-  if (id === 'satellite') return 'Satellite'
-  if (id === 'terrain') return 'Terrain'
-  return 'Map'
-}
-
-function basemapIcon(id: MapBasemapId) {
-  if (id === 'satellite') return <Satellite className="h-4 w-4 shrink-0" />
-  if (id === 'terrain') return <MountainSnow className="h-4 w-4 shrink-0" />
-  return <Map className="h-4 w-4 shrink-0" />
 }
 
 function ToolRow({

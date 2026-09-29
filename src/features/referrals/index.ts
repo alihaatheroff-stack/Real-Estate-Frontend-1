@@ -24,6 +24,7 @@ export {
   EMPLOYER_DISTANCE_DEFAULT,
 } from '@/features/referrals/model/employerFilters'
 export { EmployerMapCard } from '@/features/referrals/components/EmployerMapCard'
+export { FeaturedEmployerAdCard } from '@/features/referrals/components/FeaturedEmployerAdCard'
 export { EmployersMapView } from '@/features/referrals/components/EmployersMapView'
 export { EmployersMap } from '@/features/referrals/components/EmployersMap'
 export { ProjectListCard } from '@/features/referrals/components/ProjectListCard'

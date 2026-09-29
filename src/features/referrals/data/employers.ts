@@ -5,7 +5,64 @@ import type {
   EmployerProject,
 } from '@/entities/employer/types'
 import type { Review } from '@/entities/provider/types'
+import { AD_COMPANY_LOGOS, adLogoByIndex } from '@/features/referrals/data/adCompanyLogos'
 import { employerCoords } from '@/features/referrals/lib/geo'
+
+/** Tight Canva crop (same asset as partner logo 14) — not the padded JPG. */
+const DIVERSE_MORTGAGE_LOGO = '/images/logos/14.svg'
+const BALENCIAGA_LANDSCAPING_LOGO = '/images/logos/balenciaga-landscaping.jpg'
+
+/** Platform / tab mark — never assign to a company card. */
+const PLATFORM_LOGO_PATHS = [
+  '/images/logos/lcre-logo.svg',
+  '/images/logos/lcre-mark.png',
+  '/images/logos/15.svg',
+  '/favicon.svg',
+]
+
+function isPlatformLogo(src: string) {
+  const path = src.split('?')[0] ?? src
+  return PLATFORM_LOGO_PATHS.some((blocked) => path === blocked || path.endsWith(blocked))
+}
+
+/** Pick a partner logo that fits the employer category / name. */
+function resolveEmployerLogoUrl(seed: {
+  id: string
+  name: string
+  category: string
+  logoUrl?: string
+}): string {
+  if (seed.logoUrl && !isPlatformLogo(seed.logoUrl)) return seed.logoUrl
+
+  const name = seed.name.toLowerCase()
+  const tag = `${name} ${seed.category}`
+  if (seed.category === 'mortgage-finance' || name.includes('mortgage')) {
+    return DIVERSE_MORTGAGE_LOGO
+  }
+  if (
+    name.includes('landscap') ||
+    name.includes('lawn') ||
+    name.includes('sod') ||
+    name.includes('recreation') ||
+    tag.includes('landscap')
+  ) {
+    return BALENCIAGA_LANDSCAPING_LOGO
+  }
+
+  const keywordMatch = AD_COMPANY_LOGOS.find((logo) => {
+    if (isPlatformLogo(logo.src)) return false
+    const brand = logo.companyName.toLowerCase().split(/\s+/)[0] ?? ''
+    return brand.length > 3 && name.includes(brand)
+  })
+  if (keywordMatch) return keywordMatch.src
+
+  let hash = 0
+  for (let i = 0; i < seed.id.length; i += 1) {
+    hash = (hash + seed.id.charCodeAt(i) * (i + 1)) % AD_COMPANY_LOGOS.length
+  }
+  const picked = adLogoByIndex(hash)
+  return isPlatformLogo(picked.src) ? adLogoByIndex(hash + 1).src : picked.src
+}
 
 export { getCityCoords, milesBetween } from '@/features/referrals/lib/geo'
 
@@ -551,7 +608,7 @@ function buildEmployer(seed: EmployerSeed): Employer {
     name: seed.name,
     logoInitials: seed.logoInitials,
     logoColor: seed.logoColor,
-    logoUrl: seed.logoUrl,
+    logoUrl: resolveEmployerLogoUrl(seed),
     coverImage: seed.coverImage ?? defaultCoverImage(seed.id, seed.category),
     tagline: seed.tagline,
     category: seed.category,
@@ -900,10 +957,32 @@ export const EMPLOYERS: Employer[] = [
   }),
   buildEmployer({
     id: 'e17',
+    name: 'Balenciaga Landscaping Services',
+    logoInitials: 'BL',
+    logoColor: '#15803D',
+    logoUrl: '/images/logos/balenciaga-landscaping.jpg',
+    tagline: 'Landscaping Services',
+    category: 'construction-trade',
+    extraCategories: ['Landscaping'],
+    city: 'Fresno',
+    state: 'CA',
+    rating: 4.9,
+    reviewCount: 42,
+    openProjects: 3,
+    foundedYear: 2012,
+    employees: '10-20',
+    about:
+      'Full-yard landscaping, sod install, and outdoor living crews for Central Valley homes and referral partners.',
+    projectTitles: ['Front-yard refresh & sod install', 'Hardscape + planting package'],
+    positionTitles: ['Landscape Crew Lead', 'Irrigation Technician'],
+  }),
+  buildEmployer({
+    id: 'e17b',
     name: 'Pacific Recreation Build',
     logoInitials: 'PR',
     logoColor: '#9A3412',
-    tagline: 'Venue build & fit-out',
+    logoUrl: '/images/logos/balenciaga-landscaping.jpg',
+    tagline: 'Venue build & outdoor fit-out',
     category: 'construction-trade',
     city: 'Seattle',
     state: 'WA',

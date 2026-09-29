@@ -2,9 +2,9 @@ import type { Service } from '@/entities/provider/types'
 import { listServices } from '@/features/referrals/api/repository'
 
 const GALLERY_FALLBACKS = [
-  '/images/stock/photo-1486406146926-c627a92ad1ab.jpg',
-  '/images/stock/photo-1560518883-ce09059eeffa.jpg',
-  '/images/stock/photo-1600585154340-be6161a56a0c.jpg',
+  '/images/services/townhouse-exteriors.png',
+  '/images/services/architectural-home-models.png',
+  '/images/services/roofing-repair.png',
 ]
 
 export function getMinDeliveryDays(service: Service) {

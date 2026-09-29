@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { formatRating } from '@/shared/lib/format'
 import type { Employer } from '@/entities/employer/types'
-import { employerPath } from '@/app/router/paths'
+import { employerEmployeesPath, employerPath } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
 
 type EmployerCardProps = {
@@ -32,7 +32,7 @@ function CompanyLogo({ employer }: { employer: Employer }) {
       <img
         src={employer.logoUrl}
         alt={`${employer.name} logo`}
-        className="h-full w-full object-contain p-1.5"
+        className="h-full w-full object-contain"
         loading="lazy"
       />
     )
@@ -59,8 +59,12 @@ export function EmployerCard({ employer }: EmployerCardProps) {
       <div className="flex items-start gap-3">
         <Link
           to={href}
-          className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl"
-          style={{ backgroundColor: employer.logoUrl ? '#f3f4f6' : employer.logoColor }}
+          className={
+            employer.logoUrl
+              ? 'flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden sm:h-[4.5rem] sm:w-[4.5rem]'
+              : 'flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl sm:h-[4.5rem] sm:w-[4.5rem]'
+          }
+          style={employer.logoUrl ? undefined : { backgroundColor: employer.logoColor }}
         >
           <CompanyLogo employer={employer} />
         </Link>
@@ -111,7 +115,7 @@ export function EmployerCard({ employer }: EmployerCardProps) {
         <div className="rounded-xl bg-[#F3F6F8] px-3 py-2.5">
           <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-freeio-subtle">
             <Briefcase className="h-3.5 w-3.5" aria-hidden />
-            Open
+            In Queue
           </p>
           <p className="mt-1 text-sm font-bold tabular-nums text-freeio-ink">
             {employer.openProjects} {projectLabel}
@@ -122,7 +126,12 @@ export function EmployerCard({ employer }: EmployerCardProps) {
             <Users className="h-3.5 w-3.5" aria-hidden />
             Team
           </p>
-          <p className="mt-1 text-sm font-bold text-freeio-ink">{employer.employees}</p>
+          <Link
+            to={employerEmployeesPath(employer.id)}
+            className="mt-1 inline-block text-sm font-bold text-freeio-ink underline underline-offset-2 hover:text-brand"
+          >
+            {employer.employees}
+          </Link>
         </div>
       </div>
 

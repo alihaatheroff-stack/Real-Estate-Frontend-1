@@ -25,6 +25,8 @@ export type NetworkSocialValue = {
   unreadMessageCount: number
   friendResponses: Record<string, FriendRequestAction>
   followingIds: string[]
+  /** Outgoing friend requests from the current member (pending until cancelled). */
+  sentFriendRequestIds: string[]
   addPost: (input: {
     text: string
     audience: PostAudience
@@ -54,6 +56,8 @@ export type NetworkSocialValue = {
   togglePinNote: (noteId: string) => void
   respondToFriendRequest: (memberId: string, action: FriendRequestAction) => void
   toggleFollow: (memberId: string) => void
+  sendFriendRequest: (memberId: string) => void
+  cancelFriendRequest: (memberId: string) => void
 }
 
 export const NetworkSocialContext = createContext<NetworkSocialValue | null>(null)

@@ -116,7 +116,7 @@ export function ServicesMapView({
             <div className="justify-self-start">
               <ResultsFilterButton variant="underline" onClick={() => setFiltersOpen(true)} />
             </div>
-            <p className="justify-self-center text-center text-sm text-muted sm:text-base">
+            <p className="justify-self-center text-center text-sm text-muted underline underline-offset-[3px] sm:text-base">
               {count === 0 ? (
                 'No results'
               ) : (
@@ -157,7 +157,7 @@ export function ServicesMapView({
             </p>
           </div>
         ) : (
-          <div className="mx-auto grid w-full max-w-[34rem] gap-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-6 sm:gap-y-5 sm:px-1">
+          <div className="mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1">
             {feedItems.map((item) =>
               item.kind === 'ad' ? (
                 <FeaturedServiceAdCard

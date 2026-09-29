@@ -1,5 +1,6 @@
 export const PATHS = {
   home: '/',
+  hire: '/hire',
   referrals: '/referrals',
   results: '/referrals/results',
   profileResults: '/referrals/profile-results',
@@ -18,6 +19,7 @@ export const PATHS = {
   referralsForum: '/referrals/forums/:forumId',
   crowdfunding: '/crowdfunding',
   lcreCrowdfunding: '/crowdfunding/lcre',
+  crowdfundingProfile: '/crowdfunding/profile/:id',
   crowdfundingArticles: '/crowdfunding/articles',
   crowdfundingArticle: '/crowdfunding/articles/:articleId',
   crowdfundingForums: '/crowdfunding/forums',
@@ -130,6 +132,10 @@ export function referralsArticlePath(articleId: string) {
 
 export function referralsForumPath(forumId: string) {
   return `/referrals/forums/${forumId}`
+}
+
+export function crowdfundingProfilePath(id: string) {
+  return `/crowdfunding/profile/${id}`
 }
 
 export function crowdfundingArticlePath(articleId: string) {

@@ -104,7 +104,7 @@ function RelatedServiceCard({ service }: { service: Service }) {
         <img
           src={service.image}
           alt={service.title}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+          className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
           loading="lazy"
         />
         {featured ? (
