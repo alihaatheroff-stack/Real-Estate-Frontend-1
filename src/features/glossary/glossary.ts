@@ -1024,7 +1024,6 @@ export function glossaryForCategory(label: string): GlossarySnippet {
 }
 
 function rememberOption(
-  categoryLabel: string,
   categoryKey: string,
   option: string,
   question: string,
@@ -1054,7 +1053,6 @@ export function glossaryForOption(categoryLabel: string, option: string): Glossa
   const question = `Why is “${cleanLabel(option)}” an option under ${cleanLabel(categoryLabel) || 'this'}?`
   if (!categoryKey) {
     return rememberOption(
-      categoryLabel,
       `field-${normKey(categoryLabel) || 'option'}`,
       option,
       question,
@@ -1064,7 +1062,6 @@ export function glossaryForOption(categoryLabel: string, option: string): Glossa
   const found = GLOSSARY.optionByKey.get(`${categoryKey}::${normKey(option)}`)
   if (!found) {
     return rememberOption(
-      categoryLabel,
       categoryKey,
       option,
       question,
