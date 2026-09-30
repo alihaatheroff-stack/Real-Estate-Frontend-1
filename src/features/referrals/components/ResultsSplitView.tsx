@@ -387,23 +387,47 @@ export function ResultsSortMenu<T extends string>({
   const triggerLabel =
     showSelectedLabel && selectedLabel ? `Sort by: ${selectedLabel}` : 'Sort by'
   const underline = variant === 'underline'
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number; minWidth: number } | null>(
+    null,
+  )
 
   useEffect(() => {
+    if (!open) return
+
     function onPointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
     }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') setOpen(false)
     }
-    if (open) {
-      document.addEventListener('mousedown', onPointerDown)
-      document.addEventListener('keydown', onKeyDown)
+    function syncMenuPos() {
+      if (!underline) return
+      const trigger = rootRef.current?.querySelector('button')
+      if (!trigger) return
+      const rect = trigger.getBoundingClientRect()
+      const minWidth = Math.max(rect.width, 280)
+      // Prefer opening to the right (over the map), like ServiceSortSelect.
+      const preferredLeft = rect.left
+      const left = Math.min(preferredLeft, window.innerWidth - minWidth - 8)
+      setMenuPos({ top: rect.bottom + 4, left: Math.max(8, left), minWidth })
+    }
+
+    syncMenuPos()
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    if (underline) {
+      window.addEventListener('resize', syncMenuPos)
+      window.addEventListener('scroll', syncMenuPos, true)
     }
     return () => {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
+      if (underline) {
+        window.removeEventListener('resize', syncMenuPos)
+        window.removeEventListener('scroll', syncMenuPos, true)
+      }
     }
-  }, [open])
+  }, [open, underline])
 
   function toggleForTouch() {
     if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
@@ -445,14 +469,26 @@ export function ResultsSortMenu<T extends string>({
           </button>
           <div
             className={cn(
-              'settings-paste-menu settings-paste-menu--underline network-thin-scroll right-0 mt-1 max-h-56 w-max min-w-[10rem] overflow-y-auto',
+              'settings-paste-menu settings-paste-menu--underline network-thin-scroll max-h-56 overflow-y-auto',
               open ? 'is-open z-[60]' : 'pointer-events-none',
             )}
+            style={
+              menuPos
+                ? {
+                    position: 'fixed',
+                    top: menuPos.top,
+                    left: menuPos.left,
+                    minWidth: menuPos.minWidth,
+                    width: 'auto',
+                  }
+                : undefined
+            }
             role="listbox"
             aria-label="Sort options"
           >
             {options.map((option) => {
               const checked = value === option.value
+              const icon = sortOptionIcon(option.value)
               return (
                 <button
                   key={option.value}
@@ -466,7 +502,16 @@ export function ResultsSortMenu<T extends string>({
                   }}
                   className="group whitespace-nowrap"
                 >
-                  {option.label}
+                  <span className="inline-flex items-center gap-1.5">
+                    {icon ? (
+                      <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center [&_svg]:h-full [&_svg]:w-full">
+                        {icon}
+                      </span>
+                    ) : null}
+                    <span className="group-hover:underline group-focus-visible:underline decoration-brand underline-offset-[3px]">
+                      {option.label}
+                    </span>
+                  </span>
                 </button>
               )
             })}

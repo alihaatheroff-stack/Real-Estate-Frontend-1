@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { ArrowLeftToLine, ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
@@ -28,6 +28,10 @@ type ServiceFiltersDrawerProps = {
   ) => void
   onReset: () => void
   onApply: () => void
+  /** Overlay (default) covers the page; push sits inline and shifts siblings. */
+  layout?: 'overlay' | 'push'
+  title?: string
+  subtitle?: string
 }
 
 type FilterSectionProps = {
@@ -130,8 +134,13 @@ export function ServiceFiltersDrawer({
   onChange,
   onReset,
   onApply,
+  layout = 'overlay',
+  title = 'All Filters',
+  subtitle,
 }: ServiceFiltersDrawerProps) {
   const distance = Number(filters.radius || SERVICE_DISTANCE_MIN)
+  const isPush = layout === 'push'
+  const panelRef = useRef<HTMLElement>(null)
 
   function clearMortgageFields() {
     onChange('institution', '')
@@ -235,99 +244,125 @@ export function ServiceFiltersDrawer({
 
   useEffect(() => {
     if (!open) return
-    const onKeyDown = (event: KeyboardEvent) => {
+
+    function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose()
     }
+
     document.addEventListener('keydown', onKeyDown)
+
+    if (isPush) {
+      function onPointerDown(event: PointerEvent) {
+        const target = event.target
+        if (!(target instanceof Node)) return
+        if (panelRef.current?.contains(target)) return
+        onClose()
+      }
+      document.addEventListener('pointerdown', onPointerDown)
+      return () => {
+        document.removeEventListener('keydown', onKeyDown)
+        document.removeEventListener('pointerdown', onPointerDown)
+      }
+    }
+
     document.body.style.overflow = 'hidden'
     return () => {
       document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = ''
     }
-  }, [onClose, open])
+  }, [isPush, onClose, open])
 
   if (!open) return null
 
-  return (
-    <div className="fixed inset-0 z-[1100] flex">
-      <aside
-        className="relative flex h-full w-full max-w-[360px] flex-col bg-paper shadow-2xl animate-drawer-in"
-        aria-label="All filters"
-      >
-        <div className="flex items-center justify-between border-b border-line px-6 py-5">
-          <div>
-            <h2 className="text-lg font-bold text-ink">All Filters</h2>
-            <button
-              type="button"
-              onClick={onReset}
-              className="mt-1 text-[13px] font-medium text-muted hover:text-brand hover:underline"
-            >
-              Reset all
-            </button>
-          </div>
+  const locationFields = (
+    <div className="space-y-3">
+      <div>
+        <h3 className="mb-1.5 text-sm font-semibold text-ink">Zipcode</h3>
+        <Input
+          name="location"
+          value={filters.zip}
+          onChange={(e) => onChange('zip', e.target.value)}
+          placeholder="Enter location or ZIP"
+          className="text-[13px]"
+        />
+      </div>
+
+      <div>
+        <h3 className="mb-1.5 text-sm font-semibold text-ink">Mile Radius</h3>
+        <p className="mb-3 text-[13px] text-muted">Distance: {distance} miles</p>
+        <RangeSlider
+          min={SERVICE_DISTANCE_MIN}
+          max={SERVICE_DISTANCE_MAX}
+          value={distance}
+          onChange={(value) => onChange('radius', String(value))}
+        />
+      </div>
+    </div>
+  )
+
+  const panel = (
+    <aside
+      ref={panelRef}
+      className={
+        isPush
+          ? 'flex h-0 min-h-full w-full max-w-[360px] shrink-0 flex-col self-stretch overflow-hidden border-r border-line bg-paper animate-drawer-in'
+          : 'relative flex h-full w-full max-w-[360px] flex-col bg-paper shadow-2xl animate-drawer-in'
+      }
+      aria-label={title}
+    >
+      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-line px-6 py-5">
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-semibold text-ink sm:text-xl">{title}</h2>
+          {subtitle ? <p className="mt-1 text-xs text-muted sm:text-sm">{subtitle}</p> : null}
           <button
             type="button"
-            onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-brand-light text-muted transition hover:text-brand"
-            aria-label="Close filters"
+            onClick={onReset}
+            className="mt-2 text-[13px] font-medium text-muted hover:text-brand hover:underline"
           >
-            <ArrowLeftToLine className="h-5 w-5" />
+            Reset all
           </button>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-light text-muted transition hover:text-brand"
+          aria-label="Close filters"
+        >
+          <ArrowLeftToLine className="h-5 w-5" />
+        </button>
+      </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="px-6 py-2">
-            <LandingFilterFields
-              value={toLandingValues(filters)}
-              onChange={handleLandingChange}
-              hideLocation
-              stopBeforeLanguage
-            />
-          </div>
-
-          <FilterSection title="Languages Spoken:">
-            <HeroFilterSelect
-              compact
-              inlineMenu
-              hideLabel
-              label="Languages Spoken:"
-              placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
-              optionsByLetter={LANGUAGE_BY_LETTER}
-              value={splitCsv(filters.language)}
-              onChange={(next) => setFilterList('language', next)}
-            />
-          </FilterSection>
-
-          <ResultsBelowLanguageFields filters={filters} onChange={onChange} />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="px-6 py-2">
+          <LandingFilterFields
+            value={toLandingValues(filters)}
+            onChange={handleLandingChange}
+            hideLocation
+            stopBeforeLanguage
+          />
         </div>
 
+        <FilterSection title="Languages Spoken:">
+          <HeroFilterSelect
+            compact
+            inlineMenu
+            hideLabel
+            label="Languages Spoken:"
+            placeholder="Ex. (Mandrin, English, Spanish, etc.,)"
+            optionsByLetter={LANGUAGE_BY_LETTER}
+            value={splitCsv(filters.language)}
+            onChange={(next) => setFilterList('language', next)}
+          />
+        </FilterSection>
+
+        <ResultsBelowLanguageFields filters={filters} onChange={onChange} />
+
+        {isPush ? <div className="border-t border-line px-6 py-4">{locationFields}</div> : null}
+      </div>
+
+      {!isPush ? (
         <div className="shrink-0 space-y-3 border-t border-line bg-paper px-6 py-4">
-          <div>
-            <h3 className="mb-1.5 text-sm font-semibold text-ink">Zipcode</h3>
-            <Input
-              name="location"
-              value={filters.zip}
-              onChange={(e) => onChange('zip', e.target.value)}
-              placeholder="Enter location or ZIP"
-              className="text-[13px]"
-            />
-          </div>
-
-          <div>
-            <h3 className="mb-1.5 text-sm font-semibold text-ink">
-              Mile Radius
-            </h3>
-            <p className="mb-3 text-[13px] text-muted">
-              Distance: {distance} miles
-            </p>
-            <RangeSlider
-              min={SERVICE_DISTANCE_MIN}
-              max={SERVICE_DISTANCE_MAX}
-              value={distance}
-              onChange={(value) => onChange('radius', String(value))}
-            />
-          </div>
-
+          {locationFields}
           <Button
             className="h-12 w-full rounded-xl text-base"
             rightIcon={<ArrowUpRight className="h-4 w-4" />}
@@ -339,8 +374,15 @@ export function ServiceFiltersDrawer({
             Find Service
           </Button>
         </div>
-      </aside>
+      ) : null}
+    </aside>
+  )
 
+  if (isPush) return panel
+
+  return (
+    <div className="fixed inset-0 z-[1100] flex">
+      {panel}
       <button
         type="button"
         className="flex-1 bg-ink/45 backdrop-blur-[1px]"

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronLeft, ChevronRight, Maximize2, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { HeroSlide } from '@/features/landing/data/heroSlides'
 
 type HeroLightboxProps = {
@@ -35,58 +35,61 @@ export function HeroLightbox({ slides, index, onClose, onChange }: HeroLightboxP
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={slide.alt}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-paper"
+      aria-label={slide?.alt ?? 'Hero image preview'}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95"
+      onClick={onClose}
     >
       <button
         type="button"
         aria-label="Close preview"
         onClick={onClose}
-        className="absolute right-4 top-4 z-10 rounded-full p-2 text-ink/70 transition hover:bg-ink/5 hover:text-ink"
+        className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 sm:right-5 sm:top-5"
       >
-        <X className="h-6 w-6" />
+        <X className="h-5 w-5" strokeWidth={2.25} />
       </button>
 
-      <button
-        type="button"
-        aria-label="Toggle full size"
-        onClick={() => {
-          const el = document.documentElement
-          if (!document.fullscreenElement) void el.requestFullscreen()
-          else void document.exitFullscreen()
-        }}
-        className="absolute left-4 top-4 z-10 rounded-full p-2 text-ink/70 transition hover:bg-ink/5 hover:text-ink"
-      >
-        <Maximize2 className="h-5 w-5" />
-      </button>
+      <p className="absolute left-1/2 top-4 z-10 -translate-x-1/2 text-xs font-medium tracking-wide text-white/70 sm:top-5 sm:text-sm">
+        {index + 1} / {total}
+      </p>
 
       <button
         type="button"
         aria-label="Previous image"
-        onClick={() => onChange((index - 1 + total) % total)}
-        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-ink/5 p-2 text-ink transition hover:bg-ink/10 sm:left-6"
+        onClick={(event) => {
+          event.stopPropagation()
+          onChange((index - 1 + total) % total)
+        }}
+        className="absolute left-2 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 sm:left-5 sm:h-12 sm:w-12"
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-7 w-7" strokeWidth={2.25} />
       </button>
 
       <button
         type="button"
         aria-label="Next image"
-        onClick={() => onChange((index + 1) % total)}
-        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-ink/5 p-2 text-ink transition hover:bg-ink/10 sm:right-6"
+        onClick={(event) => {
+          event.stopPropagation()
+          onChange((index + 1) % total)
+        }}
+        className="absolute right-2 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 sm:right-5 sm:h-12 sm:w-12"
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-7 w-7" strokeWidth={2.25} />
       </button>
 
-      <figure className="flex max-h-[88vh] max-w-[min(92vw,1100px)] flex-col items-center gap-3 px-14">
+      <figure
+        className="flex max-h-[100dvh] max-w-[100vw] flex-col items-center gap-3 px-14 py-16 sm:px-20"
+        onClick={(event) => event.stopPropagation()}
+      >
         <img
           src={slide.src}
           alt={slide.alt}
-          className="max-h-[80vh] w-auto max-w-full rounded-sm object-contain shadow-soft"
+          className="max-h-[min(88dvh,920px)] w-auto max-w-full object-contain"
         />
-        <figcaption className="text-center text-sm font-medium text-ink/70">
-          {slide.caption}
-        </figcaption>
+        {slide.caption ? (
+          <figcaption className="max-w-2xl text-center text-sm font-medium text-white/80">
+            {slide.caption}
+          </figcaption>
+        ) : null}
       </figure>
     </div>,
     document.body,

@@ -1,26 +1,17 @@
 ﻿import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import {
-  Building2,
-  ChevronLeft,
-  ChevronRight,
-  Filter,
-  LayoutGrid,
-  List,
-  RotateCcw,
-  SearchX,
-} from 'lucide-react'
-import { EmployerFiltersDrawer } from '@/features/referrals/components/EmployerFiltersDrawer'
+import { Link, useNavigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, RotateCcw, SearchX } from 'lucide-react'
 import { EmployerMapCard } from '@/features/referrals/components/EmployerMapCard'
 import { EmployersMap } from '@/features/referrals/components/EmployersMap'
 import { FeaturedEmployerAdCard } from '@/features/referrals/components/FeaturedEmployerAdCard'
 import { adBannerPlacementFor } from '@/features/referrals/components/FeaturedAgentAdCard'
+import { ServiceFiltersDrawer } from '@/features/referrals/components/ServiceFiltersDrawer'
 import {
   pickEmployerResultAds,
   type EmployerResultAd,
 } from '@/features/referrals/data/employerResultAds'
-import type { EmployerFiltersState } from '@/features/referrals/model/employerFilters'
 import {
+  ResultsFilterButton,
   ResultsSortMenu,
   ResultsSplitView,
 } from '@/features/referrals/components/ResultsSplitView'
@@ -36,8 +27,9 @@ import {
   EMPLOYER_SORT_OPTIONS,
   type EmployerSortKey,
 } from '@/features/referrals/model/sort'
+import { type HeroFiltersState } from '@/features/search'
 import type { Employer } from '@/entities/employer/types'
-import { employerPath } from '@/app/router/paths'
+import { PATHS } from '@/app/router/paths'
 import { cn } from '@/shared/lib/cn'
 
 type FeedItem =
@@ -58,60 +50,42 @@ function buildFeedWithAds(employers: Employer[], page: number): FeedItem[] {
 
 export type { EmployerSortKey }
 
-type LayoutMode = 'grid' | 'list'
-
 type EmployersMapViewProps = {
   employers: Employer[]
   count: number
   sort: EmployerSortKey
   onSortChange: (sort: EmployerSortKey) => void
-  draftFilters: EmployerFiltersState
-  onFiltersChange: (filters: EmployerFiltersState) => void
-  onApplySearch: (filters?: EmployerFiltersState) => void
+  q?: string
+  filters: HeroFiltersState
+  onFilterChange: <K extends keyof HeroFiltersState>(
+    key: K,
+    value: HeroFiltersState[K],
+  ) => void
   onResetFilters: () => void
+  toSearchParams: () => URLSearchParams
   isLoading?: boolean
   activeFilterCount?: number
 }
 
-function EmployersListSkeleton({ layout }: { layout: LayoutMode }) {
+function EmployersListSkeleton() {
   return (
     <div
-      className={cn(
-        layout === 'grid'
-          ? 'mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1'
-          : 'flex flex-col gap-3',
-      )}
+      className="mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1"
       aria-busy="true"
       aria-live="polite"
     >
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
-          className={cn(
-            'animate-pulse overflow-hidden rounded-2xl border border-line/80 bg-white',
-            layout === 'grid' ? 'flex flex-col' : 'h-[96px]',
-          )}
+          className="flex animate-pulse flex-col overflow-hidden rounded-2xl border border-line/80 bg-white"
         >
-          {layout === 'grid' ? (
-            <>
-              <div className="aspect-[4/3] bg-mist" />
-              <div className="space-y-2 p-4">
-                <div className="h-3 w-24 rounded bg-freeio-hover" />
-                <div className="h-5 w-3/4 rounded bg-freeio-hover" />
-                <div className="h-4 w-1/2 rounded bg-freeio-hover" />
-                <div className="mt-2 h-10 rounded bg-freeio-hover" />
-              </div>
-            </>
-          ) : (
-            <div className="flex gap-3 p-4">
-              <div className="h-14 w-14 rounded-xl bg-freeio-hover" />
-              <div className="flex-1 space-y-2 pt-1">
-                <div className="h-3 w-24 rounded bg-freeio-hover" />
-                <div className="h-4 w-3/4 rounded bg-freeio-hover" />
-                <div className="h-3 w-full rounded bg-freeio-hover" />
-              </div>
-            </div>
-          )}
+          <div className="aspect-[4/3] bg-mist" />
+          <div className="space-y-2 p-4">
+            <div className="h-3 w-24 rounded bg-freeio-hover" />
+            <div className="h-5 w-3/4 rounded bg-freeio-hover" />
+            <div className="h-4 w-1/2 rounded bg-freeio-hover" />
+            <div className="mt-2 h-10 rounded bg-freeio-hover" />
+          </div>
         </div>
       ))}
       <span className="sr-only">Loading office results</span>
@@ -220,16 +194,16 @@ export function EmployersMapView({
   count,
   sort,
   onSortChange,
-  draftFilters,
-  onFiltersChange,
-  onApplySearch,
+  q = '',
+  filters,
+  onFilterChange,
   onResetFilters,
+  toSearchParams,
   isLoading = false,
   activeFilterCount = 0,
 }: EmployersMapViewProps) {
   const navigate = useNavigate()
   const [filtersOpen, setFiltersOpen] = useState(false)
-  const [layout, setLayout] = useState<LayoutMode>('grid')
   const { page, setPage, totalPages, pageStart, pageEnd, pagedItems } =
     useResultsPagination(employers, RESULTS_ORGANIC_PAGE_SIZE)
   const feedItems = useMemo(() => buildFeedWithAds(pagedItems, page), [page, pagedItems])
@@ -245,108 +219,78 @@ export function EmployersMapView({
   const { selectedId, setSelectedId, hoveredId, setHoveredId, itemRefs } =
     useMapResultsInteraction(mapEmployers)
 
-  function openEmployer(id: string) {
-    navigate(employerPath(id))
+  function applyFilters() {
+    const params = toSearchParams()
+    params.delete('view')
+    if (q) params.set('q', q)
+    const find = filters.find
+    const target = find.includes('profile')
+      ? PATHS.profileResults
+      : find.includes('service')
+        ? PATHS.results
+        : PATHS.employerResults
+    navigate(`${target}?${params.toString()}`)
   }
 
   return (
     <ResultsSplitView
-      rootClassName="flex h-full min-h-0 flex-col"
+      rootClassName="flex h-full min-h-0 flex-1 flex-col overflow-hidden"
+      splitRowClassName="flex min-h-0 flex-1 overflow-hidden"
       asideClassName="bg-freeio-wash lg:w-[48%]"
-      toolbarClassName="relative z-30 flex items-center justify-between gap-3 overflow-visible border-b border-freeio-border-soft bg-white px-4 py-3.5 sm:px-5"
-      showMapBarClassName="border-t border-freeio-border-soft bg-white p-3 lg:hidden"
+      toolbarClassName="relative z-30 flex flex-col gap-2 bg-paper px-4 py-4 sm:px-5"
+      showMapBarClassName="border-t border-line bg-white p-3 lg:hidden"
       mapPanelClassName="bg-mist lg:w-[52%]"
+      mapInnerClassName="absolute inset-0 overflow-hidden bg-mist"
       toolbarStart={
-        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2.5 sm:gap-3">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen(true)}
-            className="relative inline-flex h-10 items-center gap-2 rounded-lg border border-freeio-border bg-white px-3.5 text-sm font-medium text-freeio-ink transition hover:border-freeio hover:text-freeio sm:h-11 sm:px-4 sm:text-[15px]"
-          >
-            <Filter className="h-4 w-4" aria-hidden />
-            Filter
-            {activeFilterCount > 0 ? (
-              <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[11px] font-bold text-white">
-                {activeFilterCount}
-              </span>
-            ) : null}
-          </button>
-          <p className="text-sm text-freeio-muted sm:text-[15px]">
-            {count === 0 ? (
-              <span className="inline-flex items-center gap-1.5">
-                <Building2 className="h-4 w-4 text-freeio-subtle" aria-hidden />
-                No results
-              </span>
-            ) : (
-              <>
-                Showing{' '}
-                <span className="font-semibold tabular-nums text-freeio-ink">
-                  {pageStart}–{pageEnd}
-                </span>{' '}
-                of{' '}
-                <span className="font-semibold tabular-nums text-freeio-ink">{count}</span>
-              </>
-            )}
-          </p>
-        </div>
-      }
-      toolbarEnd={
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <ResultsSortMenu
-            options={EMPLOYER_SORT_OPTIONS}
-            value={sort}
-            onChange={onSortChange}
-            clearValue="default"
-          />
-          <div
-            className="inline-flex h-10 items-center rounded-lg border border-freeio-border bg-freeio-surface p-0.5 sm:h-11"
-            role="group"
-            aria-label="Result layout"
-          >
-            <button
-              type="button"
-              aria-pressed={layout === 'grid'}
-              onClick={() => setLayout('grid')}
-              className={cn(
-                'inline-flex h-full items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition sm:px-3',
-                layout === 'grid'
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-freeio-muted hover:text-freeio-ink',
+        <div className="flex w-full min-w-0 flex-col gap-2">
+          <div className="grid grid-cols-3 items-center gap-3">
+            <div className="justify-self-start">
+              <ResultsFilterButton variant="underline" onClick={() => setFiltersOpen(true)} />
+              {activeFilterCount > 0 ? (
+                <span className="sr-only">{activeFilterCount} active filters</span>
+              ) : null}
+            </div>
+            <p className="justify-self-center text-center text-sm text-muted underline underline-offset-[3px] sm:text-base">
+              {count === 0 ? (
+                'No results'
+              ) : (
+                <>
+                  Showing{' '}
+                  <span className="font-semibold text-ink">
+                    {pageStart} – {pageEnd}
+                  </span>{' '}
+                  of <span className="font-semibold text-ink">{count}</span> results
+                </>
               )}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" aria-hidden />
-              <span className="hidden sm:inline">Grid</span>
-            </button>
-            <button
-              type="button"
-              aria-pressed={layout === 'list'}
-              onClick={() => setLayout('list')}
-              className={cn(
-                'inline-flex h-full items-center gap-1.5 rounded-md px-2.5 text-sm font-semibold transition sm:px-3',
-                layout === 'list'
-                  ? 'bg-brand text-white shadow-sm'
-                  : 'text-freeio-muted hover:text-freeio-ink',
-              )}
-            >
-              <List className="h-3.5 w-3.5" aria-hidden />
-              <span className="hidden sm:inline">List</span>
-            </button>
+            </p>
+            <div className="justify-self-end">
+              <ResultsSortMenu
+                options={EMPLOYER_SORT_OPTIONS}
+                value={sort}
+                onChange={onSortChange}
+                clearValue="default"
+                variant="underline"
+              />
+            </div>
           </div>
+          {q ? (
+            <p className="text-sm text-muted">
+              <Link to={PATHS.home} className="text-brand hover:underline">
+                Home
+              </Link>
+              {' · '}“{q}”
+            </p>
+          ) : null}
         </div>
       }
+      toolbarEnd={null}
       list={
         isLoading ? (
-          <EmployersListSkeleton layout={layout} />
+          <EmployersListSkeleton />
         ) : count === 0 ? (
           <EmployersEmptyState onReset={onResetFilters} />
         ) : (
-          <ul
-            className={cn(
-              layout === 'grid'
-                ? 'mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1'
-                : 'flex flex-col gap-3',
-            )}
-          >
+          <ul className="mx-auto grid w-full max-w-[34rem] auto-rows-fr items-stretch gap-5 pl-5 sm:max-w-none sm:grid-cols-2 sm:gap-x-8 sm:gap-y-5 sm:pl-6 sm:pr-1">
             {feedItems.map((item, index) => {
               const employer = item.kind === 'ad' ? item.ad.employer : item.employer
               return (
@@ -355,7 +299,7 @@ export function EmployersMapView({
                   className="animate-[section-rise_0.4s_ease-out_both]"
                   style={{ animationDelay: `${Math.min(index, 7) * 35}ms` }}
                 >
-                  {item.kind === 'ad' && layout === 'grid' ? (
+                  {item.kind === 'ad' ? (
                     <FeaturedEmployerAdCard
                       ref={(element) => {
                         itemRefs.current[employer.id] = element
@@ -365,10 +309,7 @@ export function EmployersMapView({
                       bannerPlacement={adBannerPlacementFor(employer.id)}
                       selected={selectedId === employer.id}
                       active={hoveredId === employer.id}
-                      onSelect={(id) => {
-                        setSelectedId(id)
-                        openEmployer(id)
-                      }}
+                      onSelect={setSelectedId}
                       onHover={setHoveredId}
                     />
                   ) : (
@@ -377,13 +318,9 @@ export function EmployersMapView({
                         itemRefs.current[employer.id] = element
                       }}
                       employer={employer}
-                      compact={layout === 'list'}
                       selected={selectedId === employer.id}
                       active={hoveredId === employer.id}
-                      onSelect={(id) => {
-                        setSelectedId(id)
-                        openEmployer(id)
-                      }}
+                      onSelect={setSelectedId}
                       onHover={setHoveredId}
                     />
                   )}
@@ -403,7 +340,7 @@ export function EmployersMapView({
           <CircularPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       }
-      scrollResetKey={`${page}-${layout}`}
+      scrollResetKey={page}
       map={
         <EmployersMap
           employers={mapEmployers}
@@ -415,13 +352,13 @@ export function EmployersMapView({
         />
       }
       drawer={
-        <EmployerFiltersDrawer
+        <ServiceFiltersDrawer
           open={filtersOpen}
           onClose={() => setFiltersOpen(false)}
-          filters={draftFilters}
-          onChange={onFiltersChange}
+          filters={filters}
+          onChange={onFilterChange}
           onReset={onResetFilters}
-          onApply={() => onApplySearch()}
+          onApply={applyFilters}
         />
       }
     />

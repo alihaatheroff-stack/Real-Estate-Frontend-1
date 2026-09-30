@@ -632,7 +632,7 @@ export function LandingFilterFields({
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label={resolvedExperienceLabel}
-        placeholder="Ex. (First-time, Repeat, Investment, etc.,)"
+        placeholder="Ex. (First-time, Repeat, etc.,)"
         tree={clientExperienceTree}
         value={value.clientExperience}
         onChange={(next) => onChange('clientExperience', next)}
@@ -1094,7 +1094,7 @@ export function LandingFilterFields({
           selectedPrefix={selectedPrefix}
           highlightSelected={highlightSelected}
           label={experienceLabel ?? 'Client Experience:'}
-          placeholder="Ex. (First-time, Repeat, Investment, etc.,)"
+          placeholder="Ex. (First-time, Repeat, etc.,)"
           tree={CLIENT_EXPERIENCE_TREE}
           value={value.clientExperience}
           onChange={(next) => onChange('clientExperience', next)}

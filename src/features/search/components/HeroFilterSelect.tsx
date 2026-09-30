@@ -1263,7 +1263,7 @@ export function HeroFilterSelect({
           <div
             ref={menuRef}
             className={cn(
-              'landing-scroll-pane max-h-[20rem] overflow-x-hidden overflow-y-auto',
+              'landing-scroll-pane max-h-[20rem] overflow-x-hidden overflow-y-scroll',
               compact ? 'space-y-0.5 px-1.5 py-1' : 'bg-white p-1',
             )}
             onMouseMove={(event) => {

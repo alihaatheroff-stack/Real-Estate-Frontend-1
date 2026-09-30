@@ -230,11 +230,10 @@ export function ProvidersMap({
   )
 
   const flyTarget = useMemo(() => {
-    const targetId = selectedId ?? hoveredId
-    if (!targetId) return null
-    const marker = markers.find((m) => m.provider.id === targetId)
+    if (!selectedId) return null
+    const marker = markers.find((m) => m.provider.id === selectedId)
     return marker?.position ?? null
-  }, [hoveredId, markers, selectedId])
+  }, [markers, selectedId])
 
   if (!mounted) {
     return <div className="h-full w-full animate-pulse bg-mist" aria-hidden />
@@ -253,8 +252,8 @@ export function ProvidersMap({
       <MapBounds markers={markers} />
       <MapFlyTo
         position={flyTarget}
-        enabled={Boolean(selectedId || hoveredId)}
-        focusKey={selectedId ?? hoveredId}
+        enabled={Boolean(selectedId)}
+        focusKey={selectedId}
       />
       {markers.map((marker) => (
         <ProviderMarkerPin

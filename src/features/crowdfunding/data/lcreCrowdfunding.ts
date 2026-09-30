@@ -133,7 +133,7 @@ export const LCRE_INDEX = {
       id: 'explore',
       label: 'Explore Priority Index',
       note: 'Other page',
-      href: PATHS.crowdfunding,
+      href: PATHS.crowdfundingExplore,
     },
   ],
 } as const

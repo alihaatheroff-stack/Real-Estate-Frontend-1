@@ -1,49 +1,50 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   EmployersMapView,
   type EmployerSortKey,
 } from '@/features/referrals/components/EmployersMapView'
+import { useEmployerResults } from '@/features/referrals/hooks/useEmployerResults'
 import {
-  DEFAULT_EMPLOYER_FILTERS,
-  useEmployerResults,
-} from '@/features/referrals/hooks/useEmployerResults'
-import { useDraftAppliedFilters } from '@/features/referrals/hooks/useDraftAppliedFilters'
+  DEFAULT_FILTERS,
+  useProviderFilters,
+  type HeroFiltersState,
+} from '@/features/search'
 
-function countDrawerFilters(filters: typeof DEFAULT_EMPLOYER_FILTERS) {
-  let count = filters.categories.length + filters.locations.length
-  if (filters.foundedFrom !== DEFAULT_EMPLOYER_FILTERS.foundedFrom) count += 1
-  if (filters.foundedTo !== DEFAULT_EMPLOYER_FILTERS.foundedTo) count += 1
-  if (filters.radiusMiles !== DEFAULT_EMPLOYER_FILTERS.radiusMiles) count += 1
-  return count
+function countActiveHeroFilters(filters: HeroFiltersState) {
+  return (Object.keys(DEFAULT_FILTERS) as (keyof HeroFiltersState)[]).filter((key) => {
+    if (key === 'find') return false
+    const value = filters[key]
+    const fallback = DEFAULT_FILTERS[key]
+    return Boolean(value) && value !== fallback
+  }).length
 }
 
 export function EmployerResultsView() {
-  const {
-    draftFilters,
-    setDraftFilters,
-    appliedFilters,
-    appliedQuery,
-    appliedLocationQuick,
-    apply,
-    reset,
-  } = useDraftAppliedFilters({ defaultFilters: DEFAULT_EMPLOYER_FILTERS })
+  const [params] = useSearchParams()
+  const { filters, updateFilter, resetFilters, toSearchParams, setFilters } =
+    useProviderFilters({ find: 'agency' })
   const [sort, setSort] = useState<EmployerSortKey>('default')
   const [isSearching, setIsSearching] = useState(true)
+  const q = params.get('q')?.toLowerCase() ?? ''
 
-  const results = useEmployerResults({
-    appliedQuery,
-    appliedLocationQuick,
-    appliedFilters,
-    sort,
-  })
+  useEffect(() => {
+    const next: Partial<HeroFiltersState> = { find: 'agency' }
+    for (const key of Object.keys(DEFAULT_FILTERS) as (keyof HeroFiltersState)[]) {
+      const value = params.get(key)
+      if (value) next[key] = value
+    }
+    setFilters((prev) => ({ ...prev, ...next }))
+  }, [params, setFilters])
 
-  const activeFilterCount = countDrawerFilters(appliedFilters)
+  const results = useEmployerResults({ q, filters, sort })
+  const activeFilterCount = countActiveHeroFilters(filters)
 
   useEffect(() => {
     setIsSearching(true)
     const timer = window.setTimeout(() => setIsSearching(false), 320)
     return () => window.clearTimeout(timer)
-  }, [appliedQuery, appliedLocationQuick, appliedFilters, sort])
+  }, [q, filters, sort])
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-white">
@@ -53,10 +54,11 @@ export function EmployerResultsView() {
           count={results.length}
           sort={sort}
           onSortChange={setSort}
-          draftFilters={draftFilters}
-          onFiltersChange={setDraftFilters}
-          onApplySearch={apply}
-          onResetFilters={reset}
+          q={q}
+          filters={filters}
+          onFilterChange={updateFilter}
+          onResetFilters={resetFilters}
+          toSearchParams={toSearchParams}
           isLoading={isSearching}
           activeFilterCount={activeFilterCount}
         />

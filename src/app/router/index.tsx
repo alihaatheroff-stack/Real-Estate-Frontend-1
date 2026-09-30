@@ -7,6 +7,7 @@ import { NetworkLayout } from '@/app/layouts/NetworkLayout'
 import { PATHS } from '@/app/router/paths'
 import { LandingPage } from '@/pages/landing/LandingPage'
 import { CrowdfundingExplorePage } from '@/pages/crowdfunding/CrowdfundingExplorePage'
+import { CrowdfundingLandingPage } from '@/pages/crowdfunding/CrowdfundingLandingPage'
 import { CrowdfundingProfilePage } from '@/pages/crowdfunding/CrowdfundingProfilePage'
 import { LcreCrowdfundingPage } from '@/pages/crowdfunding/LcreCrowdfundingPage'
 import {
@@ -101,6 +102,10 @@ export const router = createBrowserRouter([
           { path: PATHS.home, element: <LandingPage /> },
           {
             path: PATHS.crowdfunding,
+            element: <CrowdfundingLandingPage />,
+          },
+          {
+            path: PATHS.crowdfundingExplore,
             element: <CrowdfundingExplorePage />,
           },
           {

@@ -230,11 +230,10 @@ export function EmployersMap({
   )
 
   const flyTarget = useMemo(() => {
-    const targetId = selectedId ?? hoveredId
-    if (!targetId) return null
-    const marker = markers.find((item) => item.employer.id === targetId)
+    if (!selectedId) return null
+    const marker = markers.find((item) => item.employer.id === selectedId)
     return marker?.position ?? null
-  }, [hoveredId, markers, selectedId])
+  }, [markers, selectedId])
 
   if (!mounted) {
     return <div className="h-full w-full animate-pulse bg-freeio-hover" aria-hidden />
@@ -253,8 +252,8 @@ export function EmployersMap({
       <MapBounds markers={markers} />
       <MapFlyTo
         position={flyTarget}
-        enabled={Boolean(selectedId || hoveredId)}
-        focusKey={selectedId ?? hoveredId}
+        enabled={Boolean(selectedId)}
+        focusKey={selectedId}
       />
       {markers.map((marker) => (
         <EmployerMarkerPin

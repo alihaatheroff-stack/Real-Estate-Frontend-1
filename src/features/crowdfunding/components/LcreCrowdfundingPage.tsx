@@ -501,7 +501,7 @@ export function LcreCrowdfundingPage() {
       <Section className={block} containerClassName={shell}>
         <SectionEyebrow>Pipeline</SectionEyebrow>
         <SectionTitle>{LCRE_PROJECTS.title}</SectionTitle>
-        <Link to={PATHS.crowdfunding} className="mt-8 inline-block">
+        <Link to={PATHS.crowdfundingExplore} className="mt-8 inline-block">
           <Button variant="outline" rightIcon={<ArrowRight className="h-4 w-4" />}>
             {LCRE_PROJECTS.browseCta}
           </Button>

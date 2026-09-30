@@ -18,6 +18,7 @@ export const PATHS = {
   referralsForums: '/referrals/forums',
   referralsForum: '/referrals/forums/:forumId',
   crowdfunding: '/crowdfunding',
+  crowdfundingExplore: '/crowdfunding/explore',
   lcreCrowdfunding: '/crowdfunding/lcre',
   crowdfundingProfile: '/crowdfunding/profile/:id',
   crowdfundingArticles: '/crowdfunding/articles',

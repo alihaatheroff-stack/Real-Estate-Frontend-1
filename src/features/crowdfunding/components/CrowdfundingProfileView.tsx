@@ -144,7 +144,7 @@ export function CrowdfundingProfileView({ profile }: { profile: CrowdfundingProf
             </div>
 
             <div className="flex flex-wrap gap-2 pb-1">
-              <Link to={PATHS.crowdfunding}>
+              <Link to={PATHS.crowdfundingExplore}>
                 <Button size="md">Vote on venues</Button>
               </Link>
               <Link to={PATHS.lcreCrowdfunding}>
@@ -219,7 +219,7 @@ export function CrowdfundingProfileView({ profile }: { profile: CrowdfundingProf
                   </p>
                 </div>
                 <Link
-                  to={PATHS.crowdfunding}
+                  to={PATHS.crowdfundingExplore}
                   className="shrink-0 text-sm font-semibold text-brand hover:underline"
                 >
                   Explore all
@@ -327,7 +327,7 @@ export function CrowdfundingProfileView({ profile }: { profile: CrowdfundingProf
               </dl>
 
               <div className="mt-5 space-y-2">
-                <Link to={PATHS.crowdfunding} className="block">
+                <Link to={PATHS.crowdfundingExplore} className="block">
                   <Button className="w-full" size="md">
                     Cast a vote
                   </Button>

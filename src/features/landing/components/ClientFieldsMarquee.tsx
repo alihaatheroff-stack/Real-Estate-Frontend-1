@@ -9,6 +9,7 @@ import {
   type DemographyRow,
   type DemographySlide,
 } from '@/features/landing/data/clientFieldCards'
+import { HireScratchOffSection } from '@/features/landing/components/HireScratchOffSection'
 import { cn } from '@/shared/lib/cn'
 
 export function ClientFieldsMarquee() {
@@ -28,6 +29,8 @@ export function ClientFieldsMarquee() {
             <DemographyMarquee row={row} />
           </ScrollReveal>
         ))}
+
+        <HireScratchOffSection />
       </div>
     </Section>
   )

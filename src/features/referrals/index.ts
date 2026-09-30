@@ -87,7 +87,7 @@ export {
 } from '@/features/referrals/components/ResultsSplitView'
 export { useEmployerJobs, DEFAULT_JOB_FILTERS, JOB_SORT_OPTIONS } from '@/features/referrals/hooks/useEmployerJobs'
 export { useEmployerProjects, DEFAULT_PROJECT_FILTERS, PROJECT_SORT_OPTIONS } from '@/features/referrals/hooks/useEmployerProjects'
-export { useEmployerResults, DEFAULT_EMPLOYER_FILTERS } from '@/features/referrals/hooks/useEmployerResults'
+export { useEmployerResults } from '@/features/referrals/hooks/useEmployerResults'
 export { useDraftAppliedFilters } from '@/features/referrals/hooks/useDraftAppliedFilters'
 export {
   FilterSection,

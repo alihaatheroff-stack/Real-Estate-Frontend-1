@@ -1,3 +1,5 @@
+export const REFERRAL_EXCHANGE_HERO_IMAGE = '/images/stock/photo-1454165804606-c3d57bc86b40.jpg'
+
 export const REFERRAL_EXCHANGE_HERO = {
   eyebrow: 'Referral Exchange',
   brand: 'RE Network',

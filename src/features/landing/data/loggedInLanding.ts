@@ -53,7 +53,7 @@ export const NEWS_TABS: NewsTab[] = [
     id: 'crowdfunding',
     label: '2. CROWDFUNDING:',
     heading: 'Crowdfunding:',
-    href: PATHS.crowdfunding,
+    href: PATHS.crowdfundingExplore,
     bullets: [
       { text: 'Track recreational project interest by jurisdiction.' },
       { text: "Review your investment's, high's, and low's." },

@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
+import { Button } from '@/components/ui/Button'
+import { setAuthenticated } from '@/features/auth/session'
 import { cn } from '@/shared/lib/cn'
 
 const optionClassName = cn(
@@ -8,6 +10,8 @@ const optionClassName = cn(
 )
 
 export function RegisterRoleSelect() {
+  const navigate = useNavigate()
+
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8">
       <div className="space-y-2 text-center sm:text-left">
@@ -38,6 +42,19 @@ export function RegisterRoleSelect() {
           </span>
         </Link>
       </div>
+
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full"
+        size="sm"
+        onClick={() => {
+          setAuthenticated(true)
+          navigate(PATHS.home)
+        }}
+      >
+        Skip (testing)
+      </Button>
 
       <p className="text-center text-sm text-muted sm:text-left">
         Already have an account?{' '}

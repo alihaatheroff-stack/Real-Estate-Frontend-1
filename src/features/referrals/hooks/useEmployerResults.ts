@@ -1,93 +1,81 @@
 import { useMemo } from 'react'
-import {
-  EMPLOYER_DISTANCE_DEFAULT,
-  type EmployerFiltersState,
-} from '@/features/referrals/model/employerFilters'
 import type { EmployerSortKey } from '@/features/referrals/model/sort'
 import { listEmployers } from '@/features/referrals/api/repository'
-import { getCityCoords, milesBetween } from '@/features/referrals/lib/geo'
+import { matchesZipRadius } from '@/features/referrals/lib/geo'
+import { splitCsv, type HeroFiltersState } from '@/features/search'
 import { shuffledCopy } from '@/shared/lib/array'
 import type { Employer } from '@/entities/employer/types'
 
-export const DEFAULT_EMPLOYER_FILTERS: EmployerFiltersState = {
-  categories: [],
-  locations: [],
-  radiusMiles: EMPLOYER_DISTANCE_DEFAULT,
-  foundedFrom: 1885,
-  foundedTo: 2026,
-}
-
-function matchesLocation(city: string, state: string, locationValue: string) {
-  const normalized = locationValue.replaceAll('-', ' ')
-  const cityLower = city.toLowerCase()
-  const stateLower = state.toLowerCase()
-  return (
-    cityLower.includes(normalized) ||
-    stateLower.includes(normalized) ||
-    cityLower.includes(locationValue)
-  )
-}
-
 type UseEmployerResultsOptions = {
-  appliedQuery: string
-  appliedLocationQuick: string
-  appliedFilters: EmployerFiltersState
+  q: string
+  filters: HeroFiltersState
   sort: EmployerSortKey
 }
 
+function matchesText(haystack: string, needle: string) {
+  const normalized = needle.toLowerCase().replaceAll('-', ' ').trim()
+  if (!normalized) return true
+  return haystack.includes(normalized)
+}
+
 export function useEmployerResults({
-  appliedQuery,
-  appliedLocationQuick,
-  appliedFilters,
+  q,
+  filters,
   sort,
 }: UseEmployerResultsOptions): Employer[] {
   return useMemo(() => {
     let list = listEmployers()
 
-    if (appliedQuery) {
+    if (q) {
       list = list.filter(
         (employer) =>
-          employer.name.toLowerCase().includes(appliedQuery) ||
-          employer.city.toLowerCase().includes(appliedQuery) ||
-          employer.state.toLowerCase().includes(appliedQuery) ||
-          employer.about.toLowerCase().includes(appliedQuery) ||
-          employer.category.replaceAll('-', ' ').includes(appliedQuery),
+          employer.name.toLowerCase().includes(q) ||
+          employer.city.toLowerCase().includes(q) ||
+          employer.state.toLowerCase().includes(q) ||
+          employer.about.toLowerCase().includes(q) ||
+          employer.category.replaceAll('-', ' ').includes(q) ||
+          employer.categories.some((category) =>
+            category.replaceAll('-', ' ').includes(q),
+          ),
       )
     }
 
-    const originKey = appliedFilters.locations[0] || appliedLocationQuick
-    const origin = originKey ? getCityCoords(originKey) : null
-    const radius = appliedFilters.radiusMiles || EMPLOYER_DISTANCE_DEFAULT
+    const categories = splitCsv(filters.pspCategory)
+    if (categories.length) {
+      list = list.filter((employer) => {
+        const text = [
+          employer.category,
+          ...employer.categories,
+          employer.about,
+          employer.tagline,
+        ]
+          .join(' ')
+          .toLowerCase()
+          .replaceAll('-', ' ')
+        return categories.some((category) => matchesText(text, category))
+      })
+    }
 
-    if (origin) {
-      list = list.filter(
-        (employer) => milesBetween(origin, [employer.lat, employer.lng]) <= radius,
-      )
-    } else if (appliedLocationQuick) {
-      list = list.filter(
-        (employer) =>
-          employer.city.toLowerCase().includes(appliedLocationQuick) ||
-          employer.state.toLowerCase().includes(appliedLocationQuick),
-      )
-    } else if (appliedFilters.locations.length) {
+    if (filters.field) {
+      list = list.filter((employer) => {
+        const text = [
+          employer.category,
+          ...employer.categories,
+          employer.about,
+          employer.tagline,
+        ]
+          .join(' ')
+          .toLowerCase()
+          .replaceAll('-', ' ')
+        return matchesText(text, filters.field)
+      })
+    }
+
+    if (filters.zip) {
       list = list.filter((employer) =>
-        appliedFilters.locations.some((location) =>
-          matchesLocation(employer.city, employer.state, location),
-        ),
+        matchesZipRadius(employer, filters.zip, filters.radius),
       )
     }
-
-    if (appliedFilters.categories.length) {
-      list = list.filter((employer) =>
-        appliedFilters.categories.includes(employer.category),
-      )
-    }
-
-    list = list.filter(
-      (employer) =>
-        employer.foundedYear >= appliedFilters.foundedFrom &&
-        employer.foundedYear <= appliedFilters.foundedTo,
-    )
 
     if (sort === 'random') {
       return shuffledCopy(list)
@@ -102,5 +90,5 @@ export function useEmployerResults({
     })
 
     return list
-  }, [appliedFilters, appliedLocationQuick, appliedQuery, sort])
+  }, [filters, q, sort])
 }

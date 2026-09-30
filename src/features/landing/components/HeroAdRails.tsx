@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { Maximize2, Minimize2 } from 'lucide-react'
@@ -15,7 +15,6 @@ import {
 import { cn } from '@/shared/lib/cn'
 
 const SLIDE_MS = 700
-const ROTATE_MS = 4800
 
 /** Corner tall-ad width — keep LandingHero / HeroSlideshow offsets in sync */
 const SIDE_AD_RAIL = 'w-[clamp(7.5rem,11vw,11rem)]'
@@ -166,7 +165,7 @@ function HeroAdExpandDialog({
             ))}
           </div>
           <div className="pointer-events-none absolute inset-x-0 top-0 z-[4] flex items-center justify-between gap-2 px-3 py-3">
-            <span className="rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-semibold underline text-ink shadow-sm">
+            <span className="pointer-events-auto rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-semibold text-ink shadow-sm hover:underline">
               Ad
             </span>
             {ad.logo ? (
@@ -254,7 +253,7 @@ function AdCard({
         loading="lazy"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/25 to-transparent" />
-      <span className="absolute left-1.5 top-1.5 z-[3] rounded-md bg-white/95 px-1.5 py-0.5 text-[9px] font-semibold underline text-ink shadow-sm sm:left-2 sm:top-2 sm:text-[10px]">
+      <span className="absolute left-1.5 top-1.5 z-[3] rounded-md bg-white/95 px-1.5 py-0.5 text-[9px] font-semibold text-ink shadow-sm hover:underline sm:left-2 sm:top-2 sm:text-[10px]">
         Ad
       </span>
       {onExpand ? (
@@ -313,21 +312,23 @@ function PromoBannerCard({ ad }: { ad: HeroAd }) {
   )
 }
 
-function useAdSlideshow({
-  count,
-  startDelayMs,
-  intervalMs,
-  paused,
+/**
+ * Corner tall-ad slot — image fills height, dots + Advertise here overlay on the image.
+ */
+function CornerAdSlot({
+  ads,
+  label,
+  className,
+  onExpand,
 }: {
-  count: number
-  startDelayMs: number
-  intervalMs: number
-  paused: boolean
+  ads: HeroAd[]
+  label: string
+  className?: string
+  onExpand?: (ad: HeroAd) => void
 }) {
+  const count = ads.length
   const [index, setIndex] = useState(0)
-  const [instant, setInstant] = useState(false)
   const [reduceMotion, setReduceMotion] = useState(false)
-  const awaitingFirstTick = useRef(true)
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -337,100 +338,27 @@ function useAdSlideshow({
     return () => media.removeEventListener('change', apply)
   }, [])
 
-  useEffect(() => {
-    if (paused || count < 2) return
-    const wait = awaitingFirstTick.current ? intervalMs + startDelayMs : intervalMs
-    let intervalId = 0
-    const timeoutId = window.setTimeout(() => {
-      awaitingFirstTick.current = false
-      setIndex((current) => current + 1)
-      intervalId = window.setInterval(() => {
-        setIndex((current) => current + 1)
-      }, intervalMs)
-    }, wait)
-    return () => {
-      window.clearTimeout(timeoutId)
-      window.clearInterval(intervalId)
-    }
-  }, [paused, count, intervalMs, startDelayMs])
-
-  useEffect(() => {
-    if (count < 2 || index < count) return
-    const timeoutId = window.setTimeout(() => {
-      setInstant(true)
-      setIndex(0)
-    }, SLIDE_MS)
-    return () => window.clearTimeout(timeoutId)
-  }, [index, count])
-
-  useEffect(() => {
-    if (!instant) return
-    const frame = window.requestAnimationFrame(() => {
-      setInstant(false)
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [instant])
-
-  return { index, setIndex, instant, setInstant, reduceMotion }
-}
-
-/**
- * Corner tall-ad slot — image fills height, dots + Advertise here overlay on the image.
- */
-function CornerAdSlot({
-  ads,
-  label,
-  startDelayMs = 0,
-  intervalMs = ROTATE_MS,
-  className,
-  rotationPaused = false,
-  onExpand,
-}: {
-  ads: HeroAd[]
-  label: string
-  startDelayMs?: number
-  intervalMs?: number
-  className?: string
-  rotationPaused?: boolean
-  onExpand?: (ad: HeroAd) => void
-}) {
-  const count = ads.length
-  const [paused, setPaused] = useState(false)
-  const { index, setIndex, instant, setInstant, reduceMotion } = useAdSlideshow({
-    count,
-    startDelayMs,
-    intervalMs,
-    paused: paused || rotationPaused,
-  })
-
   if (count === 0) return null
 
-  const active = index % count
-  const slides = count > 1 ? [...ads, ads[0]!] : ads
+  const active = ((index % count) + count) % count
 
   return (
-    <div
-      className={cn('relative min-h-0 flex-1 overflow-hidden', className)}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-    >
+    <div className={cn('relative min-h-0 flex-1 overflow-hidden', className)}>
       <div
         className="absolute inset-y-0 left-0 flex h-full motion-reduce:transition-none"
         style={{
-          width: `${slides.length * 100}%`,
-          transform: `translateX(-${(index * 100) / slides.length}%)`,
-          transition: instant || reduceMotion ? 'none' : `transform ${SLIDE_MS}ms ease-in-out`,
+          width: `${count * 100}%`,
+          transform: `translateX(-${(active * 100) / count}%)`,
+          transition: reduceMotion ? 'none' : `transform ${SLIDE_MS}ms ease-in-out`,
         }}
       >
-        {slides.map((ad, slideIndex) => {
-          const visible = slideIndex === index
+        {ads.map((ad, slideIndex) => {
+          const visible = slideIndex === active
           return (
             <div
-              key={`${ad.id}-${slideIndex}`}
+              key={ad.id}
               className="relative h-full shrink-0"
-              style={{ width: `${100 / slides.length}%` }}
+              style={{ width: `${100 / count}%` }}
               aria-hidden={!visible}
               inert={!visible}
             >
@@ -461,10 +389,7 @@ function CornerAdSlot({
               role="tab"
               aria-label={`Show ${ad.title}`}
               aria-selected={dotIndex === active}
-              onClick={() => {
-                setInstant(true)
-                setIndex(dotIndex)
-              }}
+              onClick={() => setIndex(dotIndex)}
               className={cn(
                 'h-1.5 rounded-full shadow-sm transition-all',
                 dotIndex === active ? 'w-3.5 bg-paper' : 'w-1.5 bg-paper/45 hover:bg-paper/75',
@@ -476,7 +401,7 @@ function CornerAdSlot({
 
       <Link
         to={PATHS.advertise}
-        className="absolute inset-x-0 bottom-0 z-[3] px-1 pb-1 pt-0.5 text-center text-[9px] font-semibold tracking-wide text-paper drop-shadow-sm transition hover:text-accent sm:text-[10px]"
+        className="absolute inset-x-0 bottom-0 z-[3] px-1 pb-1 pt-0.5 text-center text-[9px] font-semibold tracking-wide text-paper drop-shadow-sm transition hover:text-paper hover:underline sm:text-[10px]"
         onClick={(event) => event.stopPropagation()}
       >
         Advertise here
@@ -496,37 +421,19 @@ function CornerAdColumn({
   bottomAds,
   topLabel,
   bottomLabel,
-  topDelayMs,
-  bottomDelayMs,
-  rotationPaused = false,
   onExpand,
 }: {
   topAds: HeroAd[]
   bottomAds: HeroAd[]
   topLabel: string
   bottomLabel: string
-  topDelayMs: number
-  bottomDelayMs: number
-  rotationPaused?: boolean
   onExpand?: (ad: HeroAd) => void
 }) {
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
-      <CornerAdSlot
-        ads={topAds}
-        label={topLabel}
-        startDelayMs={topDelayMs}
-        rotationPaused={rotationPaused}
-        onExpand={onExpand}
-      />
+      <CornerAdSlot ads={topAds} label={topLabel} onExpand={onExpand} />
       <div className="h-9 shrink-0" aria-hidden />
-      <CornerAdSlot
-        ads={bottomAds}
-        label={bottomLabel}
-        startDelayMs={bottomDelayMs}
-        rotationPaused={rotationPaused}
-        onExpand={onExpand}
-      />
+      <CornerAdSlot ads={bottomAds} label={bottomLabel} onExpand={onExpand} />
     </div>
   )
 }
@@ -556,7 +463,6 @@ function RightPromoCardGrid({ cards }: { cards: HeroAd[] }) {
 
 export function HeroAdRails() {
   const [expandedAd, setExpandedAd] = useState<HeroAd | null>(null)
-  const rotationPaused = expandedAd != null
 
   return (
     <>
@@ -567,9 +473,6 @@ export function HeroAdRails() {
           bottomAds={BOTTOM_LEFT_ADS}
           topLabel="Top left"
           bottomLabel="Bottom left"
-          topDelayMs={0}
-          bottomDelayMs={1600}
-          rotationPaused={rotationPaused}
           onExpand={setExpandedAd}
         />
       </aside>
@@ -584,9 +487,6 @@ export function HeroAdRails() {
           bottomAds={BOTTOM_RIGHT_ADS}
           topLabel="Top right"
           bottomLabel="Bottom right"
-          topDelayMs={800}
-          bottomDelayMs={2400}
-          rotationPaused={rotationPaused}
           onExpand={setExpandedAd}
         />
       </aside>
@@ -595,10 +495,7 @@ export function HeroAdRails() {
         <CornerAdSlot
           ads={TOP_RIGHT_ADS}
           label="Featured"
-          startDelayMs={400}
-          intervalMs={4200}
           className="h-full flex-none"
-          rotationPaused={rotationPaused}
           onExpand={setExpandedAd}
         />
       </div>

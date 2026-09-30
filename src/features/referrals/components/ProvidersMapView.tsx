@@ -114,7 +114,6 @@ export function ProvidersMapView({
 
   function hoverProvider(id: string | null) {
     setHoveredId(id)
-    if (id) setSelectedId(id)
   }
 
   return (

@@ -17,8 +17,8 @@ export function MarketingLayout() {
   const { pathname } = useLocation()
   const isAuthenticated = useIsAuthenticated()
   const fillViewport =
-    pathname === PATHS.crowdfunding ||
-    pathname === `${PATHS.crowdfunding}/` ||
+    pathname === PATHS.crowdfundingExplore ||
+    pathname === `${PATHS.crowdfundingExplore}/` ||
     pathname === PATHS.advertise ||
     pathname === `${PATHS.advertise}/`
 

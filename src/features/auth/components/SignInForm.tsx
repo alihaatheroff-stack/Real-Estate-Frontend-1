@@ -61,6 +61,18 @@ export function SignInForm() {
           <Button type="submit" className="w-full" size="lg">
             Sign in
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full"
+            size="sm"
+            onClick={() => {
+              setAuthenticated(true)
+              navigate(PATHS.home)
+            }}
+          >
+            Skip (testing)
+          </Button>
           <Link to={PATHS.forgotPassword} className={actionLinkClassName}>
             Forgot password?
           </Link>

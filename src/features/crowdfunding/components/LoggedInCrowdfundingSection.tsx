@@ -25,7 +25,7 @@ export function LoggedInCrowdfundingSection() {
       </ScrollReveal>
 
       <ScrollReveal id="crowdfunding-explore" className="mt-2 scroll-mt-24">
-        <Link to={PATHS.crowdfunding}>
+        <Link to={PATHS.crowdfundingExplore}>
           <Button size="lg">Vote</Button>
         </Link>
       </ScrollReveal>

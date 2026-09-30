@@ -14,7 +14,8 @@ export const REFERRALS_MENU = [
 
 /** Crowdfunding dropdown — mirrors Referrals subpage pattern */
 export const CROWDFUNDING_MENU = [
-  { label: 'Explore Priority Index', href: PATHS.crowdfunding },
+  { label: 'Crowdfund Overview', href: PATHS.crowdfunding },
+  { label: 'Explore Priority Index', href: PATHS.crowdfundingExplore },
   { label: 'LCRE Crowdfunding', href: PATHS.lcreCrowdfunding },
   { label: 'Profile', href: crowdfundingProfilePath('rigo') },
   { label: 'Articles', href: PATHS.crowdfundingArticles },

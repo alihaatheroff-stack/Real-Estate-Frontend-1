@@ -98,7 +98,6 @@ export function ServicesMapView({
 
   function hoverService(id: string | null) {
     setHoveredId(id)
-    if (id) setSelectedId(id)
   }
 
   return (
