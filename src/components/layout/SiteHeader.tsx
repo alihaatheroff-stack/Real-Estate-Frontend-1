@@ -99,20 +99,23 @@ export function SiteHeader({
   }
 
   return (
-    <header className="sticky top-0 z-50 shrink-0 border-b border-line/70 bg-paper/85 backdrop-blur-md">
-      <Container className="flex h-[4.75rem] max-w-none items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4 lg:px-5">
-        <SiteLogo to={homeHref} />
+    <header className="sticky top-0 z-50 shrink-0 overflow-x-clip border-b border-line/70 bg-paper/85 backdrop-blur-md">
+      <Container className="flex h-[4.75rem] max-w-none items-center justify-between gap-2 px-2 sm:h-[5.5rem] sm:gap-3 sm:px-3 lg:px-4">
+        <div className="flex min-w-0 items-center gap-2 lg:gap-3">
+          <SiteLogo to={homeHref} titleClassName="text-2xl sm:text-3xl" />
 
-        <SiteModuleNav
-          className="hidden lg:flex"
-          items={marketingNav}
-          referralsMenu={referralsMenu}
-          crowdfundingMenu={crowdfundingMenu}
-          networkMenu={networkMenu}
-          aboutMenu={aboutMenu}
-        />
+          <SiteModuleNav
+            compact
+            className="hidden lg:flex"
+            items={marketingNav}
+            referralsMenu={referralsMenu}
+            crowdfundingMenu={crowdfundingMenu}
+            networkMenu={networkMenu}
+            aboutMenu={aboutMenu}
+          />
+        </div>
 
-        <div className="flex items-center gap-0.5 sm:gap-1">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           <div className="hidden items-center gap-0.5 sm:flex">
             <NewsHeaderLink />
             <WritingMenu locked={!isAuthenticated} />
@@ -166,8 +169,10 @@ export function SiteHeader({
                 signInHref={signInHref}
                 registerHref={registerHref}
               />
-              <Link ref={joinNetworkRef} to={registerHref} className="hidden md:block">
-                <Button size="sm">Join RE Network</Button>
+              <Link ref={joinNetworkRef} to={registerHref} className="hidden shrink-0 md:block">
+                <Button size="sm" className="whitespace-nowrap px-2.5">
+                  Join RE Network
+                </Button>
               </Link>
             </>
           )}

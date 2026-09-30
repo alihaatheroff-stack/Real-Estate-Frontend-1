@@ -96,7 +96,7 @@ export function SiteModuleNav({
   }
 
   return (
-    <nav className={cn('items-center', compact ? 'gap-16' : 'gap-4', className)}>
+    <nav className={cn('items-center', compact ? 'gap-1.5' : 'gap-2', className)}>
       {items.map((item, index) => {
         const href = resolveModuleNavHref(item, isAuthenticated)
         const active = isModuleNavActive(pathname, item)
@@ -105,8 +105,8 @@ export function SiteModuleNav({
 
         if (item.hasDropdown) {
           const triggerClassName = cn(
-            'inline-flex items-center gap-1 rounded-lg font-semibold transition',
-            compact ? 'px-2 py-1.5 text-[13px]' : 'px-3 py-2 text-sm',
+            'inline-flex items-center gap-0.5 rounded-lg font-semibold transition',
+            compact ? 'px-1.5 py-1.5 text-[13px]' : 'px-2 py-1.5 text-sm',
             highlighted ? 'bg-brand-light text-brand-dark' : 'text-ink hover:bg-mist',
           )
           const trigger = (
@@ -173,7 +173,7 @@ export function SiteModuleNav({
             aria-current={active ? 'page' : undefined}
             className={cn(
               'inline-flex items-center rounded-lg font-semibold transition',
-              compact ? 'px-2 py-1.5 text-[13px]' : 'px-3 py-2 text-sm',
+              compact ? 'px-1.5 py-1.5 text-[13px]' : 'px-2 py-1.5 text-sm',
               active ? 'bg-brand-light text-brand-dark' : 'text-ink hover:bg-mist',
             )}
           >
