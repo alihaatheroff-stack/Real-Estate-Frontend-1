@@ -69,7 +69,7 @@ export function AuthRequiredDialog({
               Log in
             </Button>
           </Link>
-          <Link to={PATHS.registerPsp} onClick={onClose} className="sm:order-3">
+          <Link to={PATHS.register} onClick={onClose} className="sm:order-3">
             <Button size="sm" className="w-full sm:w-auto">
               Register
             </Button>

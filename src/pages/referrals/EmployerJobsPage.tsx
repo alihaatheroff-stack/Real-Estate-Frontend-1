@@ -17,7 +17,7 @@ export function EmployerJobsPage() {
           to={PATHS.employerResults}
           className="mt-4 inline-block text-brand hover:underline"
         >
-          Back to employers
+          Back to office results
         </Link>
       </Section>
     )

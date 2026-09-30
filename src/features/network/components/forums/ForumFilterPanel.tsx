@@ -1,5 +1,7 @@
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { Input } from '@/components/ui/Input'
 import { RangeSlider } from '@/components/ui/RangeSlider'
+import { LandingInfoMarksContext } from '@/features/glossary/infoMarksContext'
 import {
   LandingFilterFields,
   SERVICE_DISTANCE_MAX,
@@ -172,6 +174,7 @@ export function ForumFilterPanel({
   }
 
   return (
+    <LandingInfoMarksContext.Provider value={true}>
     <aside
       className={cn(
         'flex h-full min-h-0 w-full max-w-[21rem] shrink-0 flex-col overflow-hidden bg-white',
@@ -201,6 +204,7 @@ export function ForumFilterPanel({
         )}
 
         <LandingFilterFields
+          showInfoMarks
           hideLocation
           stopBeforeLanguage
           selectedPrefix="Selected: "
@@ -214,7 +218,10 @@ export function ForumFilterPanel({
 
       <div className="shrink-0 space-y-3 border-t border-line bg-white px-5 py-3">
         <div>
-          <h3 className="mb-1.5 text-sm font-semibold text-ink">Zipcode</h3>
+          <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+            Zipcode
+            <FieldQaMark field="Zipcode" />
+          </h3>
           <Input
             name="forum-zip"
             value={filters.zip}
@@ -224,7 +231,10 @@ export function ForumFilterPanel({
           />
         </div>
         <div>
-          <h3 className="mb-1.5 text-sm font-semibold text-ink">Mile Radius</h3>
+          <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+            Mile Radius
+            <FieldQaMark field="Mile Radius" />
+          </h3>
           <p className="mb-3 text-[13px] text-muted">Distance: {distance} miles</p>
           <RangeSlider
             min={SERVICE_DISTANCE_MIN}
@@ -235,6 +245,7 @@ export function ForumFilterPanel({
         </div>
       </div>
     </aside>
+    </LandingInfoMarksContext.Provider>
   )
 }
 
@@ -252,6 +263,7 @@ export function ForumModuleSelect({
     <div className={cn(className)}>
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix="Selected: "
         highlightSelected
         label="Choose Module:"

@@ -49,6 +49,8 @@ export const PATHS = {
   networkSettings: '/network/settings',
   shop: '/shop',
   signIn: '/auth/sign-in',
+  forgotPassword: '/auth/forgot-password',
+  register: '/auth/register',
   registerPsp: '/auth/register/psp',
   registerCustomer: '/auth/register/customer',
   dashboard: '/dashboard',

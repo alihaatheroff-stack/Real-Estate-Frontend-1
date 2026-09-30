@@ -114,7 +114,7 @@ function EmployersListSkeleton({ layout }: { layout: LayoutMode }) {
           )}
         </div>
       ))}
-      <span className="sr-only">Loading employer results</span>
+      <span className="sr-only">Loading office results</span>
     </div>
   )
 }

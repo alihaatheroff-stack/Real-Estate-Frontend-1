@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { ArrowLeftToLine, ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { Input } from '@/components/ui/Input'
 import { RangeSlider } from '@/components/ui/RangeSlider'
 import { ResultsBelowLanguageFields } from '@/features/referrals/components/filters/ResultsBelowLanguageFields'
@@ -32,12 +33,16 @@ type ServiceFiltersDrawerProps = {
 type FilterSectionProps = {
   title: string
   children: ReactNode
+  qaField?: string
 }
 
-function FilterSection({ title, children }: FilterSectionProps) {
+function FilterSection({ title, children, qaField }: FilterSectionProps) {
   return (
     <section className="px-6 py-2">
-      <h3 className="mb-1.5 text-sm font-semibold text-ink">{title}</h3>
+      <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+        {title}
+        <FieldQaMark field={qaField ?? title} />
+      </h3>
       {children}
     </section>
   )

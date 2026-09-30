@@ -17,7 +17,6 @@ export function RegisterFilterSelect(
       compact
       inlineMenu
       showQaMark
-      openOnHover
       showPriorityPanel
       alwaysShowPlaceholder
     />

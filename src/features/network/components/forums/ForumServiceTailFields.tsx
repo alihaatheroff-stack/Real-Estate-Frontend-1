@@ -39,6 +39,7 @@ export function ForumServiceTailFields({
     <div className="mt-1 flex flex-col gap-1 border-t border-line pt-2">
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Languages Spoken:"
@@ -50,6 +51,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="English Level:"
@@ -61,12 +63,14 @@ export function ForumServiceTailFields({
 
       <ReferralShareInput
         compact
+        showQaMark
         value={filters.percentageShare[0] ?? ''}
         onChange={(value) => setList('percentageShare', value ? [value] : [])}
       />
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Willing to Train:"
@@ -78,6 +82,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="EDUCATION + ARCHIVE + video playlists:"
@@ -89,6 +94,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="AR Measurement Tools:"
@@ -102,6 +108,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Payment Methods:"
@@ -113,6 +120,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Payment Packet:"
@@ -124,6 +132,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Tier Selection:"
@@ -135,6 +144,7 @@ export function ForumServiceTailFields({
 
       <HeroFilterSelect
         compact
+        showInfoMarks
         selectedPrefix={selectedPrefix}
         highlightSelected={highlightSelected}
         label="Payment Terms:"

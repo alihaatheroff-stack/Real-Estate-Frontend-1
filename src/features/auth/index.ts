@@ -1,4 +1,7 @@
 export { setAuthenticated, signOut, useIsAuthenticated } from '@/features/auth/session'
+export { RegisterRoleSelect } from '@/features/auth/components/RegisterRoleSelect'
+export { RegisterClientForm } from '@/features/auth/components/RegisterClientForm'
 export { RegisterPspForm } from '@/features/auth/components/RegisterPspForm'
 export { SignInForm } from '@/features/auth/components/SignInForm'
+export { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm'
 export { AuthRequiredDialog } from '@/features/auth/components/AuthRequiredDialog'

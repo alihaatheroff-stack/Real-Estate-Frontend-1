@@ -41,8 +41,9 @@ export function GlossaryPage() {
             Glossary
           </h1>
           <p className="mt-2 max-w-4xl text-base leading-relaxed text-ink/70">
-            Why each landing-page filter is asked, listed A to Z. Choose a letter, or open
-            Learn more on a question to land on that entry.
+            Why each landing and register filter question — and each option under it — is
+            asked, listed A to Z. Choose a letter, or open Learn more on a mark to land on
+            that entry.
           </p>
         </header>
 

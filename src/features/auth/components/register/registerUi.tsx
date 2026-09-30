@@ -9,15 +9,23 @@ export function FormSection({
   title,
   hint,
   step,
+  divided = true,
   children,
 }: {
   title: string
   hint?: string
   step?: number
+  /** Top divider rule. Default true. */
+  divided?: boolean
   children: ReactNode
 }) {
   return (
-    <section className="space-y-3 border-t border-line pt-6 first:border-t-0 first:pt-0">
+    <section
+      className={cn(
+        'space-y-3',
+        divided ? 'border-t border-line pt-6 first:border-t-0 first:pt-0' : 'pt-2',
+      )}
+    >
       <div className="space-y-1">
         <h2 className="flex items-center gap-3 font-display text-xl font-bold tracking-tight text-ink">
           {step != null ? <SectionStepBadge step={step} /> : null}

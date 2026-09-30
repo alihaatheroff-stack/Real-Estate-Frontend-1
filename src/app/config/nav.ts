@@ -1,11 +1,12 @@
 import { PATHS, crowdfundingProfilePath } from '@/app/router/paths'
 
 export const REFERRALS_MENU = [
+  { label: 'Referral Exchange', href: PATHS.referrals },
   { label: 'Service Results', href: PATHS.results },
   { label: 'Profile Results', href: PATHS.profileResults },
   { label: 'Service Selected', href: '/referrals/services/s1' },
   { label: 'Profile', href: '/referrals/providers/p1' },
-  { label: 'Employer Results', href: PATHS.employerResults },
+  { label: 'Office Results', href: PATHS.employerResults },
   { label: 'Articles', href: PATHS.referralsArticles },
   { label: 'Forums', href: PATHS.referralsForums },
   { label: 'Dashboard', href: PATHS.dashboard },
@@ -35,7 +36,7 @@ export const ABOUT_MENU = [
 
 export const MARKETING_NAV = [
   { label: 'Hire', href: PATHS.hire },
-  { label: 'Referral', href: PATHS.referrals, hasDropdown: true, menuOnly: true },
+  { label: 'Referral', href: PATHS.referrals, hasDropdown: true },
   { label: 'Crowdfund', href: PATHS.crowdfunding, hasDropdown: true },
   { label: 'Network', href: PATHS.network, hasDropdown: true },
   { label: 'Shop', href: PATHS.shop },
@@ -45,8 +46,9 @@ export const MARKETING_NAV = [
 export const FOOTER_LINKS = {
   account: [
     { label: 'Sign In', href: PATHS.signIn },
+    { label: 'Register', href: PATHS.register },
     { label: 'Register as Provider', href: PATHS.registerPsp },
-    { label: 'Register as Customer', href: PATHS.registerCustomer, soon: true },
+    { label: 'Register as Client', href: PATHS.registerCustomer },
     { label: 'Post / Receive Offers', href: PATHS.postOffer },
   ],
   legal: [

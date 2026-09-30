@@ -14,6 +14,8 @@ export {
 } from './registerUi'
 export { MembershipCardInformation } from './membership'
 export { FormOfPaymentMethodsBlock, getResolvedBusinessAddress } from './formOfPayment'
+export { PaymentsAndTermsBlock } from './PaymentsAndTermsBlock'
+export { LanguageAndLevelBlock } from './LanguageAndLevelBlock'
 export {
   RegisterFilterSelect,
   ProfileFilterGroup,

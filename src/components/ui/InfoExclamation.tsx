@@ -83,8 +83,8 @@ export function InfoExclamation({ entry, className }: InfoExclamationProps) {
         ref={buttonRef}
         type="button"
         className={cn(
-          'inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center text-black',
-          'hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/25',
+          'inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center text-black',
+          'relative z-[1] hover:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/25',
           className,
         )}
         aria-label={entry.question}
@@ -97,12 +97,12 @@ export function InfoExclamation({ entry, className }: InfoExclamationProps) {
         onClick={stop}
       >
         <svg viewBox="0 0 24 24" className="h-full w-full" aria-hidden>
-          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.35" />
-          <circle cx="12" cy="8.1" r="1.05" fill="currentColor" />
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="12" cy="8.1" r="1.15" fill="currentColor" />
           <path
             d="M12 11.15v5.7"
             stroke="currentColor"
-            strokeWidth="1.5"
+            strokeWidth="1.65"
             strokeLinecap="round"
           />
         </svg>
@@ -118,7 +118,7 @@ export function InfoExclamation({ entry, className }: InfoExclamationProps) {
                 bottom: pos.above ? window.innerHeight - pos.top : undefined,
                 left: pos.left,
               }}
-              className="fixed z-[80] w-64"
+              className="fixed z-[9999] w-64"
               onMouseEnter={show}
               onMouseLeave={hideSoon}
               onMouseDown={(event) => event.stopPropagation()}

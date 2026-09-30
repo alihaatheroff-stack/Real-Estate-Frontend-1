@@ -25,6 +25,7 @@ import {
   createEmptyBusinessEmployee,
   createEmptyEmergencyContact,
   createEmptyFormOfPaymentMethod,
+  type FormOfPaymentMethodEntry,
   type FormOfPaymentMethodField,
   type FormOfPaymentMethodType,
   getMissingManualFields,
@@ -42,8 +43,10 @@ import {
 } from '@/features/search'
 import { getResolvedBusinessAddress } from '@/features/auth/components/register/formOfPayment'
 
-/** All Register PSP form state, updaters, and validation — keeps the view thin. */
-export function useRegisterPspForm() {
+export type RegisterFormMode = 'client' | 'psp'
+
+/** All Register form state, updaters, and validation — keeps the view thin. */
+export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
   const navigate = useNavigate()
   const [data, setData] = useState<FormData>(() => {
     const now = formatNow()
@@ -586,6 +589,15 @@ export function useRegisterPspForm() {
     setError('')
   }
 
+  function syncFormOfPaymentMethods(entries: FormOfPaymentMethodEntry[]) {
+    setData((prev) => ({
+      ...prev,
+      formOfPaymentMethods:
+        entries.length > 0 ? entries : [createEmptyFormOfPaymentMethod()],
+    }))
+    setError('')
+  }
+
   function validateForm(): boolean {
     const nextErrors: Partial<Record<FieldErrorKey, boolean>> = {}
 
@@ -596,10 +608,11 @@ export function useRegisterPspForm() {
     }
 
     markManualErrors('identification', data.identification)
-    markManualErrors('license', data.license)
-    markManualErrors('insurance', data.insurance)
-
-    if (!data.insuranceInfo.trim()) nextErrors.insuranceInfo = true
+    if (mode === 'psp') {
+      markManualErrors('license', data.license)
+      markManualErrors('insurance', data.insurance)
+      if (!data.insuranceInfo.trim()) nextErrors.insuranceInfo = true
+    }
 
     if (!data.email.trim() || !data.email.includes('@')) {
       setError('Enter a valid email address.')
@@ -678,6 +691,13 @@ export function useRegisterPspForm() {
       setFieldErrors(nextErrors)
       return false
     }
+
+    if (mode === 'client') {
+      setFieldErrors({})
+      setError('')
+      return true
+    }
+
     const businessTextFields: Array<
       Extract<
         BusinessFieldKey,
@@ -830,6 +850,7 @@ export function useRegisterPspForm() {
     addFormOfPaymentMethod,
     updateFormOfPaymentMethod,
     removeFormOfPaymentMethod,
+    syncFormOfPaymentMethods,
     handleSubmit,
   }
 }

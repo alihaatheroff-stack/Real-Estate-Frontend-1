@@ -10,7 +10,7 @@ import {
 import { ChevronDown, ChevronUp, GripVertical, Plus, Send, X } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { InfoExclamation } from '@/components/ui/InfoExclamation'
-import { glossaryForCategory } from '@/features/glossary/glossary'
+import { glossaryForOption } from '@/features/glossary/glossary'
 import { LandingInfoMarksContext } from '@/features/glossary/infoMarksContext'
 import { cn } from '@/shared/lib/cn'
 import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
@@ -45,7 +45,7 @@ type HeroFilterSelectProps = {
   inlineMenu?: boolean
   /** Show trailing info icon for QA / why-this-question help. */
   showQaMark?: boolean
-  /** Landing: circled info mark on the question label only. */
+  /** Circled info mark on the question label and each option. Default on for filter dropdowns. */
   showInfoMarks?: boolean
   /** Open the menu on hover and close when the pointer leaves. */
   openOnHover?: boolean
@@ -328,6 +328,8 @@ function OptionRow({
   optionKey,
   hovered = false,
   singleSelect = false,
+  categoryLabel,
+  showInfoMark = false,
 }: {
   item: string
   checked: boolean
@@ -336,7 +338,17 @@ function OptionRow({
   optionKey?: string
   hovered?: boolean
   singleSelect?: boolean
+  categoryLabel?: string
+  showInfoMark?: boolean
 }) {
+  const infoMark =
+    showInfoMark && categoryLabel ? (
+      <InfoExclamation
+        entry={glossaryForOption(categoryLabel, item)}
+        className="mt-0.5"
+      />
+    ) : null
+
   if (compact) {
     return (
       <div data-option-key={optionKey ?? item} className="flex w-full items-start gap-x-3">
@@ -365,18 +377,21 @@ function OptionRow({
             />
           )}
         </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          data-option-key={optionKey ?? item}
-          className={cn(
-            'min-w-0 flex-1 whitespace-normal break-words py-2 pr-1 text-left text-sm leading-snug text-ink',
-            checked && 'font-medium',
-            hovered && 'underline decoration-ink underline-offset-4',
-          )}
-        >
-          {item}
-        </button>
+        <div className="inline-flex max-w-full min-w-0 items-start gap-1 py-2 pr-1">
+          <button
+            type="button"
+            onClick={onToggle}
+            data-option-key={optionKey ?? item}
+            className={cn(
+              'min-w-0 whitespace-normal break-words text-left text-sm leading-snug text-ink',
+              checked && 'font-medium',
+              hovered && 'underline decoration-ink underline-offset-4',
+            )}
+          >
+            {item}
+          </button>
+          {infoMark}
+        </div>
       </div>
     )
   }
@@ -399,8 +414,11 @@ function OptionRow({
             className={singleSelect ? undefined : 'register-check'}
           />
         </span>
-        <span className="mt-0.5 min-w-0 flex-1 whitespace-normal break-words text-sm leading-snug text-black">
-          {item}
+        <span className="mt-0.5 inline-flex min-w-0 max-w-full items-start gap-1">
+          <span className="min-w-0 whitespace-normal break-words text-sm leading-snug text-black">
+            {item}
+          </span>
+          {infoMark}
         </span>
       </label>
     </div>
@@ -416,6 +434,8 @@ function GroupHeadingRow({
   dottedLeader = false,
   optionKey,
   hovered = false,
+  categoryLabel,
+  showInfoMark = false,
 }: {
   item: string
   checked: boolean
@@ -424,7 +444,17 @@ function GroupHeadingRow({
   dottedLeader?: boolean
   optionKey?: string
   hovered?: boolean
+  categoryLabel?: string
+  showInfoMark?: boolean
 }) {
+  const infoMark =
+    showInfoMark && categoryLabel ? (
+      <InfoExclamation
+        entry={glossaryForOption(categoryLabel, item)}
+        className="mt-0.5"
+      />
+    ) : null
+
   if (compact) {
     return (
       <div data-option-key={optionKey ?? item} className="flex w-full items-center gap-x-3">
@@ -443,23 +473,34 @@ function GroupHeadingRow({
             />
           )}
         </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          data-option-key={optionKey ?? item}
+        <div
           className={cn(
-            'flex min-w-0 items-start gap-2 py-2 pr-2.5 text-left text-sm font-semibold leading-snug text-ink',
+            'flex min-w-0 items-start gap-1 py-2 pr-2.5',
             dottedLeader && 'flex-1',
           )}
         >
           <span
             className={cn(
-              'whitespace-normal break-words',
-              dottedLeader ? 'w-max max-w-[70%] shrink' : 'shrink-0',
-              hovered && 'underline decoration-ink underline-offset-4',
+              'inline-flex min-w-0 max-w-full items-start gap-1',
+              dottedLeader && 'max-w-[70%]',
             )}
           >
-            {item}
+            <button
+              type="button"
+              onClick={onToggle}
+              data-option-key={optionKey ?? item}
+              className="min-w-0 text-left text-sm font-semibold leading-snug text-ink"
+            >
+              <span
+                className={cn(
+                  'whitespace-normal break-words',
+                  hovered && 'underline decoration-ink underline-offset-4',
+                )}
+              >
+                {item}
+              </span>
+            </button>
+            {infoMark}
           </span>
           {dottedLeader ? (
             <span
@@ -467,7 +508,7 @@ function GroupHeadingRow({
               aria-hidden
             />
           ) : null}
-        </button>
+        </div>
       </div>
     )
   }
@@ -490,8 +531,11 @@ function GroupHeadingRow({
             className="register-check"
           />
         </span>
-        <span className="mt-0.5 shrink-0 whitespace-nowrap text-sm font-semibold leading-snug text-black">
-          {item}
+        <span className="mt-0.5 inline-flex shrink-0 items-start gap-1">
+          <span className="whitespace-nowrap text-sm font-semibold leading-snug text-black">
+            {item}
+          </span>
+          {infoMark}
         </span>
         {dottedLeader ? (
           <span
@@ -714,6 +758,8 @@ function TreeNodes({
   dottedLeader = false,
   groupByLetter = false,
   hoveredKey = null,
+  categoryLabel,
+  showInfoMark = false,
 }: {
   nodes: FilterTreeNode[]
   value: string[]
@@ -723,6 +769,8 @@ function TreeNodes({
   dottedLeader?: boolean
   groupByLetter?: boolean
   hoveredKey?: string | null
+  categoryLabel?: string
+  showInfoMark?: boolean
 }) {
   function renderNode(node: FilterTreeNode, index: number) {
     const nodePath = path ? `${path} > ${node.label}` : node.label
@@ -738,6 +786,8 @@ function TreeNodes({
           compact={compact}
           optionKey={nodePath}
           hovered={hoveredKey === nodePath}
+          categoryLabel={categoryLabel}
+          showInfoMark={showInfoMark}
           onToggle={() => onChange(toggleValue(value, nodePath))}
         />
       )
@@ -755,6 +805,8 @@ function TreeNodes({
             dottedLeader={dottedLeader}
             optionKey={nodePath}
             hovered={hoveredKey === nodePath}
+            categoryLabel={categoryLabel}
+            showInfoMark={showInfoMark}
             onToggle={() => onChange(toggleValue(value, nodePath))}
           />
         )}
@@ -769,6 +821,8 @@ function TreeNodes({
               dottedLeader={dottedLeader}
               groupByLetter={Boolean(node.groupByLetter)}
               hoveredKey={hoveredKey}
+              categoryLabel={categoryLabel}
+              showInfoMark={showInfoMark}
             />
           </NestBlock>
         ) : null}
@@ -832,16 +886,18 @@ export function HeroFilterSelect({
   selectedPrefix,
   highlightSelected = false,
   hideLabel = false,
-  showInfoMarks = false,
+  showInfoMarks = true,
 }: HeroFilterSelectProps) {
   const registerMenu = useContext(RegisterFilterMenuContext)
   const useInlineMenu = inlineMenu || registerMenu
   const useQaMark = showQaMark || registerMenu
-  const useOpenOnHover = openOnHover || registerMenu
+  const useOpenOnHover = openOnHover
   const useAlwaysPlaceholder = alwaysShowPlaceholder || registerMenu
   const usePriorityPanel = showPriorityPanel || registerMenu
   const infoFromContext = useContext(LandingInfoMarksContext)
   const infoMarks = showInfoMarks || infoFromContext
+  // Options get marks wherever filter dropdowns show; register also covers via menu context.
+  const optionInfoMarks = infoMarks || registerMenu
   const [open, setOpen] = useState(false)
   const [hoveredKey, setHoveredKey] = useState<string | null>(null)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -906,6 +962,8 @@ export function HeroFilterSelect({
           optionKey={item}
           hovered={hoveredKey === item}
           singleSelect={singleSelect && !registerMenu}
+          categoryLabel={label}
+          showInfoMark={optionInfoMarks}
           onToggle={() => pickOption(item)}
         />
       )
@@ -920,6 +978,8 @@ export function HeroFilterSelect({
           dottedLeader={dottedLeader}
           optionKey={item}
           hovered={hoveredKey === item}
+          categoryLabel={label}
+          showInfoMark={optionInfoMarks}
           onToggle={() => pickOption(item)}
         />
         <NestBlock className="ml-5" compact={compact}>
@@ -931,6 +991,8 @@ export function HeroFilterSelect({
             compact={compact}
             dottedLeader={dottedLeader}
             hoveredKey={hoveredKey}
+            categoryLabel={label}
+            showInfoMark={optionInfoMarks}
           />
         </NestBlock>
       </div>
@@ -966,8 +1028,7 @@ export function HeroFilterSelect({
       <span className={cn('min-w-0', (wrapLabel || infoMarks) && 'whitespace-normal')}>
         {label}
       </span>
-      {useQaMark ? <FieldQaMark field={label} /> : null}
-      {infoMarks ? <InfoExclamation entry={glossaryForCategory(label)} className="mt-0.5" /> : null}
+      {useQaMark || infoMarks ? <FieldQaMark field={label} /> : null}
     </label>
   )
 
@@ -998,7 +1059,9 @@ export function HeroFilterSelect({
           labelInsideShell ? undefined : dense ? 'mt-0' : 'mt-0.5',
           unifiedShell &&
             cn(
-              'relative overflow-hidden border shadow-sm transition duration-150',
+              'relative border shadow-sm transition duration-150',
+              // Keep open menus (and option info marks) from clipping hover / focus.
+              open ? 'overflow-visible' : 'overflow-hidden',
               dense ? 'border' : 'border-2',
               // Selected: soft cornflower wash (forums / network rails only).
               !invalid &&
@@ -1233,6 +1296,8 @@ export function HeroFilterSelect({
                       compact={compact}
                       dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
+                      categoryLabel={label}
+                      showInfoMark={optionInfoMarks}
                     />
                     {suggestRow}
                     <TreeNodes
@@ -1242,6 +1307,8 @@ export function HeroFilterSelect({
                       compact={compact}
                       dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
+                      categoryLabel={label}
+                      showInfoMark={optionInfoMarks}
                     />
                   </>
                 ) : (
@@ -1253,6 +1320,8 @@ export function HeroFilterSelect({
                       compact={compact}
                       dottedLeader={usePriorityPanel}
                       hoveredKey={hoveredKey}
+                      categoryLabel={label}
+                      showInfoMark={optionInfoMarks}
                     />
                     {suggestRow}
                   </>

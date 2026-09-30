@@ -45,7 +45,7 @@ export function AccountCredentialsBlock({
 
   return (
     <>
-      <FormSection title="Set up log in credentials" step={step}>
+      <FormSection title="Set up log in credentials" step={step} divided={false}>
         <div className="grid grid-cols-1 gap-4">
           <div>
             <Input

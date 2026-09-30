@@ -83,7 +83,7 @@ function getPaymentLinkMeta(type: FormOfPaymentMethodType) {
   }
 }
 
-function FormOfPaymentMethodFields({
+export function FormOfPaymentMethodFields({
   entry,
   onUpdate,
   businessName,

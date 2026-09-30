@@ -51,24 +51,23 @@ export function LandingFaqSection() {
       className="scroll-mt-24 bg-mist/50 pt-4 pb-12 sm:pt-6 sm:pb-16"
       containerClassName="max-w-none"
     >
-      <ScrollReveal>
+      <ScrollReveal y={36}>
         <SectionHeading
           title="Frequently Asked Questions"
           className="mb-6 w-full items-start sm:flex-col sm:items-start [&>div]:max-w-none"
         />
       </ScrollReveal>
-      <ScrollReveal delay={80}>
-        <div className="w-full space-y-1.5">
-          {LANDING_FAQS.map((faq, index) => (
+      <div className="w-full space-y-1.5">
+        {LANDING_FAQS.map((faq, index) => (
+          <ScrollReveal key={faq.question} delay={Math.min(index, 6) * 100} y={28}>
             <FaqItem
-              key={faq.question}
               question={faq.question}
               answer={faq.answer}
               defaultOpen={index === 0}
             />
-          ))}
-        </div>
-      </ScrollReveal>
+          </ScrollReveal>
+        ))}
+      </div>
     </Section>
   )
 }

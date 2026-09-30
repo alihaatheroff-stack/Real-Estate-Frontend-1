@@ -54,8 +54,12 @@ import { ServiceDetailPage } from '@/pages/referrals/ServiceDetailPage'
 import { ProviderProfilePage } from '@/pages/referrals/ProviderProfilePage'
 import { ProviderServicesPage } from '@/pages/referrals/ProviderServicesPage'
 import { PostOfferPage } from '@/pages/referrals/PostOfferPage'
+import { ReferralsLandingPage } from '@/pages/referrals/ReferralsLandingPage'
 import { SignInPage } from '@/pages/auth/SignInPage'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
+import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { RegisterPspPage } from '@/pages/auth/RegisterPspPage'
+import { RegisterCustomerPage } from '@/pages/auth/RegisterCustomerPage'
 import { NotFoundPage } from '@/pages/errors/NotFoundPage'
 import { PlaceholderPage } from '@/pages/errors/PlaceholderPage'
 import { AboutPage } from '@/pages/about/AboutPage'
@@ -146,6 +150,10 @@ export const router = createBrowserRouter([
             element: <HirePage />,
           },
           {
+            path: PATHS.referrals,
+            element: <ReferralsLandingPage />,
+          },
+          {
             path: PATHS.shop,
             element: (
               <PlaceholderPage title="Shop" description="Commerce is complementary and not in this delivery." />
@@ -204,19 +212,12 @@ export const router = createBrowserRouter([
         element: <AuthLayout />,
         children: [
           { path: PATHS.signIn, element: <SignInPage /> },
+          { path: PATHS.forgotPassword, element: <ForgotPasswordPage /> },
+          { path: PATHS.register, element: <RegisterPage /> },
           { path: PATHS.registerPsp, element: <RegisterPspPage /> },
-          {
-            path: PATHS.registerCustomer,
-            element: (
-              <PlaceholderPage
-                title="Customer registration"
-                description="Customer signup is marked Coming Soon in the product brief."
-              />
-            ),
-          },
+          { path: PATHS.registerCustomer, element: <RegisterCustomerPage /> },
         ],
       },
-      { path: PATHS.referrals, element: <Navigate to={PATHS.home} replace /> },
       {
         element: <DashboardLayout />,
         children: [

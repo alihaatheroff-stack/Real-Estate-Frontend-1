@@ -228,7 +228,7 @@ function GuestReferralsContent() {
         <LearnMoreSection className="mb-10" />
       </ScrollReveal>
 
-      <SectionCtas exploreTo={PATHS.results} label="Explore Referrals" />
+      <SectionCtas exploreTo={PATHS.referrals} label="Explore Referrals" />
     </>
   )
 }

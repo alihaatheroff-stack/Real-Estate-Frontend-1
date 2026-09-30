@@ -1,10 +1,12 @@
 import type { FilterTreeNode } from '@/features/search/data/landingFilterOptions'
 import {
+  AR_MEASUREMENT_TOOLS_OPTIONS,
   CHARGE_TREE,
   CLIENT_EXPERIENCE_TREE,
   CLIENT_MOTIVE_OPTIONS,
   CREDIT_CHECK_TREE,
   DTI_OPTIONS,
+  EDUCATION_ARCHIVE_OPTIONS,
   EXECUTIVE_CLIENT_EXPERIENCE_TREE,
   EXECUTIVE_FORM_OF_PAYMENT_TREE,
   EXECUTIVE_REPRESENTATION_TOP_TREE,
@@ -20,12 +22,16 @@ import {
   LOAN_RATE_TYPE_OPTIONS,
   LOAN_TYPES_OPTIONS,
   LTV_OPTIONS,
+  MILE_RADIUS_OPTIONS,
   MORTGAGE_FIELD_TREE,
   MORTGAGE_GOV_AGENCIES_OPTIONS,
   MORTGAGE_PROPERTY_CONDITION_OPTIONS,
   MORTGAGE_SALE_TYPE_TREE,
   MORTGAGE_TITLE_OPTIONS,
   MORTGAGE_VACANCY_OPTIONS,
+  PAYMENT_METHODS_TREE,
+  PAYMENT_PACKET_OPTIONS,
+  PAYMENT_TERMS_OPTIONS,
   PERCENTAGE_SHARE_FILTER_OPTIONS,
   PREPAYMENT_PENALTY_OPTIONS,
   PRICE_DEMOGRAPHY_OPTIONS,
@@ -40,6 +46,7 @@ import {
   ROLE_FILTER_OPTIONS,
   SALE_TYPE_TREE,
   TAG_SKILL_TREE,
+  TIER_SELECTION_OPTIONS,
   TIME_DURATION_OPTIONS,
   TITLE_OPTIONS,
   TRADES_CLIENT_EXPERIENCE_TREE,
@@ -50,6 +57,7 @@ import {
   WILLING_TO_TRAIN_TRADES_OPTIONS,
   YOUR_EXPERIENCE_OPTIONS,
 } from '@/features/search/data/landingFilterOptions'
+import { ENGLISH_LEVEL_OPTIONS } from '@/features/search/data/categories'
 
 const EXPERIENCE_LEVEL_OPTIONS = [
   '1 — Low experience',
@@ -213,12 +221,38 @@ function optionAnswer(categoryKey: string, categoryLabel: string, option: string
       return `We ask “${name}” so a trades quote stays inside this price-per-square-foot band.`
     case 'proof':
       return `We ask “${name}” so a trades referral starts from someone who can show they have the right to hire the work.`
+    case 'english-level':
+      return `We ask “${name}” so both sides know how comfortably the work can be discussed in English.`
+    case 'education-archive':
+      return `We list “${name}” so the archive and playlists match this lesson topic from your search.`
+    case 'ar-tools':
+      return `We ask “${name}” so measuring this part of the job is included when the work needs it.`
+    case 'payment-methods':
+      return `We ask “${name}” so how you accept payment is clear before the job starts.`
+    case 'payment-packet':
+      return `We ask “${name}” so the billing cycle is agreed before work begins.`
+    case 'tier-selection':
+      return `We ask “${name}” so the tools and the price match the membership plan you chose.`
+    case 'payment-terms':
+      return `We ask “${name}” so both sides know when payment is due for this work.`
+    case 'mile-radius':
+      return `We ask “${name}” so search only shows you to people inside this travel distance.`
+    case 'choose-module':
+      return `We ask “${name}” so forums and articles stay inside this part of the platform, instead of mixing every module together.`
     default:
       return `We ask “${name}” under ${categoryLabel} so matching, verification, and search use the same detail on both sides of the referral.`
   }
 }
 
 const CATEGORIES: CategorySource[] = [
+  {
+    key: 'choose-module',
+    label: 'Choose Module',
+    aliases: ['Choose Module:'],
+    options: ['Home', 'Referrals', 'Crowdfund', 'Network', 'Shop'],
+    answer:
+      'We ask which module you are in so forums and articles stay tied to that part of the platform.',
+  },
   {
     key: 'role',
     label: 'Role',
@@ -608,6 +642,7 @@ const CATEGORIES: CategorySource[] = [
   {
     key: 'english-level',
     label: 'English Level',
+    options: ENGLISH_LEVEL_OPTIONS.map((option) => option.label),
     answer:
       'We ask your English level so both sides know how comfortably the work can be discussed in English.',
   },
@@ -620,48 +655,61 @@ const CATEGORIES: CategorySource[] = [
   {
     key: 'willing-to-train-short',
     label: 'Willing to train',
+    aliases: ['Willing to Train', 'Willing to Train:'],
     answer:
       'We ask whether you will train the person you refer so both sides know if teaching is part of the introduction.',
   },
   {
     key: 'education-archive',
     label: 'EDUCATION + ARCHIVE + video playlists based on search',
+    aliases: [
+      'EDUCATION + ARCHIVE + video playlists',
+      'EDUCATION, + Archive, + video playlists based on search',
+    ],
+    options: EDUCATION_ARCHIVE_OPTIONS,
     answer:
       'We ask which lessons you want so the archive and playlists match the work you searched for.',
   },
   {
     key: 'ar-tools',
     label: 'AR MEASUREMENT TOOLS',
+    aliases: ['AR Measurement Tools', 'AR Measurement Tools:'],
+    options: AR_MEASUREMENT_TOOLS_OPTIONS,
     answer:
       'We ask which measuring tools you use so a job can include doors, windows, or land area when that is needed.',
   },
   {
     key: 'payment-methods',
     label: 'Payment Methods',
+    trees: [PAYMENT_METHODS_TREE],
     answer:
       'We ask how you accept payment so cash and credit are clear before the job starts.',
   },
   {
     key: 'payment-packet',
     label: 'Payment Packet',
+    options: PAYMENT_PACKET_OPTIONS,
     answer:
       'We ask how often you are paid so the billing cycle is agreed before work begins.',
   },
   {
     key: 'tier-selection',
     label: 'Tier Selection',
+    options: TIER_SELECTION_OPTIONS,
     answer:
       'We ask which membership tier you want so the tools and the price match the plan you chose.',
   },
   {
     key: 'payment-terms',
     label: 'Payment Terms',
+    options: PAYMENT_TERMS_OPTIONS,
     answer:
       'We ask when payment is due so both sides know if it is before the work, after, or on another schedule.',
   },
   {
     key: 'mile-radius',
     label: 'Mile Radius',
+    options: MILE_RADIUS_OPTIONS,
     answer:
       'We ask how far you will travel so search only shows you to people inside that distance.',
   },
@@ -975,20 +1023,53 @@ export function glossaryForCategory(label: string): GlossarySnippet {
   return { id: found.id, question, answer: found.answer }
 }
 
+function rememberOption(
+  categoryLabel: string,
+  categoryKey: string,
+  option: string,
+  question: string,
+  answer: string,
+): GlossarySnippet {
+  const name = cleanLabel(option)
+  const id = `q-${slugify(categoryKey || 'field')}-${slugify(normKey(name))}`
+  const already = GLOSSARY.entries.find((entry) => entry.id === id)
+  if (already) return { id: already.id, question: already.question, answer: already.answer }
+  const snippet: GlossarySnippet = { id, question, answer }
+  GLOSSARY.optionByKey.set(`${categoryKey}::${normKey(name)}`, snippet)
+  GLOSSARY.entries.push({
+    ...snippet,
+    term: name,
+    letter: indexLetter(name),
+  })
+  GLOSSARY.entries.sort(
+    (a, b) =>
+      a.term.localeCompare(b.term, undefined, { sensitivity: 'base', numeric: true }) ||
+      a.question.localeCompare(b.question, undefined, { sensitivity: 'base' }),
+  )
+  return snippet
+}
+
 export function glossaryForOption(categoryLabel: string, option: string): GlossarySnippet {
   const categoryKey = GLOSSARY.aliasToKey.get(normKey(categoryLabel))
-  const category = categoryKey ? GLOSSARY.categoryByKey.get(categoryKey) : undefined
   const question = `Why is “${cleanLabel(option)}” an option under ${cleanLabel(categoryLabel) || 'this'}?`
   if (!categoryKey) {
-    return { id: '', question, answer: optionAnswer('', cleanLabel(categoryLabel), option) }
+    return rememberOption(
+      categoryLabel,
+      `field-${normKey(categoryLabel) || 'option'}`,
+      option,
+      question,
+      optionAnswer('', cleanLabel(categoryLabel), option),
+    )
   }
   const found = GLOSSARY.optionByKey.get(`${categoryKey}::${normKey(option)}`)
   if (!found) {
-    return {
-      id: category?.id ?? '',
+    return rememberOption(
+      categoryLabel,
+      categoryKey,
+      option,
       question,
-      answer: optionAnswer(categoryKey, cleanLabel(categoryLabel), option),
-    }
+      optionAnswer(categoryKey, cleanLabel(categoryLabel), option),
+    )
   }
   return { id: found.id, question, answer: found.answer }
 }

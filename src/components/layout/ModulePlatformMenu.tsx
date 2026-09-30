@@ -43,6 +43,11 @@ type ModulePlatformMenuProps = {
   /** Guest / non-registered: keep the icon, block the feature */
   locked?: boolean
   footer?: ReactNode
+  /**
+   * When provided and returns true, the platform row action is handled
+   * (e.g. open a composer) instead of drilling into detail items.
+   */
+  onPlatformOpen?: (platform: ModulePlatformRow) => boolean
 }
 
 function PlatformIcon() {
@@ -283,6 +288,7 @@ function UnlockedPlatformMenu({
   footerHref,
   demo = false,
   footer,
+  onPlatformOpen,
 }: Omit<ModulePlatformMenuProps, 'locked'>) {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
@@ -301,6 +307,14 @@ function UnlockedPlatformMenu({
   function closeMenu() {
     setOpen(false)
     setActivePlatformId(null)
+  }
+
+  function handlePlatformOpen(platform: ModulePlatformRow) {
+    if (onPlatformOpen?.(platform)) {
+      closeMenu()
+      return
+    }
+    setActivePlatformId(platform.id)
   }
 
   function cyclePlatform(fromIndex: number, delta: number) {
@@ -424,7 +438,7 @@ function UnlockedPlatformMenu({
                     key={platform.id}
                     platform={platform}
                     circledMeta={circledListRows}
-                    onOpen={() => setActivePlatformId(platform.id)}
+                    onOpen={() => handlePlatformOpen(platform)}
                     onPrev={() => cyclePlatform(index, -1)}
                     onNext={() => cyclePlatform(index, 1)}
                   />

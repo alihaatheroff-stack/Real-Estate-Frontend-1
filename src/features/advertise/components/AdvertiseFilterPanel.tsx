@@ -1,4 +1,5 @@
 import { useState, type CSSProperties } from 'react'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { Input } from '@/components/ui/Input'
 import { RangeSlider } from '@/components/ui/RangeSlider'
 import { Select } from '@/components/ui/Select'
@@ -659,7 +660,10 @@ export function AdvertiseFilterPanel({
           onChange={handleLandingChange}
         />
         <div className="mt-1">
-          <h3 className="mb-1.5 text-sm font-semibold text-ink">Languages Spoken:</h3>
+          <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+            Languages Spoken:
+            <FieldQaMark field="Languages Spoken:" />
+          </h3>
           <HeroFilterSelect
             compact
             inlineMenu

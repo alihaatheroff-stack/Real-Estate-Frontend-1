@@ -1,4 +1,8 @@
 import type { ReactNode } from 'react'
+import {
+  ExperienceLevelScale,
+  parseExperienceLevel,
+} from '@/components/ui/ExperienceLevelScale'
 import { RangeSlider } from '@/components/ui/RangeSlider'
 import { LandingInfoMarksContext } from '@/features/glossary/infoMarksContext'
 import { HeroFilterSelect } from '@/features/search/components/HeroFilterSelect'
@@ -155,7 +159,7 @@ type LandingFilterFieldsProps = {
   hideSearchBy?: boolean
   /** Advertisement renders A–Z PSP at the top of its own panel. */
   hidePsp?: boolean
-  /** Landing hero: exclamation marks that explain why each question is asked. */
+  /** Exclamation marks that explain why each question / option is asked. Default on. */
   showInfoMarks?: boolean
   /** Register: highlight A–Z PSP when the category is required and empty. */
   pspInvalid?: boolean
@@ -169,6 +173,8 @@ type LandingFilterFieldsProps = {
     experience: ReactNode
     payments: ReactNode
   }) => ReactNode
+  /** Register: use the 1–10 scale bar instead of the Experience Level dropdown. */
+  experienceLevelAsScale?: boolean
 }
 
 /**
@@ -196,9 +202,10 @@ export function LandingFilterFields({
   stopBeforeLanguage = false,
   hideSearchBy = false,
   hidePsp = false,
-  showInfoMarks = false,
+  showInfoMarks = true,
   pspInvalid = false,
   groupSections,
+  experienceLevelAsScale = false,
 }: LandingFilterFieldsProps) {
   const profile = getPspFilterProfile(value.psp)
   const isExecutive = profile === 'executive'
@@ -235,6 +242,38 @@ export function LandingFilterFields({
     : 'Tag; skill: (optional)'
 
   const radiusMiles = Number(value.radius || SERVICE_DISTANCE_DEFAULT)
+
+  function renderExperienceLevelField(
+    levelValue: string[],
+    onLevelChange: (next: string[]) => void,
+    fieldName = 'experienceLevel',
+  ) {
+    if (experienceLevelAsScale) {
+      return (
+        <ExperienceLevelScale
+          label="Experience Level:"
+          name={fieldName}
+          value={parseExperienceLevel(levelValue)}
+          onChange={(next) =>
+            onLevelChange(next == null ? [] : [String(next)])
+          }
+        />
+      )
+    }
+    return (
+      <HeroFilterSelect
+        compact
+        singleSelect
+        selectedPrefix={selectedPrefix}
+        highlightSelected={highlightSelected}
+        label="Experience Level:"
+        placeholder="Ex ( 1= Low, 10=High)"
+        options={[...EXPERIENCE_LEVEL_OPTIONS]}
+        value={levelValue}
+        onChange={onLevelChange}
+      />
+    )
+  }
 
   const locationFields = hideLocation ? null : (
     <>
@@ -600,17 +639,11 @@ export function LandingFilterFields({
       />
 
       {showExperienceLevel ? (
-        <HeroFilterSelect
-          compact
-          singleSelect
-          selectedPrefix={selectedPrefix}
-          highlightSelected={highlightSelected}
-          label="Experience Level:"
-          placeholder="Ex ( 1= Low, 10=High)"
-          options={[...EXPERIENCE_LEVEL_OPTIONS]}
-          value={experienceLevel}
-          onChange={(next) => onExperienceLevelChange?.(next)}
-        />
+        renderExperienceLevelField(
+          experienceLevel,
+          (next) => onExperienceLevelChange?.(next),
+          'forumExperienceLevel',
+        )
       ) : null}
     </>
   ) : null
@@ -696,17 +729,11 @@ export function LandingFilterFields({
       {/* 10. Experience Level + Your Experience */}
       {hideRecipientExperience ? null : (
         <>
-          <HeroFilterSelect
-            compact
-            singleSelect
-            selectedPrefix={selectedPrefix}
-            highlightSelected={highlightSelected}
-            label="Experience Level:"
-            placeholder="Ex ( 1= Low, 10=High)"
-            options={[...EXPERIENCE_LEVEL_OPTIONS]}
-            value={value.experienceLevel}
-            onChange={(next) => onChange('experienceLevel', next)}
-          />
+          {renderExperienceLevelField(
+            value.experienceLevel,
+            (next) => onChange('experienceLevel', next),
+            'profileExperienceLevel',
+          )}
           <HeroFilterSelect
             compact
             selectedPrefix={selectedPrefix}
@@ -959,17 +986,11 @@ export function LandingFilterFields({
 
       {hideRecipientExperience ? null : (
         <>
-          <HeroFilterSelect
-            compact
-            singleSelect
-            selectedPrefix={selectedPrefix}
-            highlightSelected={highlightSelected}
-            label="Experience Level:"
-            placeholder="Ex ( 1= Low, 10=High)"
-            options={[...EXPERIENCE_LEVEL_OPTIONS]}
-            value={value.experienceLevel}
-            onChange={(next) => onChange('experienceLevel', next)}
-          />
+          {renderExperienceLevelField(
+            value.experienceLevel,
+            (next) => onChange('experienceLevel', next),
+            'mortgageExperienceLevel',
+          )}
           <HeroFilterSelect
             compact
             selectedPrefix={selectedPrefix}
@@ -1080,17 +1101,11 @@ export function LandingFilterFields({
         />
 
         {showExperienceLevel ? (
-          <HeroFilterSelect
-            compact
-            singleSelect
-            selectedPrefix={selectedPrefix}
-            highlightSelected={highlightSelected}
-            label="Experience Level:"
-            placeholder="Ex ( 1= Low, 10=High)"
-            options={[...EXPERIENCE_LEVEL_OPTIONS]}
-            value={experienceLevel}
-          onChange={(next) => onExperienceLevelChange?.(next)}
-        />
+          renderExperienceLevelField(
+            experienceLevel,
+            (next) => onExperienceLevelChange?.(next),
+            'forumExperienceLevelAlt',
+          )
         ) : null}
       </>
     ) : null
@@ -1149,17 +1164,11 @@ export function LandingFilterFields({
       <>
         {hideRecipientExperience ? null : (
           <>
-            <HeroFilterSelect
-              compact
-              singleSelect
-              selectedPrefix={selectedPrefix}
-              highlightSelected={highlightSelected}
-              label="Experience Level:"
-              placeholder="Ex ( 1= Low, 10=High)"
-              options={[...EXPERIENCE_LEVEL_OPTIONS]}
-              value={value.experienceLevel}
-              onChange={(next) => onChange('experienceLevel', next)}
-            />
+            {renderExperienceLevelField(
+              value.experienceLevel,
+              (next) => onChange('experienceLevel', next),
+              'genericExperienceLevel',
+            )}
             <HeroFilterSelect
               compact
               selectedPrefix={selectedPrefix}

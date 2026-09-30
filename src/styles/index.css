@@ -384,25 +384,98 @@
   }
 }
 
+/* Freeio / Elementor-style scroll entrances (slide-up, slide-left/right, scale) */
 .scroll-reveal {
   opacity: 0;
-  transform: translate3d(0, var(--reveal-y, 28px), 0);
+  transform: translate3d(0, var(--reveal-y, 40px), 0);
   transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
-    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
 .scroll-reveal[data-reveal='fade'] {
   transform: none;
 }
 
+.scroll-reveal[data-reveal='left'] {
+  transform: translate3d(calc(var(--reveal-x, 36px) * -1), 0, 0);
+}
+
+.scroll-reveal[data-reveal='right'] {
+  transform: translate3d(var(--reveal-x, 36px), 0, 0);
+}
+
+.scroll-reveal[data-reveal='scale'] {
+  transform: scale(0.92);
+}
+
 .scroll-reveal.is-visible {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .scroll-reveal[data-reveal='fade'].is-visible {
   transform: none;
+}
+
+@keyframes hire-hero-kenburns {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.08);
+  }
+}
+
+.hire-hero-photo {
+  animation: hire-hero-kenburns 14s ease-out forwards;
+}
+
+.hire-benefit-card {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hire-benefit-card:hover {
+  transform: translate3d(0, -8px, 0);
+  box-shadow: 0 24px 56px rgba(11, 31, 58, 0.14);
+}
+
+.hire-benefit-card__media {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hire-benefit-card:hover .hire-benefit-card__media {
+  transform: scale(1.08);
+}
+
+.hire-award-tile {
+  transition:
+    background-color 0.35s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hire-award-tile:hover {
+  transform: translate3d(0, -4px, 0);
+}
+
+.hire-panel-card {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hire-panel-card:hover {
+  transform: translate3d(0, -6px, 0);
+}
+
+.hire-panel-card__media {
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hire-panel-card:hover .hire-panel-card__media {
+  transform: scale(1.06);
 }
 
 .animate-drawer-in {
@@ -468,6 +541,7 @@
   .hero-slide-image.is-active,
   .animate-hero-panel-in,
   .animate-drawer-in,
+  .hire-hero-photo,
   .service-map-marker__body,
   .service-map-marker__shadow {
     animation: none !important;
@@ -476,6 +550,20 @@
   .scroll-reveal,
   .scroll-reveal.is-visible {
     opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hire-benefit-card,
+  .hire-benefit-card:hover,
+  .hire-benefit-card__media,
+  .hire-benefit-card:hover .hire-benefit-card__media,
+  .hire-award-tile,
+  .hire-award-tile:hover,
+  .hire-panel-card,
+  .hire-panel-card:hover,
+  .hire-panel-card__media,
+  .hire-panel-card:hover .hire-panel-card__media {
     transform: none;
     transition: none;
   }

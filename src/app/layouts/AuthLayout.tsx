@@ -9,19 +9,25 @@ export function AuthLayout() {
 
   return (
     <div className="flex min-h-screen flex-col bg-mist">
-      <header className="border-b border-line bg-paper">
+      <header className={cn(isRegister && 'border-b border-line bg-paper')}>
         <div
           className={cn(
-            'flex h-16 items-center px-4 sm:h-[4.5rem] sm:px-6 lg:px-8',
-            !isRegister && 'mx-auto max-w-2xl',
+            'flex items-center',
+            isRegister
+              ? 'h-16 px-4 sm:h-[4.5rem] sm:px-6 lg:px-8'
+              : 'h-20 justify-center px-3 pt-4 sm:h-24 sm:px-4 sm:pt-6 lg:px-5',
           )}
         >
           <SiteLogo
             to={PATHS.home}
             showTagline={isRegister}
-            className="gap-3"
-            markClassName="h-10 w-10 sm:h-11 sm:w-11"
-            titleClassName="text-xl sm:text-2xl"
+            className={isRegister ? 'gap-3' : 'gap-3.5'}
+            markClassName={
+              isRegister ? 'h-10 w-10 sm:h-11 sm:w-11' : 'h-14 w-14 sm:h-16 sm:w-16'
+            }
+            titleClassName={
+              isRegister ? 'text-xl sm:text-2xl' : 'text-4xl sm:text-5xl'
+            }
           />
         </div>
       </header>
@@ -33,7 +39,7 @@ export function AuthLayout() {
         </main>
       ) : (
         <main className="flex flex-1 items-start justify-center px-4 py-8 sm:items-center sm:px-6 sm:py-10">
-          <div className="w-full max-w-2xl rounded-2xl border border-line bg-paper p-6 shadow-soft sm:p-8">
+          <div className="w-full max-w-md rounded-2xl border border-line bg-paper p-6 shadow-soft sm:p-8">
             <Outlet />
           </div>
         </main>

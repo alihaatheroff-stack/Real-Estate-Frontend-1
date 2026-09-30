@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
 import { useRegisterPspForm } from '@/features/auth/hooks/useRegisterPspForm'
 import {
@@ -9,20 +10,27 @@ import {
   FormSection,
   InlineBlankField,
   MembershipCardInformation,
+  PaymentsAndTermsBlock,
   ServiceProfileBlock,
   UnderlineField,
 } from './register'
 
 /** Thin composer — form state/validation live in `useRegisterPspForm`. */
 export function RegisterPspForm() {
-  const form = useRegisterPspForm()
+  const form = useRegisterPspForm('psp')
 
   return (
     <div className="space-y-6">
       <div className="space-y-4 border-b border-line pb-5">
         <div className="space-y-2">
+          <Link
+            to={PATHS.register}
+            className="text-sm font-medium text-brand hover:underline"
+          >
+            ← Change registration type
+          </Link>
           <h1 className="w-full text-balance font-display text-2xl font-bold leading-tight tracking-tight text-ink sm:text-3xl lg:text-4xl">
-            Register
+            Register as a Property Service Provider
           </h1>
         </div>
         <div className="grid w-full grid-cols-2 gap-6 sm:gap-10 lg:gap-16">
@@ -147,16 +155,21 @@ export function RegisterPspForm() {
           setProfileFilterList={form.setProfileFilterList}
           applyLandingFilterChange={form.applyLandingFilterChange}
           distance={form.distance}
-          formOfPaymentMethods={form.formOfPaymentMethods}
-          businessName={form.data.businessName}
-          businessAddress={form.resolvedBusinessAddress}
-          onAddFormOfPaymentMethod={form.addFormOfPaymentMethod}
-          onUpdateFormOfPaymentMethod={form.updateFormOfPaymentMethod}
-          onRemoveFormOfPaymentMethod={form.removeFormOfPaymentMethod}
           pspCategoryInvalid={Boolean(form.fieldErrors.pspCategory)}
         />
 
-        <FormSection title="Membership" step={6}>
+        <PaymentsAndTermsBlock
+          step={6}
+          profileFilters={form.profileFilters}
+          setProfileFilterList={form.setProfileFilterList}
+          formOfPaymentMethods={form.formOfPaymentMethods}
+          payerName={form.data.businessName || form.data.identification.firstName || 'Provider'}
+          payerAddress={form.resolvedBusinessAddress}
+          onSyncFormOfPaymentMethods={form.syncFormOfPaymentMethods}
+          onUpdateFormOfPaymentMethod={form.updateFormOfPaymentMethod}
+        />
+
+        <FormSection title="Membership" step={7}>
           <MembershipCardInformation
             numberOfEmployees={form.data.numberOfEmployees}
             employees={form.employees}
@@ -186,7 +199,7 @@ export function RegisterPspForm() {
         </FormSection>
 
         <AccountCredentialsBlock
-          step={7}
+          step={8}
           email={form.data.email}
           password={form.data.password}
           confirmPassword={form.data.confirmPassword}

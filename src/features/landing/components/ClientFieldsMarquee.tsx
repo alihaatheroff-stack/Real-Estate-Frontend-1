@@ -14,7 +14,7 @@ import { cn } from '@/shared/lib/cn'
 export function ClientFieldsMarquee() {
   return (
     <Section id="client-fields" containerClassName="max-w-none">
-      <ScrollReveal>
+      <ScrollReveal y={40}>
         <SectionHeading
           eyebrow="Hire"
           title="Demography"
@@ -24,7 +24,7 @@ export function ClientFieldsMarquee() {
 
       <div className="space-y-12 sm:space-y-14">
         {DEMOGRAPHY_ROWS.map((row, index) => (
-          <ScrollReveal key={row.id} delay={index * 80}>
+          <ScrollReveal key={row.id} delay={index * 150} y={48}>
             <DemographyMarquee row={row} />
           </ScrollReveal>
         ))}

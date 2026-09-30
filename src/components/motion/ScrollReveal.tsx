@@ -7,10 +7,13 @@ type ScrollRevealProps = {
   id?: string
   /** Extra delay in milliseconds, for staggered siblings. */
   delay?: number
-  /** Upward travel distance in pixels. */
+  /** Upward travel distance in pixels (also used as base for left/right). */
   y?: number
-  /** Fade only — use when a child already animates its own transform. */
-  variant?: 'up' | 'fade'
+  /**
+   * Reveal motion — Freeio/Elementor-style entrances:
+   * up (slide-up), fade, left, right, scale.
+   */
+  variant?: 'up' | 'fade' | 'left' | 'right' | 'scale'
 }
 
 export function ScrollReveal({
@@ -18,7 +21,7 @@ export function ScrollReveal({
   className,
   id,
   delay = 0,
-  y = 28,
+  y = 40,
   variant = 'up',
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null)
@@ -40,16 +43,21 @@ export function ScrollReveal({
         setVisible(true)
         observer.disconnect()
       },
-      { threshold: 0, rootMargin: '0px 0px -48px 0px' },
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' },
     )
 
     observer.observe(node)
     return () => observer.disconnect()
   }, [])
 
-  const style: CSSProperties & { '--reveal-delay': string; '--reveal-y': string } = {
+  const style: CSSProperties & {
+    '--reveal-delay': string
+    '--reveal-y': string
+    '--reveal-x': string
+  } = {
     '--reveal-delay': `${delay}ms`,
     '--reveal-y': `${y}px`,
+    '--reveal-x': `${Math.round(y * 0.9)}px`,
   }
 
   return (

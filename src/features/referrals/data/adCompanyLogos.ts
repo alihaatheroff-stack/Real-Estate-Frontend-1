@@ -64,19 +64,19 @@ export const AD_COMPANY_LOGOS: AdCompanyLogo[] = [
   },
   {
     id: 10,
-    src: '/images/logos/10.svg',
+    src: '/images/logos/10.svg?v=2',
     companyName: 'Blue Ridge Partners',
     companyTagline: 'Lending & Closing',
   },
   {
     id: 11,
-    src: '/images/logos/11.svg',
+    src: '/images/logos/11.svg?v=2',
     companyName: 'Cedar Lane Group',
     companyTagline: 'Property Solutions',
   },
   {
     id: 12,
-    src: '/images/logos/12.svg',
+    src: '/images/logos/12.svg?v=2',
     companyName: 'Meridian Estates',
     companyTagline: 'Portfolio Services',
   },

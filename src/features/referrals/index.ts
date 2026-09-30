@@ -1,3 +1,4 @@
+export { ReferralsExchangeLanding } from '@/features/referrals/components/ReferralsExchangeLanding'
 export { ServiceCard } from '@/features/referrals/components/ServiceCard'
 export { ProviderCard } from '@/features/referrals/components/ProviderCard'
 export { CategoryGrid } from '@/features/referrals/components/CategoryGrid'

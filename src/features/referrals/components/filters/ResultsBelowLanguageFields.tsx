@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Plus } from 'lucide-react'
+import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { ReferralShareInput } from '@/components/ui/ReferralShareInput'
 import {
   HeroFilterSelect,
@@ -28,13 +29,19 @@ type ResultsBelowLanguageFieldsProps = {
 function FilterSection({
   title,
   children,
+  qaField,
 }: {
   title: string
   children: ReactNode
+  /** Glossary field label when title text differs. */
+  qaField?: string
 }) {
   return (
     <section className="px-6 py-2">
-      <h3 className="mb-1.5 text-sm font-semibold text-ink">{title}</h3>
+      <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+        {title}
+        <FieldQaMark field={qaField ?? title} />
+      </h3>
       {children}
     </section>
   )
@@ -147,7 +154,10 @@ export function ResultsBelowLanguageFields({
         />
       </FilterSection>
 
-      <FilterSection title="EDUCATION, + Archive, + video playlists based on search:">
+      <FilterSection
+        title="EDUCATION, + Archive, + video playlists based on search:"
+        qaField="EDUCATION + ARCHIVE + video playlists based on search"
+      >
         <HeroFilterSelect
           compact
           inlineMenu
@@ -160,7 +170,7 @@ export function ResultsBelowLanguageFields({
         />
       </FilterSection>
 
-      <FilterSection title="AR Measurement Tools:">
+      <FilterSection title="AR Measurement Tools:" qaField="AR MEASUREMENT TOOLS">
         <HeroFilterSelect
           compact
           inlineMenu
@@ -175,7 +185,10 @@ export function ResultsBelowLanguageFields({
 
       <section className="px-6 py-2">
         <p className="mb-1.5 text-[13px] text-blue-600 underline">Membership</p>
-        <h3 className="mb-1.5 text-sm font-semibold text-ink">Payment Methods:</h3>
+        <h3 className="mb-1.5 inline-flex items-center gap-1 text-sm font-semibold text-ink">
+          Payment Methods:
+          <FieldQaMark field="Payment Methods:" />
+        </h3>
         <HeroFilterSelect
           compact
           inlineMenu

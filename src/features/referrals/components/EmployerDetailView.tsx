@@ -118,7 +118,7 @@ export function EmployerDetailView({ employer }: { employer: Employer }) {
             </Link>
             <ChevronRight className="h-3.5 w-3.5" />
             <Link to={PATHS.employerResults} className="hover:text-freeio-ink">
-              Employers
+              Office Results
             </Link>
             <ChevronRight className="h-3.5 w-3.5" />
             <span className="text-freeio-ink">{employer.name}</span>

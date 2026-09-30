@@ -105,7 +105,7 @@ export function NetworkHeader({
           {isAuthenticated ? (
             <ProfileMenu homeHref={PATHS.networkFeed} onSignOut={signOut} />
           ) : (
-            <GuestAccountMenu signInHref={PATHS.signIn} registerHref={PATHS.registerPsp} />
+            <GuestAccountMenu signInHref={PATHS.signIn} registerHref={PATHS.register} />
           )}
         </div>
       </div>

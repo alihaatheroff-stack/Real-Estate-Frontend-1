@@ -63,7 +63,7 @@ export function DashboardLayout() {
         onSignOut={signOut}
         homeHref={PATHS.home}
         signInHref={PATHS.signIn}
-        registerHref={PATHS.registerPsp}
+        registerHref={PATHS.register}
         marketingNav={MARKETING_NAV}
         referralsMenu={REFERRALS_MENU}
         crowdfundingMenu={CROWDFUNDING_MENU}
