@@ -88,6 +88,7 @@ export function UnderlineField({
   onChange,
   placeholder,
   inputMode,
+  readOnly = false,
 }: {
   label: string
   name: string
@@ -96,19 +97,24 @@ export function UnderlineField({
   onChange: (value: string) => void
   placeholder?: string
   inputMode?: 'numeric' | 'text'
+  /** When true, value is display-only (e.g. registration stamp). */
+  readOnly?: boolean
 }) {
+  const labelMark = readOnly ? null : <FieldQaMark field={label} />
+
   if (type === 'date') {
     return (
       <label className="flex w-full flex-col gap-1.5">
         <span className="inline-flex items-center gap-1 text-base font-bold text-ink sm:text-lg">
           {label}
-          <FieldQaMark field={label} />
+          {labelMark}
         </span>
         <DateInput
           name={name}
           value={value}
           onChange={onChange}
           variant="underline"
+          disabled={readOnly}
         />
       </label>
     )
@@ -119,7 +125,7 @@ export function UnderlineField({
       <label className="flex w-full flex-col gap-1.5">
         <span className="inline-flex items-center gap-1 text-base font-bold text-ink sm:text-lg">
           {label}
-          <FieldQaMark field={label} />
+          {labelMark}
         </span>
         <TimeInput
           name={name}
@@ -127,7 +133,8 @@ export function UnderlineField({
           onChange={onChange}
           variant="underline"
           showSeconds
-          live
+          live={!readOnly}
+          disabled={readOnly}
         />
       </label>
     )
@@ -137,7 +144,7 @@ export function UnderlineField({
     <label className="flex w-full flex-col gap-1.5">
       <span className="inline-flex items-center gap-1 text-base font-bold text-ink sm:text-lg">
         {label}
-        <FieldQaMark field={label} />
+        {labelMark}
       </span>
       <input
         type={type}
@@ -146,8 +153,15 @@ export function UnderlineField({
         placeholder={placeholder}
         inputMode={inputMode}
         maxLength={type === 'text' ? 10 : undefined}
+        readOnly={readOnly}
+        disabled={readOnly}
         onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-full border-0 border-b-2 border-ink/30 bg-transparent px-2 text-base text-ink outline-none transition placeholder:text-muted/50 focus:border-brand sm:h-14 sm:text-lg"
+        className={cn(
+          'h-12 w-full border-0 border-b-2 bg-transparent px-2 text-base outline-none transition sm:h-14 sm:text-lg',
+          readOnly
+            ? 'cursor-default border-ink/20 text-muted'
+            : 'border-ink/30 text-ink placeholder:text-muted/50 focus:border-brand',
+        )}
       />
     </label>
   )

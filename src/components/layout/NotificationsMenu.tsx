@@ -9,9 +9,11 @@ import {
 export function NotificationsMenu({
   className,
   locked = false,
+  tourId,
 }: {
   className?: string
   locked?: boolean
+  tourId?: string
 }) {
   const platforms = buildNotificationPlatforms(false)
   const unread = locked ? 0 : platformUnreadTotal(platforms)
@@ -30,6 +32,7 @@ export function NotificationsMenu({
       badgeCount={unread}
       circledListRows
       locked={locked}
+      tourId={tourId}
     />
   )
 }

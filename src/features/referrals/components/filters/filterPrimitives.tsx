@@ -214,7 +214,7 @@ export function FilterSearchButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex w-full items-center justify-center gap-2 font-semibold text-white transition hover:brightness-95 bg-freeio',
+        'inline-flex w-full items-center justify-center gap-2 font-semibold text-white transition hover:bg-brand-dark bg-brand',
         size === 'lg'
           ? 'mt-4 h-14 rounded-xl text-[15px]'
           : 'mt-8 h-12 rounded-lg text-sm',

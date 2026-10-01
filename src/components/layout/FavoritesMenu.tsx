@@ -18,10 +18,12 @@ export function FavoritesMenu({
   className,
   triggerClassName,
   locked = false,
+  tourId,
 }: {
   className?: string
   triggerClassName?: string
   locked?: boolean
+  tourId?: string
 }) {
   const { items, folderNameById } = useFavorites()
 
@@ -89,6 +91,7 @@ export function FavoritesMenu({
       platforms={platforms}
       badgeCount={savedCount}
       locked={locked}
+      tourId={tourId}
     />
   )
 }

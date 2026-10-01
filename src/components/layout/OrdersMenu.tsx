@@ -8,9 +8,11 @@ import {
 export function OrdersMenu({
   className,
   locked = false,
+  tourId,
 }: {
   className?: string
   locked?: boolean
+  tourId?: string
 }) {
   const platforms = buildOrdersPlatforms(false)
   const unread = locked ? 0 : platformUnreadTotal(platforms)
@@ -27,6 +29,7 @@ export function OrdersMenu({
       platforms={platforms}
       badgeCount={unread}
       locked={locked}
+      tourId={tourId}
     />
   )
 }

@@ -192,7 +192,7 @@ export function EmployerJobsView({ employer }: EmployerJobsViewProps) {
           </label>
           <button
             type="button"
-            className="mt-5 inline-flex h-14 w-full items-center justify-center rounded-xl text-[15px] font-semibold text-white transition hover:brightness-95 bg-freeio"
+            className="mt-5 inline-flex h-14 w-full items-center justify-center rounded-xl text-[15px] font-semibold text-white transition hover:bg-brand-dark bg-brand"
           >
             Submit Listing
           </button>

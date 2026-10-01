@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { FieldSaveMark } from '@/features/auth/components/FieldSaveContext'
 import { cn } from '@/shared/lib/cn'
 
 const SLOT_COUNT = 4
@@ -58,7 +59,11 @@ export function ReferralShareInput({
           )}
         >
           <span className={compact ? 'truncate' : undefined}>{label}</span>
-          {showQaMark ? <FieldQaMark field={label} /> : null}
+          {showQaMark ? (
+            <FieldQaMark field={label} />
+          ) : (
+            <FieldSaveMark fieldId={name} />
+          )}
         </label>
       )}
 

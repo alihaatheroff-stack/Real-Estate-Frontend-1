@@ -661,6 +661,8 @@ export const EMPLOYERS: Employer[] = [
       name: 'Alumax Realty & Mortgage',
       logoInitials: 'AR',
       logoColor: '#0F4C81',
+      // Brokerage mark — avoid auto mortgage → Diverse (14.svg) clash with Westline ad
+      logoUrl: '/images/logos/3.svg',
       coverImage: '/images/stock/photo-1568605114967-8130f3a36994.jpg',
       tagline: 'Fresno brokerage, mortgage & referral partners',
       category: 'brokerage',

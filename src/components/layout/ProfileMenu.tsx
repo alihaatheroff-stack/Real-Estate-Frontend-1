@@ -19,6 +19,7 @@ type MenuItem = {
 
 const PROFILE_MENU_SECTIONS: MenuItem[][] = [
   [
+    { id: 'member-home', label: 'Home', href: PATHS.memberHome },
     { id: 'profile', label: 'Profile', href: providerPath('p1') },
     { id: 'post-brief', label: 'Post a project brief', href: PATHS.postOffer },
     { id: 'briefs', label: 'Your briefs', href: PATHS.dashboard },
@@ -26,7 +27,6 @@ const PROFILE_MENU_SECTIONS: MenuItem[][] = [
   ],
   [
     { id: 'seller', label: 'Become a Seller', href: PATHS.registerPsp },
-    { id: 'settings', label: 'Account settings', href: PATHS.dashboard },
     { id: 'billing', label: 'Billing and payments', href: PATHS.dashboard },
   ],
   [
@@ -133,11 +133,13 @@ export function ProfileMenu({
   homeHref,
   onAfterLogout,
   onSignOut,
+  tourId,
 }: {
   className?: string
   homeHref: string
   onAfterLogout?: () => void
   onSignOut?: () => void
+  tourId?: string
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuId = useId()
@@ -180,6 +182,7 @@ export function ProfileMenu({
     <div ref={rootRef} className={cn('relative', className)}>
       <button
         type="button"
+        data-tour-id={tourId}
         className={cn(
           'relative inline-flex items-center justify-center rounded-full transition',
           menuOpen && 'ring-2 ring-brand/30',
@@ -205,7 +208,7 @@ export function ProfileMenu({
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 top-full z-50 mt-2 w-[min(92vw,16.5rem)] overflow-hidden rounded-xl border border-line bg-white py-1 shadow-soft"
+          className="absolute right-0 top-full z-[80] mt-2 w-[min(92vw,16.5rem)] overflow-hidden rounded-xl border border-line bg-white py-1 shadow-soft"
         >
           {PROFILE_MENU_SECTIONS.map((section, sectionIndex) => (
             <div
@@ -219,6 +222,10 @@ export function ProfileMenu({
           ))}
 
           <div className="border-t border-line">
+            <MenuRow
+              item={{ id: 'settings', label: 'Settings', href: PATHS.dashboardSettings }}
+              onNavigate={closeMenu}
+            />
             <button
               type="button"
               role="menuitem"

@@ -323,7 +323,12 @@ export function MarketplaceFilterDrawer({
   const isSimple = variant === 'simple'
 
   return (
-    <div className={cn('fixed inset-0 z-50', mobileOnly && 'lg:hidden')}>
+    <div
+      className={cn(
+        'fixed inset-x-0 bottom-0 top-[4.75rem] z-[60] sm:top-[5.5rem]',
+        mobileOnly && 'lg:hidden',
+      )}
+    >
       <button
         type="button"
         aria-label="Close filters"

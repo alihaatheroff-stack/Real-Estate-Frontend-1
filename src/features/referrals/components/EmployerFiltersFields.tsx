@@ -162,7 +162,7 @@ export function EmployerFiltersFields({
           <button
             type="button"
             onClick={onSearch}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-freeio text-base font-semibold text-white transition hover:brightness-95"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand text-base font-semibold text-white transition hover:bg-brand-dark"
           >
             <Search className="h-4 w-4" />
             Search

@@ -35,11 +35,7 @@ export function NetworkHeader({
     <header className="relative sticky top-0 z-50 border-b border-black/5 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
       <div className="flex h-[4.75rem] w-full items-center justify-between gap-4 px-3 sm:h-[5.5rem] sm:px-4">
         <div className="flex min-w-0 items-center gap-3 lg:gap-4">
-          <SiteLogo
-            to={PATHS.home}
-            titleClassName="text-2xl sm:text-3xl"
-          />
-
+          <SiteLogo to={PATHS.home} titleClassName="text-2xl sm:text-3xl" />
           <SiteModuleNav
             compact
             className="hidden lg:flex"

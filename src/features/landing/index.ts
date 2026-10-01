@@ -15,6 +15,8 @@ export { HireWelcomeSection } from '@/features/landing/components/HireWelcomeSec
 export { HireScratchOffSection } from '@/features/landing/components/HireScratchOffSection'
 export { ClientFieldsMarquee } from '@/features/landing/components/ClientFieldsMarquee'
 export { LandingFaqSection } from '@/features/landing/components/LandingFaqSection'
+export { LandingAssistantWidget } from '@/features/landing/components/LandingAssistantWidget'
+export { LoggedInHomeHub } from '@/features/landing/components/LoggedInHomeHub'
 export { ReferralMemberHub } from '@/features/landing/components/ReferralMemberHub'
 export { ProfilePortraitStrip } from '@/features/landing/components/ProfilePortraitStrip'
 export { MemberActivitySection } from '@/features/landing/components/MemberActivitySection'

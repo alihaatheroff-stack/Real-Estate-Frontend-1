@@ -8,6 +8,8 @@ type SiteLogoProps = {
   className?: string
   markClassName?: string
   titleClassName?: string
+  /** Fires before navigation (e.g. switch home to marketing landing). */
+  onNavigate?: () => void
 }
 
 export function SiteLogo({
@@ -16,9 +18,14 @@ export function SiteLogo({
   className,
   markClassName,
   titleClassName,
+  onNavigate,
 }: SiteLogoProps) {
   return (
-    <Link to={to} className={cn('flex min-w-0 shrink-0 items-center gap-2.5', className)}>
+    <Link
+      to={to}
+      onClick={onNavigate}
+      className={cn('flex min-w-0 shrink-0 items-center gap-2.5', className)}
+    >
       <img
         src={SITE.logoSrc}
         alt=""

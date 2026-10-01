@@ -12,8 +12,8 @@ const NEW_MEMBERS = NETWORK_MEMBERS.slice(0, 4)
 /** One photograph per dispatch, matched to what the update is about. */
 const STORY_MEDIA: Record<string, { image: string; alt: string }> = {
   'features-0': {
-    image: '/images/hire/gps.jpg',
-    alt: 'Map view used to track a provider on the way',
+    image: '/images/news/van.jpg',
+    alt: 'Service van used to track a provider on the way',
   },
   'features-1': {
     image: '/images/hire/education.jpg',
@@ -167,50 +167,50 @@ export function NewsPage() {
   return (
     <div className="bg-paper text-ink">
       <div className="border-b border-ink">
-        <div className="mx-auto flex w-full max-w-[90rem] flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="mx-auto w-full max-w-[90rem] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-4 sm:gap-6 lg:gap-8">
             <div className="min-w-0">
               <p className="text-[0.7rem] font-bold uppercase tracking-[0.28em] text-accent">
                 The desk
               </p>
-              <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight sm:text-6xl">
+              <h1 className="mt-1 whitespace-nowrap font-display text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
                 News & Updates
               </h1>
+              <div className="mt-3 h-0.5 w-24 bg-accent sm:mt-4" />
             </div>
-            <div className="text-left sm:text-right">
-              <p className="font-display text-2xl font-semibold tabular-nums tracking-tight underline decoration-ink/30 underline-offset-4 sm:text-3xl">
+
+            <div className="flex min-w-0 flex-col items-center gap-2 sm:gap-3">
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-muted">
+                Filter by module
+              </p>
+              <div className="flex max-w-[min(100vw-2rem,42rem)] items-center gap-1 overflow-x-auto rounded-2xl border border-line bg-white px-1.5 py-1.5 shadow-[0_10px_30px_rgba(11,31,58,0.08)] sm:gap-2 sm:px-2 sm:py-2">
+                {NEWS_TABS.map((tab) => {
+                  const active = tab.id === activeId
+                  const label = tab.label.replace(/:$/, '').replace(/^\d+\.\s*/, '')
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveId(tab.id)}
+                      className={cn(
+                        'shrink-0 rounded-full px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-[0.14em] transition sm:px-4 sm:py-2 sm:text-xs',
+                        active
+                          ? 'bg-freeio-navy text-white shadow-[0_6px_16px_rgba(11,31,58,0.25)]'
+                          : 'text-ink hover:bg-accent hover:text-ink',
+                      )}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="min-w-0 justify-self-end text-right">
+              <p className="font-display text-xl font-semibold tabular-nums tracking-tight underline decoration-ink/30 underline-offset-4 sm:text-2xl lg:text-3xl">
                 {clock.time}
               </p>
-              <p className="mt-1 text-sm font-semibold text-muted">{edition}</p>
-            </div>
-          </div>
-
-          <div className="h-0.5 w-24 bg-accent" />
-
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-muted">
-              Filter by module
-            </p>
-            <div className="flex max-w-full flex-wrap items-center justify-center gap-2 rounded-2xl border border-line bg-white px-2 py-2 shadow-[0_10px_30px_rgba(11,31,58,0.08)]">
-              {NEWS_TABS.map((tab) => {
-                const active = tab.id === activeId
-                const label = tab.label.replace(/:$/, '').replace(/^\d+\.\s*/, '')
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveId(tab.id)}
-                    className={cn(
-                      'rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] transition',
-                      active
-                        ? 'bg-freeio-navy text-white shadow-[0_6px_16px_rgba(11,31,58,0.25)]'
-                        : 'text-ink hover:bg-accent hover:text-ink',
-                    )}
-                  >
-                    {label}
-                  </button>
-                )
-              })}
+              <p className="mt-1 text-xs font-semibold text-muted sm:text-sm">{edition}</p>
             </div>
           </div>
         </div>

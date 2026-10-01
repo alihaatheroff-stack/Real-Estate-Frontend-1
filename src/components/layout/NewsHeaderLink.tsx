@@ -7,14 +7,17 @@ export function NewsHeaderLink({
   className,
   iconClassName,
   onNavigate,
+  tourId,
 }: {
   className?: string
   iconClassName?: string
   onNavigate?: () => void
+  tourId?: string
 }) {
   return (
     <NavLink
       to={PATHS.news}
+      data-tour-id={tourId}
       aria-label="News and updates"
       title="News and updates"
       onClick={onNavigate}

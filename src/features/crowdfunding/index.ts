@@ -1,6 +1,7 @@
 export { CrowdfundingTeaser } from '@/features/crowdfunding/components/CrowdfundingTeaser'
 export { RecreationalCrowdfunding } from '@/features/crowdfunding/components/RecreationalCrowdfunding'
 export { LoggedInCrowdfundingSection } from '@/features/crowdfunding/components/LoggedInCrowdfundingSection'
+export { CrowdfundingActivityStrips } from '@/features/crowdfunding/components/CrowdfundingActivityStrips'
 export { LoggedInCrowdfundingDetails } from '@/features/crowdfunding/components/LoggedInCrowdfundingDetails'
 export { BoardInviteSection } from '@/features/crowdfunding/components/BoardInviteSection'
 export { LoggedInCrowdfundingVote } from '@/features/crowdfunding/components/LoggedInCrowdfundingVote'

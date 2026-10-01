@@ -1,21 +1,44 @@
-import { Fragment } from 'react'
-import { Link, NavLink } from 'react-router-dom'
-import { PanelLeftClose } from 'lucide-react'
+import { Fragment, useEffect, useRef } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { PATHS, providerPath } from '@/app/router/paths'
 import { DASHBOARD_NAV } from '@/features/dashboard/data/nav'
 import { cn } from '@/shared/lib/cn'
 
 const PROFILE_AVATAR = '/images/profile/rigoberto-peraza.jpg'
 
+function isNavItemActive(pathname: string, href: string, end: boolean) {
+  if (end) return pathname === href
+  return pathname === href || pathname.startsWith(`${href}/`)
+}
+
 export function DashboardSidebar({
   onNavigate,
   className,
-  onToggleCollapsed,
 }: {
   onNavigate?: () => void
   className?: string
-  onToggleCollapsed?: () => void
 }) {
+  const { pathname } = useLocation()
+  const listRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    const list = listRef.current
+    if (!list) return
+
+    const active = list.querySelector<HTMLElement>('[data-dashboard-nav-active="true"]')
+    if (!active) return
+
+    const listRect = list.getBoundingClientRect()
+    const activeRect = active.getBoundingClientRect()
+    const fullyVisible =
+      activeRect.top >= listRect.top && activeRect.bottom <= listRect.bottom
+
+    if (!fullyVisible) {
+      // Bring deep items (e.g. Settings) into view inside the sidebar scroller.
+      active.scrollIntoView({ block: 'center', inline: 'nearest' })
+    }
+  }, [pathname])
+
   return (
     <nav
       className={cn(
@@ -42,25 +65,18 @@ export function DashboardSidebar({
             </Link>
           </div>
         </div>
-
-        {onToggleCollapsed ? (
-          <button
-            type="button"
-            onClick={onToggleCollapsed}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition hover:bg-mist hover:text-ink"
-            aria-label="Close sidebar"
-            title="Close sidebar"
-          >
-            <PanelLeftClose className="h-5 w-5" strokeWidth={1.75} />
-          </button>
-        ) : null}
       </div>
 
-      <ul className="network-hide-scroll flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-3">
+      <ul
+        ref={listRef}
+        className="network-hide-scroll flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3 py-3"
+      >
         {DASHBOARD_NAV.map((item, index) => {
           const Icon = item.icon
           const prevSection = DASHBOARD_NAV[index - 1]?.section
           const showSection = Boolean(item.section && item.section !== prevSection)
+          const end = item.href === PATHS.dashboard
+          const active = !item.external && isNavItemActive(pathname, item.href, end)
 
           const link = item.external ? (
             <Link
@@ -74,7 +90,7 @@ export function DashboardSidebar({
           ) : (
             <NavLink
               to={item.href}
-              end={item.href === PATHS.dashboard}
+              end={end}
               onClick={onNavigate}
               className={({ isActive }) =>
                 cn(
@@ -97,7 +113,7 @@ export function DashboardSidebar({
                   {item.section}
                 </li>
               ) : null}
-              <li>{link}</li>
+              <li data-dashboard-nav-active={active ? 'true' : undefined}>{link}</li>
             </Fragment>
           )
         })}

@@ -172,6 +172,63 @@
     pointer-events: none !important;
   }
 
+  .leaflet-tooltip.roof-measure-edge-tooltip {
+    padding: 0.15rem 0.4rem;
+    border: none;
+    border-radius: 0.25rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  }
+
+  .leaflet-tooltip.roof-measure-edge-tooltip::before {
+    display: none;
+  }
+
+  .leaflet-tooltip.roof-measure-area-tooltip {
+    padding: 0.3rem 0.5rem;
+    border: none;
+    border-radius: 0.35rem;
+    background: rgba(40, 40, 40, 0.82);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+
+  .leaflet-tooltip.roof-measure-area-tooltip::before {
+    display: none;
+  }
+
+  .roof-measure-area-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+  }
+
+  .roof-measure-area-stack strong {
+    font-weight: 700;
+  }
+
+  .roof-measure-area-flat {
+    font-size: 10px;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  .roof-measure-label {
+    background: transparent !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
   .services-map .leaflet-bottom.leaflet-left {
     bottom: 0.75rem;
     left: 0.75rem;
@@ -288,6 +345,83 @@
   }
 }
 
+@keyframes tour-illu-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes tour-illu-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes tour-illu-spark {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0) scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.15);
+  }
+}
+
+@keyframes tour-illu-icon-pop {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  40% {
+    transform: scale(1.08) rotate(-4deg);
+  }
+
+  70% {
+    transform: scale(1.04) rotate(3deg);
+  }
+}
+
+.tour-step-illu__glow {
+  animation: tour-illu-pulse 2.4s ease-in-out infinite;
+}
+
+.tour-step-illu__tile {
+  animation: tour-illu-float 2.8s ease-in-out infinite;
+}
+
+.tour-step-illu__icon {
+  animation: tour-illu-icon-pop 2.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.tour-step-illu__spark {
+  animation: tour-illu-spark 1.8s ease-in-out infinite;
+}
+
+.tour-step-illu__spark--b {
+  animation-delay: 0.25s;
+}
+
+.tour-step-illu__spark--c {
+  animation-delay: 0.5s;
+}
+
 @keyframes drawer-in {
   from {
     transform: translateX(-100%);
@@ -344,12 +478,12 @@
   }
 
   to {
-    transform: scale(1.07);
+    transform: scale(1.03);
   }
 }
 
 .news-lead-photo {
-  animation: news-kenburns 18s ease-in-out infinite alternate;
+  object-position: center top;
 }
 
 @keyframes hero-kenburns {
@@ -434,6 +568,69 @@
 
 .hire-hero-photo {
   animation: hire-hero-kenburns 14s ease-out forwards;
+}
+
+/* Logged-in Fiverr-style member home */
+@keyframes logged-in-glow-breathe {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes logged-in-gig-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logged-in-home-glow {
+  background:
+    radial-gradient(ellipse 55% 70% at 18% 35%, rgb(91 187 123 / 0.28), transparent 62%),
+    radial-gradient(ellipse 45% 55% at 72% 20%, rgb(212 160 23 / 0.18), transparent 58%),
+    radial-gradient(ellipse 40% 50% at 55% 80%, rgb(11 31 58 / 0.06), transparent 65%);
+  filter: blur(2px);
+  animation: logged-in-glow-breathe 7s ease-in-out infinite;
+  transform-origin: 40% 40%;
+}
+
+.logged-in-action-card {
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease;
+}
+
+.logged-in-action-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(91 187 123 / 0.35);
+  box-shadow: 0 16px 40px rgba(15, 31, 26, 0.1);
+}
+
+.logged-in-gig-card {
+  animation: logged-in-gig-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logged-in-gig-card article {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
+}
+
+.logged-in-gig-card:hover article {
+  transform: translateY(-4px);
 }
 
 .hire-benefit-card {
@@ -569,7 +766,11 @@
   .animate-drawer-in,
   .hire-hero-photo,
   .service-map-marker__body,
-  .service-map-marker__shadow {
+  .service-map-marker__shadow,
+  .tour-step-illu__glow,
+  .tour-step-illu__tile,
+  .tour-step-illu__icon,
+  .tour-step-illu__spark {
     animation: none !important;
   }
 
@@ -589,7 +790,14 @@
   .hire-panel-card,
   .hire-panel-card:hover,
   .hire-panel-card__media,
-  .hire-panel-card:hover .hire-panel-card__media {
+  .hire-panel-card:hover .hire-panel-card__media,
+  .logged-in-home-glow,
+  .logged-in-action-card,
+  .logged-in-action-card:hover,
+  .logged-in-gig-card,
+  .logged-in-gig-card article,
+  .logged-in-gig-card:hover article {
+    animation: none !important;
     transform: none;
     transition: none;
   }

@@ -1,8 +1,8 @@
-import { useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
 import { Input } from '@/components/ui/Input'
 import { RangeSlider } from '@/components/ui/RangeSlider'
-import { Select } from '@/components/ui/Select'
 import { ResultsBelowLanguageFields } from '@/features/referrals/components/filters/ResultsBelowLanguageFields'
 import {
   DEFAULT_FILTERS,
@@ -157,6 +157,217 @@ function SectionLabel({ children }: { children: string }) {
   )
 }
 
+/** Ballot-style checked box — matches register / landing filter menus. */
+function CheckedBallotIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" className={className} aria-hidden>
+      <path
+        d="M12.25 3.1H4.6A2.1 2.1 0 0 0 2.5 5.2v6.2A2.1 2.1 0 0 0 4.6 13.5h6.2a2.1 2.1 0 0 0 2.1-2.1V7.15"
+        stroke="currentColor"
+        strokeWidth="1.55"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.35 8.05 6.9 10.55 13.55 2.85"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function PreviewOptionCheck({ checked }: { checked: boolean }) {
+  if (checked) {
+    return <CheckedBallotIcon className="mt-0.5 h-4 w-4 shrink-0 text-ink" />
+  }
+  return (
+    <span
+      className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded-[4px] border-[1.55px] border-ink/40 bg-white"
+      aria-hidden
+    />
+  )
+}
+
+type InlinePreviewOption = {
+  value: string
+  label: string
+  depth?: number
+}
+
+type InlinePreviewGroup = {
+  label: string
+  options: InlinePreviewOption[]
+}
+
+/** Landing/register-style in-flow select: label + trigger + options in one shell. */
+function InlinePreviewSelect({
+  name,
+  label,
+  value,
+  onChange,
+  placeholder,
+  groups,
+  flatOptions,
+  disabled = false,
+  listLabel,
+}: {
+  name: string
+  label: string
+  value: string
+  onChange: (next: string) => void
+  placeholder: string
+  groups?: InlinePreviewGroup[]
+  flatOptions?: InlinePreviewOption[]
+  disabled?: boolean
+  listLabel: string
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  const selectedLabel = (() => {
+    if (!value) return ''
+    if (flatOptions) {
+      return flatOptions.find((option) => option.value === value)?.label ?? value
+    }
+    for (const group of groups ?? []) {
+      const match = group.options.find((option) => option.value === value)
+      if (match) return `${group.label} · ${match.label}`
+    }
+    return value
+  })()
+
+  useEffect(() => {
+    if (!open) return
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  function pick(next: string) {
+    onChange(next)
+    setOpen(false)
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      className={cn(
+        'w-full overflow-hidden rounded-lg border bg-white shadow-sm transition',
+        disabled && 'pointer-events-none opacity-55',
+        open && !disabled ? 'border-brand' : 'border-ink/15',
+      )}
+    >
+      <p className="px-3 pt-2 text-sm font-bold leading-snug text-ink">{label}</p>
+      <button
+        type="button"
+        name={name}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        className="flex h-9 w-full items-center justify-between gap-2 rounded-none border-0 bg-transparent px-3 text-left text-sm text-ink outline-none disabled:cursor-not-allowed"
+      >
+        <span
+          className={cn(
+            'min-w-0 truncate',
+            value ? 'font-medium text-ink' : 'text-muted',
+          )}
+        >
+          {selectedLabel || placeholder}
+        </span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+        ) : (
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+        )}
+      </button>
+
+      {open && !disabled ? (
+        <>
+          <div className="mx-auto h-px w-[70%] bg-ink" aria-hidden />
+          <div
+            role="listbox"
+            aria-label={listLabel}
+            className="relative max-h-56 overflow-y-auto py-1"
+          >
+            {groups
+              ? groups.map((group) => (
+                  <div key={group.label} className="pt-1">
+                    <p className="px-3 py-1 text-sm font-bold text-ink">{group.label}</p>
+                    {group.options.map((option) => {
+                      const selected = value === option.value
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          role="option"
+                          aria-selected={selected}
+                          onClick={() => pick(option.value)}
+                          className={cn(
+                            'group flex w-full items-start gap-2 py-1.5 text-left text-sm text-ink transition-colors hover:bg-ink/5',
+                            option.depth ? 'pl-10 pr-3' : 'px-3 pl-7',
+                          )}
+                        >
+                          <PreviewOptionCheck checked={selected} />
+                          <span
+                            className={cn(
+                              'min-w-0 leading-snug group-hover:underline group-hover:decoration-ink group-hover:underline-offset-4',
+                              selected && 'font-medium',
+                            )}
+                          >
+                            {option.label}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                ))
+              : null}
+
+            {flatOptions
+              ? flatOptions.map((option) => {
+                  const selected = value === option.value
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="option"
+                      aria-selected={selected}
+                      onClick={() => pick(option.value)}
+                      className="group flex w-full items-start gap-2 px-3 py-1.5 text-left text-sm text-ink transition-colors hover:bg-ink/5"
+                    >
+                      <PreviewOptionCheck checked={selected} />
+                      <span
+                        className={cn(
+                          'min-w-0 leading-snug group-hover:underline group-hover:decoration-ink group-hover:underline-offset-4',
+                          selected && 'font-medium',
+                        )}
+                      >
+                        {option.label}
+                      </span>
+                    </button>
+                  )
+                })
+              : null}
+          </div>
+        </>
+      ) : null}
+    </div>
+  )
+}
+
 export function AdvertiseFilterPanel({
   className,
   style,
@@ -277,38 +488,36 @@ export function AdvertiseFilterPanel({
         <p className="text-[11px] font-bold uppercase tracking-wide text-ink">
           Preview on page
         </p>
-        <label className="flex w-full flex-col gap-1.5 text-sm">
-          <span className="font-bold text-ink">Choose Page</span>
-          <select
-            name="previewPage"
-            value={previewPage}
-            onChange={(event) => onPreviewPageChange?.(event.target.value)}
-            className="h-9 w-full appearance-none rounded-lg border border-line bg-paper px-3 text-sm text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-          >
-            <option value="">Select a page…</option>
-            {PREVIEW_PAGE_GROUPS.map((group) => (
-              <optgroup key={group.label} label={group.label}>
-                {group.pages.map((page) => (
-                  <option key={page.value} value={page.value}>
-                    {page.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <Select
-          label="Placement"
-          name="previewPlacement"
-          placeholder={previewPage ? 'Select placement…' : 'Choose a page first…'}
-          options={placementOptions.map((option) => ({
-            label: option.label,
-            value: option.value,
+        <InlinePreviewSelect
+          name="previewPage"
+          label="Choose Page"
+          listLabel="Choose Page"
+          value={previewPage}
+          onChange={(next) => onPreviewPageChange?.(next)}
+          placeholder="Select a page…"
+          groups={PREVIEW_PAGE_GROUPS.map((group) => ({
+            label: group.label,
+            options: group.pages.map((page) => ({
+              value: page.value,
+              label: page.label,
+              depth: page.depth,
+            })),
           }))}
+        />
+        <InlinePreviewSelect
+          name="previewPlacement"
+          label="Placement"
+          listLabel="Placement"
           value={previewPlacement}
+          onChange={(next) => onPreviewPlacementChange?.(next)}
+          placeholder={
+            previewPage ? 'Select placement…' : 'Choose a page first…'
+          }
+          flatOptions={placementOptions.map((option) => ({
+            value: option.value,
+            label: option.label,
+          }))}
           disabled={!previewPage || placementOptions.length === 0}
-          onChange={(event) => onPreviewPlacementChange?.(event.target.value)}
-          className="h-9 rounded-lg text-sm"
         />
       </div>
 

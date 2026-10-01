@@ -381,7 +381,7 @@ export function ServiceFiltersDrawer({
   if (isPush) return panel
 
   return (
-    <div className="fixed inset-0 z-[1100] flex">
+    <div className="fixed inset-x-0 bottom-0 top-[4.75rem] z-[60] flex sm:top-[5.5rem]">
       {panel}
       <button
         type="button"

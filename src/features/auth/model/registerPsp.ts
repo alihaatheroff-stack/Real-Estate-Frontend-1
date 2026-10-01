@@ -1,3 +1,9 @@
+import {
+  createEmptyAcceptedPolicies,
+  type AcceptedPolicies,
+  type RegisterPolicyId,
+} from '@/features/auth/data/registerPolicyAgreements'
+
 export const REGISTER_FIND_OPTIONS = ['Profile', 'Office']
 
 export const WEEKDAYS = [
@@ -175,8 +181,7 @@ export type RegisterPspFormData = {
   phone: string
   password: string
   confirmPassword: string
-  acceptedPrivacyPolicy: boolean
-  acceptedTermsOfService: boolean
+  acceptedPolicies: AcceptedPolicies
   businessName: string
   businessEmail: string
   businessWebsite: string
@@ -253,8 +258,7 @@ export const INITIAL_REGISTER_PSP_FORM: RegisterPspFormData = {
   phone: '',
   password: '',
   confirmPassword: '',
-  acceptedPrivacyPolicy: false,
-  acceptedTermsOfService: false,
+  acceptedPolicies: createEmptyAcceptedPolicies(),
   businessName: '',
   businessEmail: '',
   businessWebsite: '',
@@ -334,8 +338,8 @@ export type FieldErrorKey =
   | 'otherMedicalCondition'
   | 'emergencyContacts'
   | 'insuranceInfo'
-  | 'acceptedPrivacyPolicy'
-  | 'acceptedTermsOfService'
+  | 'acceptedPolicies'
+  | `acceptedPolicy.${RegisterPolicyId}`
   | 'pspCategory'
   | BusinessFieldKey
   | `employee.${string}.${BusinessEmployeeField}`

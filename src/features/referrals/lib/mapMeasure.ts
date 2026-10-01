@@ -1,5 +1,5 @@
 export type MeasureUnitSystem = 'imperial' | 'metric'
-export type MeasureTool = 'distance' | 'area' | 'elevation'
+export type MeasureTool = 'distance' | 'area' | 'elevation' | 'roof'
 
 export type LatLngTuple = [number, number]
 

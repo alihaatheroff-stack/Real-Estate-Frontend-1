@@ -1,0 +1,271 @@
+import { PATHS } from '@/app/router/paths'
+import { FieldSaveProvider } from '@/features/auth/components/FieldSaveContext'
+import { useRegisterPspForm } from '@/features/auth/hooks/useRegisterPspForm'
+import { pickManualAddressFields } from '@/features/auth/model/registerPsp'
+import {
+  AccountCredentialsBlock,
+  AdditionalLicensesBlock,
+  BusinessInformationBlock,
+  CredentialDocumentBlock,
+  FormSection,
+  InlineBlankField,
+  LanguageAndLevelBlock,
+  MembershipCardInformation,
+  PaymentsAndTermsBlock,
+  ServiceProfileBlock,
+  UnderlineField,
+} from './register'
+
+function resolveClientAddress(form: ReturnType<typeof useRegisterPspForm>) {
+  if (form.data.identificationCurrentAddressSameAsId === true) {
+    return pickManualAddressFields(form.data.identification)
+  }
+  if (form.data.identificationCurrentAddressSameAsId === false) {
+    return pickManualAddressFields(form.data.identificationCurrentAddress)
+  }
+  return pickManualAddressFields(form.data.identification)
+}
+
+/** Edit the details submitted during Client / PSP registration. */
+export function AccountSettingsForm() {
+  const form = useRegisterPspForm('client', 'edit')
+  const isPsp = form.activeMode === 'psp'
+  const payerAddress = isPsp ? form.resolvedBusinessAddress : resolveClientAddress(form)
+  const payerName = isPsp
+    ? form.data.businessName || form.data.identification.firstName || 'Provider'
+    : form.data.identification.firstName.trim() || 'Client'
+
+  return (
+    <FieldSaveProvider
+      saveField={form.saveSection}
+      savedFieldId={form.savedSectionId}
+    >
+      <div className="space-y-6">
+        <div className="space-y-4 border-b border-line pb-5">
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-brand">
+              {isPsp ? 'Property Service Provider' : 'Client'} account
+            </p>
+            <h2 className="font-display text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              Edit registration details
+            </h2>
+            <p className="text-sm text-muted">
+              Edit any field, then click the small save icon next to its label to save that change.
+            </p>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-6 sm:gap-10 lg:gap-16">
+            <UnderlineField
+              label="Registered:"
+              name="registrationTime"
+              type="time"
+              value={form.data.registrationTime}
+              onChange={(value) => form.update('registrationTime', value)}
+              readOnly
+            />
+            <UnderlineField
+              label="Date:"
+              name="registrationDate"
+              type="date"
+              value={form.data.registrationDate}
+              onChange={(value) => form.update('registrationDate', value)}
+              readOnly
+            />
+          </div>
+        </div>
+
+        <form className="space-y-8" onSubmit={form.handleSubmit} noValidate>
+          <div className="flex w-full flex-col gap-4">
+            <CredentialDocumentBlock
+              step={1}
+              title="Identification"
+              uploadLabel="ID document"
+              name="identificationDoc"
+              section="identification"
+              file={form.data.identificationDoc}
+              onFileChange={(file) => form.update('identificationDoc', file)}
+              manual={form.data.identification}
+              onManualChange={(field, value) =>
+                form.updateManual('identification', field, value)
+              }
+              fieldErrors={form.fieldErrors}
+              currentAddressSameAsId={form.data.identificationCurrentAddressSameAsId}
+              currentAddress={form.data.identificationCurrentAddress}
+              onCurrentAddressSameAsIdChange={form.setIdentificationCurrentAddressSameAsId}
+              onCurrentAddressChange={form.updateIdentificationCurrentAddress}
+              hasAllergy={form.data.hasAllergy}
+              allergyDetails={form.data.allergyDetails}
+              onHasAllergyChange={form.setHasAllergy}
+              onAllergyDetailsChange={(value) => form.update('allergyDetails', value)}
+              otherMedicalCondition={form.data.otherMedicalCondition}
+              onOtherMedicalConditionChange={(value) =>
+                form.update('otherMedicalCondition', value)
+              }
+              emergencyContacts={form.data.emergencyContacts}
+              onAddEmergencyContact={form.addEmergencyContact}
+              onUpdateEmergencyContact={form.updateEmergencyContact}
+              onRemoveEmergencyContact={form.removeEmergencyContact}
+            />
+
+            {isPsp ? (
+              <>
+                <BusinessInformationBlock
+                  step={2}
+                  phone={form.data.phone}
+                  onPhoneChange={(value) => form.update('phone', value)}
+                  businessName={form.data.businessName}
+                  businessEmail={form.data.businessEmail}
+                  businessWebsite={form.data.businessWebsite}
+                  businessAddressSameAs={form.data.businessAddressSameAs}
+                  businessAddressFields={form.data.businessAddressFields}
+                  onBusinessAddressSameAsChange={form.setBusinessAddressSameAs}
+                  onBusinessAddressFieldChange={form.updateBusinessAddress}
+                  businessOpenDays={form.data.businessOpenDays}
+                  businessHoursByDay={form.data.businessHoursByDay}
+                  bestTimesToReach={form.data.bestTimesToReach}
+                  onChange={(field, value) => form.update(field, value)}
+                  onToggleDay={form.toggleBusinessDay}
+                  onDayHoursChange={form.setDayHours}
+                  fieldErrors={form.fieldErrors}
+                />
+
+                <CredentialDocumentBlock
+                  step={3}
+                  title="License / Credential"
+                  uploadLabel="License document"
+                  name="contractorLicenseDoc"
+                  section="license"
+                  file={form.data.contractorLicenseDoc}
+                  onFileChange={(file) => form.update('contractorLicenseDoc', file)}
+                  manual={form.data.license}
+                  onManualChange={(field, value) => form.updateManual('license', field, value)}
+                  fieldErrors={form.fieldErrors}
+                />
+
+                <CredentialDocumentBlock
+                  step={4}
+                  title="Bonds / Insurance"
+                  uploadLabel="Insurance certificate"
+                  name="insuranceDoc"
+                  section="insurance"
+                  file={form.data.insuranceDoc}
+                  onFileChange={(file) => form.update('insuranceDoc', file)}
+                  manual={form.data.insurance}
+                  onManualChange={(field, value) => form.updateManual('insurance', field, value)}
+                  fieldErrors={form.fieldErrors}
+                >
+                  <InlineBlankField
+                    label="Coverage notes:"
+                    name="insuranceInfo"
+                    value={form.data.insuranceInfo}
+                    onChange={(value) => form.update('insuranceInfo', value)}
+                    required
+                    invalid={Boolean(form.fieldErrors.insuranceInfo)}
+                    className="sm:col-span-2 lg:col-span-3"
+                  />
+                </CredentialDocumentBlock>
+              </>
+            ) : null}
+          </div>
+
+          {isPsp ? (
+            <AdditionalLicensesBlock
+              licenses={form.additionalLicenses}
+              onAdd={form.addAdditionalLicense}
+              onUpdate={form.updateAdditionalLicense}
+              onRemove={form.removeAdditionalLicense}
+            />
+          ) : (
+            <LanguageAndLevelBlock
+              step={2}
+              profileFilters={form.profileFilters}
+              setProfileFilterList={form.setProfileFilterList}
+            />
+          )}
+
+          {isPsp ? (
+            <ServiceProfileBlock
+              step={5}
+              profileFilters={form.profileFilters}
+              setProfileFilter={form.setProfileFilter}
+              setProfileFilterList={form.setProfileFilterList}
+              applyLandingFilterChange={form.applyLandingFilterChange}
+              distance={form.distance}
+              pspCategoryInvalid={Boolean(form.fieldErrors.pspCategory)}
+            />
+          ) : null}
+
+          <PaymentsAndTermsBlock
+            step={isPsp ? 6 : 3}
+            divided={!isPsp ? false : undefined}
+            profileFilters={form.profileFilters}
+            setProfileFilterList={form.setProfileFilterList}
+            formOfPaymentMethods={form.formOfPaymentMethods}
+            payerName={payerName}
+            payerAddress={payerAddress}
+            onSyncFormOfPaymentMethods={form.syncFormOfPaymentMethods}
+            onUpdateFormOfPaymentMethod={form.updateFormOfPaymentMethod}
+          />
+
+          {isPsp ? (
+            <FormSection title="Membership" step={7}>
+              <MembershipCardInformation
+                numberOfEmployees={form.data.numberOfEmployees}
+                employees={form.employees}
+                total={form.data.membershipTotal}
+                membershipGpsTotal={form.data.membershipGpsTotal}
+                membershipAdvertiseTotal={form.data.membershipAdvertiseTotal}
+                membershipDealsClosedTotal={form.data.membershipDealsClosedTotal}
+                membershipTaxTotal={form.data.membershipTaxTotal}
+                cardNumber={form.profileFilters.cardNumber}
+                expirationDate={form.profileFilters.expirationDate}
+                securityCode={form.profileFilters.securityCode}
+                billingAddressSameAs={form.data.billingAddressSameAs}
+                billingPhysicalAddress={form.data.billingPhysicalAddress}
+                billingMailingAddress={form.data.billingMailingAddress}
+                onBillingAddressSameAsChange={form.setBillingAddressSameAs}
+                onBillingPhysicalAddressChange={form.updateBillingPhysicalAddress}
+                onBillingMailingAddressChange={form.updateBillingMailingAddress}
+                onNumberOfEmployeesChange={(value) => form.update('numberOfEmployees', value)}
+                onTotalChange={(value) => form.update('membershipTotal', value)}
+                onAmenityTotalChange={(field, value) => form.update(field, value)}
+                onFieldChange={form.setProfileFilter}
+                onAddEmployee={form.addEmployee}
+                onUpdateEmployee={form.updateEmployee}
+                onRemoveEmployee={form.removeEmployee}
+                fieldErrors={form.fieldErrors}
+              />
+            </FormSection>
+          ) : null}
+
+          <AccountCredentialsBlock
+            step={isPsp ? 8 : 4}
+            email={form.data.email}
+            password={form.data.password}
+            confirmPassword={form.data.confirmPassword}
+            acceptedPolicies={form.data.acceptedPolicies}
+            fieldErrors={form.fieldErrors}
+            error={form.error}
+            homeHref={PATHS.home}
+            onEmailChange={(value) => form.update('email', value)}
+            onPasswordChange={(value) => form.update('password', value)}
+            onConfirmPasswordChange={(value) => form.update('confirmPassword', value)}
+            onAcceptedPolicyChange={(id, value) =>
+              form.update('acceptedPolicies', {
+                ...form.data.acceptedPolicies,
+                [id]: value,
+              })
+            }
+            setFieldErrors={form.setFieldErrors}
+            setError={form.setError}
+            submitLabel={form.savedSectionId === 'credentials' ? 'Saved' : 'Save login details'}
+            showSkip={false}
+            showPolicies={false}
+            savedFlash={form.savedSectionId === 'credentials'}
+            credentialsTitle="Login credentials"
+            onSaveClick={() => form.saveSection('credentials')}
+          />
+        </form>
+      </div>
+    </FieldSaveProvider>
+  )
+}

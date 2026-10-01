@@ -4,7 +4,7 @@ import { Section } from '@/components/layout/Section'
 import { SectionHeading } from '@/components/layout/SectionHeading'
 import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { Button } from '@/components/ui/Button'
-import { LoggedInCrowdfundingDetails } from '@/features/crowdfunding/components/LoggedInCrowdfundingDetails'
+import { CrowdfundingActivityStrips } from '@/features/crowdfunding/components/CrowdfundingActivityStrips'
 import { RecreationalCrowdfunding } from '@/features/crowdfunding/components/RecreationalCrowdfunding'
 
 export function LoggedInCrowdfundingSection() {
@@ -17,12 +17,11 @@ export function LoggedInCrowdfundingSection() {
         />
       </ScrollReveal>
 
-      <ScrollReveal delay={70} className="mb-8">
+      <ScrollReveal delay={70} className="mb-10">
         <RecreationalCrowdfunding embedded />
       </ScrollReveal>
-      <ScrollReveal className="mb-10">
-        <LoggedInCrowdfundingDetails />
-      </ScrollReveal>
+
+      <CrowdfundingActivityStrips className="mb-10" />
 
       <ScrollReveal id="crowdfunding-explore" className="mt-2 scroll-mt-24">
         <Link to={PATHS.crowdfundingExplore}>

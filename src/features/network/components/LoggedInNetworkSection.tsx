@@ -3,6 +3,7 @@ import { PATHS } from '@/app/router/paths'
 import { Section } from '@/components/layout/Section'
 import { ScrollReveal } from '@/components/motion/ScrollReveal'
 import { Button } from '@/components/ui/Button'
+import { NetworkActivityStrips } from '@/features/network/components/NetworkActivityStrips'
 
 export function LoggedInNetworkSection() {
   return (
@@ -15,6 +16,8 @@ export function LoggedInNetworkSection() {
           Forums, groups, articles, and people to greet
         </p>
       </ScrollReveal>
+
+      <NetworkActivityStrips className="mb-10" />
 
       <ScrollReveal id="network-learn-more" delay={80} className="mt-2 flex flex-wrap gap-3 scroll-mt-24">
         <Link to={PATHS.networkFeed}>

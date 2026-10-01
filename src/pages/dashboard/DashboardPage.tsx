@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
+import { AccountSettingsForm } from '@/features/auth'
 import { DashboardOverview } from '@/features/dashboard/components/DashboardOverview'
 import { DashboardAdvertisementsView } from '@/features/dashboard/components/DashboardAdvertisementsView'
 import { DashboardDataList } from '@/features/dashboard/components/DashboardDataList'
@@ -260,6 +261,23 @@ export function DashboardReferralsSentPage() {
     >
       <DashboardDataList items={DUMMY_REFERRALS_SENT} />
     </DashboardSectionPage>
+  )
+}
+
+export function DashboardSettingsPage() {
+  return (
+    <div className="space-y-5">
+      <div>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Edit the details you submitted during registration — identity, contacts, payments, and
+          login.
+        </p>
+      </div>
+      <AccountSettingsForm />
+    </div>
   )
 }
 

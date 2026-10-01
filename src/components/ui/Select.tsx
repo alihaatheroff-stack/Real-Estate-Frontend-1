@@ -1,5 +1,6 @@
 import type { SelectHTMLAttributes } from 'react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { FieldSaveMark } from '@/features/auth/components/FieldSaveContext'
 import { cn } from '@/shared/lib/cn'
 
 type Option = { label: string; value: string }
@@ -24,13 +25,18 @@ export function Select({
   ...props
 }: SelectProps) {
   const selectId = id ?? props.name
+  const saveFieldId = props.name ?? label ?? 'field'
 
   return (
     <label className={cn('flex w-full flex-col gap-1.5 text-sm', labelClassName)}>
       {label ? (
         <span className="inline-flex items-center gap-1 font-bold text-ink">
           {label}
-          {showQaMark ? <FieldQaMark field={label} /> : null}
+          {showQaMark ? (
+            <FieldQaMark field={label} />
+          ) : (
+            <FieldSaveMark fieldId={saveFieldId} />
+          )}
         </span>
       ) : null}
       <select

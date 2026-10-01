@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
 import { Button } from '@/components/ui/Button'
-import { setAuthenticated } from '@/features/auth/session'
+import { markHeaderTourPending, markPreferMarketingLanding, setAuthenticated } from '@/features/auth/session'
 import { cn } from '@/shared/lib/cn'
 
 const optionClassName = cn(
@@ -49,6 +49,8 @@ export function RegisterRoleSelect() {
         className="w-full"
         size="sm"
         onClick={() => {
+          markHeaderTourPending()
+          markPreferMarketingLanding()
           setAuthenticated(true)
           navigate(PATHS.home)
         }}

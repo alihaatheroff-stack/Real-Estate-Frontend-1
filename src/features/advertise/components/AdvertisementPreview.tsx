@@ -1,7 +1,7 @@
 import { type BannerSizeLeaf } from '@/features/advertise/data/advertiseFilterOptions'
 import {
+  isNetworkNewsfeedPage,
   isNetworkPlacementId,
-  isPreviewPageId,
   previewPageLabel,
   previewPlacementLabel,
 } from '@/features/advertise/data/advertisePreviewPlacement'
@@ -97,7 +97,7 @@ export function AdvertisementPreview({
   const description = (draft.description ?? '').trim() || 'Your ad description will show here.'
   const cta = (draft.cta ?? '').trim() ? 'Learn more' : 'Learn more'
   const showPlacementPreview =
-    isPreviewPageId(previewPage) && isNetworkPlacementId(previewPlacement)
+    isNetworkNewsfeedPage(previewPage) && isNetworkPlacementId(previewPlacement)
   const referralPercent =
     draft.offerReferral && draft.referralPercent
       ? resolveReferralPercent(draft.referralPercent)
@@ -117,7 +117,7 @@ export function AdvertisementPreview({
         </p>
         <p className="text-xs text-muted">
           {showPlacementPreview
-            ? `${previewPageLabel(previewPage)} · ${previewPlacementLabel(previewPlacement)}`
+            ? `${previewPageLabel(previewPage)} · ${previewPlacementLabel(previewPlacement, previewPage)}`
             : `${bannerSize === 'Custom' ? 'Custom' : bannerSize} · ${size.label}`}
         </p>
       </div>

@@ -1,7 +1,16 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PATHS } from '@/app/router/paths'
-import { setAuthenticated } from '@/features/auth/session'
+import {
+  allPoliciesAccepted,
+  REGISTER_POLICY_AGREEMENTS,
+} from '@/features/auth/data/registerPolicyAgreements'
+import { markHeaderTourPending, markPreferMarketingLanding, setAuthenticated } from '@/features/auth/session'
+import {
+  getRegistrationProfileForEdit,
+  saveRegistrationProfile,
+  type RegisterFormMode,
+} from '@/features/auth/model/registrationProfile'
 import {
   EMPTY_DAY_HOURS,
   hasCompleteDayHours,
@@ -43,12 +52,28 @@ import {
 } from '@/features/search'
 import { getResolvedBusinessAddress } from '@/features/auth/components/register/formOfPayment'
 
-export type RegisterFormMode = 'client' | 'psp'
+export type { RegisterFormMode }
+
+export type RegisterFormIntent = 'register' | 'edit'
 
 /** All Register form state, updaters, and validation — keeps the view thin. */
-export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
+export function useRegisterPspForm(
+  mode: RegisterFormMode = 'psp',
+  intent: RegisterFormIntent = 'register',
+) {
   const navigate = useNavigate()
+  const isEdit = intent === 'edit'
+  const [savedFlash, setSavedFlash] = useState(false)
+  const [savedSectionId, setSavedSectionId] = useState<string | null>(null)
+  const savedSectionTimeoutRef = useRef(0)
+  const [editSnapshot] = useState(() =>
+    intent === 'edit' ? getRegistrationProfileForEdit(mode) : null,
+  )
+  const activeMode = editSnapshot?.profile.mode ?? mode
   const [data, setData] = useState<FormData>(() => {
+    if (editSnapshot) {
+      return editSnapshot.formData
+    }
     const now = formatNow()
     return {
       ...INITIAL,
@@ -61,6 +86,7 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
     }
   })
   useEffect(() => {
+    if (isEdit) return
     let intervalId = 0
     const applyNow = () => {
       const now = formatNow()
@@ -79,12 +105,22 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
       window.clearTimeout(timeoutId)
       window.clearInterval(intervalId)
     }
+  }, [isEdit])
+
+  useEffect(() => {
+    return () => window.clearTimeout(savedSectionTimeoutRef.current)
   }, [])
 
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldErrorKey, boolean>>>({})
-  const [profileFilters, setProfileFilters] = useState<HeroFiltersState>({
-    ...DEFAULT_FILTERS,
+  const [profileFilters, setProfileFilters] = useState<HeroFiltersState>(() => {
+    if (editSnapshot) {
+      return {
+        ...DEFAULT_FILTERS,
+        ...editSnapshot.profile.profileFilters,
+      }
+    }
+    return { ...DEFAULT_FILTERS }
   })
   const additionalLicenses = data.additionalLicenses ?? []
   const employees = data.employees ?? []
@@ -608,7 +644,7 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
     }
 
     markManualErrors('identification', data.identification)
-    if (mode === 'psp') {
+    if (activeMode === 'psp') {
       markManualErrors('license', data.license)
       markManualErrors('insurance', data.insurance)
       if (!data.insuranceInfo.trim()) nextErrors.insuranceInfo = true
@@ -629,14 +665,18 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
       setFieldErrors(nextErrors)
       return false
     }
-    if (!data.acceptedPrivacyPolicy || !data.acceptedTermsOfService) {
-      if (!data.acceptedPrivacyPolicy) nextErrors.acceptedPrivacyPolicy = true
-      if (!data.acceptedTermsOfService) nextErrors.acceptedTermsOfService = true
-      setError('Please accept the Privacy Policy and Terms of Service.')
+    if (!isEdit && !allPoliciesAccepted(data.acceptedPolicies)) {
+      for (const doc of REGISTER_POLICY_AGREEMENTS) {
+        if (!data.acceptedPolicies[doc.id]) {
+          nextErrors[`acceptedPolicy.${doc.id}`] = true
+        }
+      }
+      nextErrors.acceptedPolicies = true
+      setError('Please accept all required policies to continue.')
       setFieldErrors(nextErrors)
       return false
     }
-    if (!data.identificationDoc) {
+    if (!isEdit && !data.identificationDoc) {
       setError('Upload an identification document.')
       setFieldErrors(nextErrors)
       return false
@@ -692,7 +732,7 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
       return false
     }
 
-    if (mode === 'client') {
+    if (activeMode === 'client') {
       setFieldErrors({})
       setError('')
       return true
@@ -798,10 +838,33 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
     return true
   }
 
+  function flashSectionSaved(sectionId?: string) {
+    setSavedFlash(true)
+    setSavedSectionId(sectionId ?? null)
+    window.clearTimeout(savedSectionTimeoutRef.current)
+    savedSectionTimeoutRef.current = window.setTimeout(() => {
+      setSavedFlash(false)
+      setSavedSectionId(null)
+    }, 2200)
+  }
+
+  /** Persist current profile without full-form validation (per-section Save). */
+  function saveSection(sectionId: string) {
+    saveRegistrationProfile(activeMode, data, profileFilters)
+    flashSectionSaved(sectionId)
+  }
+
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!validateForm()) return
-    // UI-only — wire to registration API when backend is ready.
+    // UI-only — wire to registration / profile API when backend is ready.
+    saveRegistrationProfile(activeMode, data, profileFilters)
+    if (isEdit) {
+      flashSectionSaved('credentials')
+      return
+    }
+    markHeaderTourPending()
+    markPreferMarketingLanding()
     setAuthenticated(true)
     navigate(PATHS.home)
   }
@@ -823,6 +886,11 @@ export function useRegisterPspForm(mode: RegisterFormMode = 'psp') {
     representation,
     showRepresentation,
     distance,
+    activeMode,
+    isEdit,
+    savedFlash,
+    savedSectionId,
+    saveSection,
     setProfileFilter,
     setProfileFilterList,
     applyLandingFilterChange,

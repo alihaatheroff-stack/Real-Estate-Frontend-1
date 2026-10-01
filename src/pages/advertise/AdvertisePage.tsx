@@ -57,15 +57,20 @@ export function AdvertisePage() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-[linear-gradient(165deg,#f3f7f5_0%,#e8efeb_38%,#f6f8f7_100%)]">
-      <div className="flex shrink-0 flex-wrap items-end justify-between gap-3 px-3 pt-4 sm:px-4 sm:pt-5 lg:px-5">
+      <div className="flex shrink-0 flex-col gap-3 px-3 pt-4 sm:px-4 sm:pt-5 lg:px-5">
         <div>
           <h1 className="text-left font-display text-3xl font-semibold tracking-tight text-ink underline decoration-ink underline-offset-4 sm:text-4xl">
             Advertising:
           </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted">
+          <p className="mt-2 text-sm text-muted">
             Choose placement, craft your creative, and watch the live preview update as you go.
           </p>
         </div>
+        <p className="w-full rounded-lg border border-brand/20 border-l-4 border-l-brand bg-white/85 px-4 py-3 font-display text-sm font-semibold tracking-tight text-ink shadow-[0_8px_24px_-18px_rgba(15,31,26,0.35)] backdrop-blur-sm sm:text-base md:text-lg">
+          LCRE’s advertising system uses content-based semantic matching. It does not make
+          recommendations, steer users toward particular choices, or alter rankings based on
+          payment.
+        </p>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 pb-8 pt-4 sm:px-4 lg:px-5">

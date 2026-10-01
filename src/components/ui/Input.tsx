@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from 'react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { FieldSaveMark } from '@/features/auth/components/FieldSaveContext'
 import { cn } from '@/shared/lib/cn'
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
@@ -12,13 +13,18 @@ type InputProps = InputHTMLAttributes<HTMLInputElement> & {
 export function Input({ className, label, id, suffix, showQaMark = false, ...props }: InputProps) {
   const inputId = id ?? props.name
   const qaField = typeof label === 'string' ? label : props.name ?? 'field'
+  const saveFieldId = props.name ?? qaField
 
   return (
     <label className="flex w-full flex-col gap-1.5 text-sm">
       {label ? (
         <span className="inline-flex items-center gap-1 font-bold text-ink">
           {label}
-          {showQaMark ? <FieldQaMark field={qaField} /> : null}
+          {showQaMark ? (
+            <FieldQaMark field={qaField} />
+          ) : (
+            <FieldSaveMark fieldId={saveFieldId} />
+          )}
         </span>
       ) : null}
       <div className="relative">

@@ -1,5 +1,6 @@
 export const PATHS = {
   home: '/',
+  memberHome: '/home',
   hire: '/hire',
   referrals: '/referrals',
   results: '/referrals/results',
@@ -83,6 +84,15 @@ export const PATHS = {
   contact: '/contact',
   advertise: '/advertise',
   news: '/news',
+  compliance: '/compliance',
+  acceptableUsePolicy: '/compliance/acceptable-use-policy',
+  communityGuidelines: '/compliance/community-guidelines',
+  cookiePolicy: '/compliance/cookie-policy',
+  dataBrokerStatement: '/compliance/data-broker-registration-statement',
+  dmcaCopyrightPolicy: '/compliance/dmca-copyright-policy',
+  fairHousingStatement: '/compliance/fair-housing-statement',
+  privacyPolicy: '/compliance/privacy-policy',
+  termsOfService: '/compliance/terms-of-service',
 } as const
 
 export function servicePath(id: string) {

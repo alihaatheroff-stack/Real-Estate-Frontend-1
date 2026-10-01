@@ -37,7 +37,7 @@ export function EmployerFiltersDrawer({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[1100] flex">
+    <div className="fixed inset-x-0 bottom-0 top-[4.75rem] z-[60] flex sm:top-[5.5rem]">
       <aside
         className="relative flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl animate-drawer-in"
         aria-label="Employer filters"

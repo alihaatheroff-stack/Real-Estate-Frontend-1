@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { PATHS } from '@/app/router/paths'
-import { setAuthenticated } from '@/features/auth/session'
+import { setAuthenticated, clearPreferMarketingLanding } from '@/features/auth/session'
 import { cn } from '@/shared/lib/cn'
 
 const actionLinkClassName = cn(
@@ -11,16 +11,35 @@ const actionLinkClassName = cn(
   'hover:bg-brand-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40',
 )
 
+type SignInLocationState = {
+  from?: string
+}
+
+function resolvePostSignInPath(from: string | undefined) {
+  if (from && from.startsWith('/') && !from.startsWith('//') && from !== PATHS.signIn) {
+    return from
+  }
+  return PATHS.memberHome
+}
+
 export function SignInForm() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [error, setError] = useState('')
+  const from = (location.state as SignInLocationState | null)?.from
+
+  function completeSignIn() {
+    clearPreferMarketingLanding()
+    setAuthenticated(true)
+    navigate(resolvePostSignInPath(from), { replace: true })
+  }
 
   return (
     <div className="space-y-6">
       <div className="space-y-1.5 text-center sm:text-left">
         <h1 className="font-display text-3xl font-bold tracking-tight text-ink">Sign in</h1>
         <p className="text-sm leading-relaxed text-muted">
-          Access referrals, messages, and your dashboard.
+          Access your personalized home, referrals, messages, and dashboard.
         </p>
       </div>
 
@@ -36,8 +55,7 @@ export function SignInForm() {
             return
           }
           // UI-only — wire to auth API when backend is ready.
-          setAuthenticated(true)
-          navigate(PATHS.home)
+          completeSignIn()
         }}
       >
         <Input
@@ -66,10 +84,7 @@ export function SignInForm() {
             variant="ghost"
             className="w-full"
             size="sm"
-            onClick={() => {
-              setAuthenticated(true)
-              navigate(PATHS.home)
-            }}
+            onClick={() => completeSignIn()}
           >
             Skip (testing)
           </Button>

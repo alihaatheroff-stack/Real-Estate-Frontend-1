@@ -24,6 +24,7 @@ import {
   resolveModuleNavHref,
   SiteModuleNav,
 } from '@/components/layout/SiteModuleNav'
+import { HeaderProductTour } from '@/features/onboarding'
 
 type NavItem = { label: string; href: string; hasDropdown?: boolean; menuOnly?: boolean }
 type MenuLink = { label: string; href: string }
@@ -99,14 +100,20 @@ export function SiteHeader({
   }
 
   return (
-    <header className="sticky top-0 z-50 shrink-0 overflow-x-clip border-b border-line/70 bg-paper/85 backdrop-blur-md">
-      <Container className="flex h-[4.75rem] max-w-none items-center justify-between gap-2 px-2 sm:h-[5.5rem] sm:gap-3 sm:px-3 lg:px-4">
-        <div className="flex min-w-0 items-center gap-2 lg:gap-3">
-          <SiteLogo to={homeHref} titleClassName="text-2xl sm:text-3xl" />
+    <header className="sticky top-0 z-[70] shrink-0 overflow-x-clip border-b border-line/70 bg-paper/85 backdrop-blur-md">
+      <Container className="flex h-[4.75rem] max-w-none items-center gap-2 px-2 sm:h-[5.5rem] sm:gap-3 sm:px-3 lg:px-4">
+        <div className="shrink-0">
+          <SiteLogo
+            to={homeHref}
+            titleClassName="text-2xl sm:text-3xl"
+            onNavigate={undefined}
+          />
+        </div>
 
+        <div className="hidden min-w-0 flex-1 justify-center lg:flex">
           <SiteModuleNav
             compact
-            className="hidden lg:flex"
+            className="flex"
             items={marketingNav}
             referralsMenu={referralsMenu}
             crowdfundingMenu={crowdfundingMenu}
@@ -115,15 +122,16 @@ export function SiteHeader({
           />
         </div>
 
-        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-1">
           <div className="hidden items-center gap-0.5 sm:flex">
-            <NewsHeaderLink />
-            <WritingMenu locked={!isAuthenticated} />
-            <AdvertiseMenu />
-            <CallsMenu locked={!isAuthenticated} />
+            <NewsHeaderLink tourId="header-news" />
+            <WritingMenu locked={!isAuthenticated} tourId="header-writing" />
+            <AdvertiseMenu tourId="header-advertise" />
+            <CallsMenu locked={!isAuthenticated} tourId="header-calls" />
             {isAuthenticated ? (
               <button
                 type="button"
+                data-tour-id="header-learn"
                 className="inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist"
                 aria-label="Learn"
               >
@@ -136,13 +144,14 @@ export function SiteHeader({
                 href={signInHref}
               />
             )}
-            <MessagesMenu locked={!isAuthenticated} />
-            <NotificationsMenu locked={!isAuthenticated} />
-            <FavoritesMenu locked={!isAuthenticated} />
-            <OrdersMenu locked={!isAuthenticated} />
+            <MessagesMenu locked={!isAuthenticated} tourId="header-messages" />
+            <NotificationsMenu locked={!isAuthenticated} tourId="header-notifications" />
+            <FavoritesMenu locked={!isAuthenticated} tourId="header-favorites" />
+            <OrdersMenu locked={!isAuthenticated} tourId="header-orders" />
             {isAuthenticated ? (
               <Link
                 to={PATHS.dashboard}
+                data-tour-id="header-dashboard"
                 className="inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist"
                 aria-label="Dashboard"
               >
@@ -161,6 +170,7 @@ export function SiteHeader({
               className="hidden md:block"
               homeHref={homeHref}
               onSignOut={onSignOut}
+              tourId="header-profile"
             />
           ) : (
             <>
@@ -334,6 +344,7 @@ export function SiteHeader({
           </Container>
         </div>
       ) : null}
+      {isAuthenticated ? <HeaderProductTour /> : null}
     </header>
   )
 }

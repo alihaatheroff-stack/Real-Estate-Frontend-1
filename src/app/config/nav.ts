@@ -32,6 +32,7 @@ export const NETWORK_MENU = [
 export const ABOUT_MENU = [
   { label: 'Advertisement', href: PATHS.advertise },
   { label: 'Monetization', href: PATHS.monetization },
+  { label: 'Compliance', href: PATHS.compliance },
   { label: 'Contact', href: PATHS.contact },
 ] as const
 
@@ -53,8 +54,9 @@ export const FOOTER_LINKS = {
     { label: 'Post / Receive Offers', href: PATHS.postOffer },
   ],
   legal: [
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Cookie Policy', href: '#' },
+    { label: 'Terms of Service', href: PATHS.termsOfService },
+    { label: 'Privacy Policy', href: PATHS.privacyPolicy },
+    { label: 'Cookie Policy', href: PATHS.cookiePolicy },
+    { label: 'Compliance', href: PATHS.compliance },
   ],
 } as const

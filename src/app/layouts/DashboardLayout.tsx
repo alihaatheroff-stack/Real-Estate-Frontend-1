@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { Menu, PanelLeft, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react'
 import { SiteHeader } from '@/components/layout/SiteHeader'
 import {
   ABOUT_MENU,
@@ -15,6 +15,9 @@ import { signOut, useIsAuthenticated } from '@/features/auth'
 import { cn } from '@/shared/lib/cn'
 
 const SIDEBAR_STORAGE_KEY = 're-dashboard-sidebar-open'
+const SIDEBAR_WIDTH = 280
+/** Half of the 32px toggle — parks the full button on-screen when the sidebar is closed. */
+const TOGGLE_HALF = 16
 
 function readSidebarOpen() {
   try {
@@ -71,7 +74,7 @@ export function DashboardLayout() {
         aboutMenu={ABOUT_MENU}
       />
 
-      <div className="flex min-h-0 flex-1 overflow-hidden">
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <aside
           className={cn(
             'hidden h-full shrink-0 overflow-hidden transition-[width] duration-200 ease-out lg:block',
@@ -79,40 +82,37 @@ export function DashboardLayout() {
           )}
         >
           <div className="flex h-full w-[280px]">
-            <DashboardSidebar onToggleCollapsed={() => setSidebarOpen(false)} />
+            <DashboardSidebar />
           </div>
         </aside>
 
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((open) => !open)}
+          className="absolute top-1/2 z-30 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-black/10 bg-white text-ink/70 shadow-[0_1px_4px_rgba(0,0,0,0.12)] transition-[left,color,border-color] duration-200 ease-out hover:border-brand/25 hover:text-brand lg:flex"
+          style={{ left: sidebarOpen ? SIDEBAR_WIDTH : TOGGLE_HALF }}
+          aria-label={sidebarOpen ? 'Hide menu' : 'Show menu'}
+          aria-expanded={sidebarOpen}
+          title={sidebarOpen ? 'Hide menu' : 'Show menu'}
+        >
+          {sidebarOpen ? (
+            <ChevronLeft className="h-4 w-4" strokeWidth={2.25} />
+          ) : (
+            <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
+          )}
+        </button>
+
         <main ref={mainRef} className="relative min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div
-            className={cn(
-              'sticky top-0 z-10 flex items-center gap-2 bg-[#F4F6F5] px-3 py-2.5 sm:px-4',
-              // Hide empty strip on desktop when sidebar is already open
-              sidebarOpen && 'lg:hidden',
-            )}
-          >
+          <div className="sticky top-0 z-10 flex items-center gap-2 bg-[#F4F6F5] px-3 py-2.5 sm:px-4 lg:hidden">
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink transition hover:bg-mist lg:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink transition hover:bg-mist"
               aria-label="Open dashboard menu"
             >
               <Menu className="h-5 w-5" />
             </button>
-
-            {!sidebarOpen ? (
-              <button
-                type="button"
-                onClick={() => setSidebarOpen(true)}
-                className="hidden h-9 w-9 items-center justify-center rounded-lg text-ink transition hover:bg-mist lg:inline-flex"
-                aria-label="Open sidebar"
-                title="Open sidebar"
-              >
-                <PanelLeft className="h-5 w-5" strokeWidth={1.75} />
-              </button>
-            ) : null}
-
-            <p className="text-sm font-semibold text-ink lg:hidden">Dashboard menu</p>
+            <p className="text-sm font-semibold text-ink">Dashboard menu</p>
           </div>
 
           <div className="px-4 py-6 sm:px-6 lg:px-8">

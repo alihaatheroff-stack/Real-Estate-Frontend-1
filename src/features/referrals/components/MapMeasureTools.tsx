@@ -2,10 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from 'react-dom'
 import { CircleMarker, Polygon, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import { LandPlot, Mountain, Ruler, Spline, X } from 'lucide-react'
+import { Home, LandPlot, Mountain, Ruler, Spline, X } from 'lucide-react'
 import { fetchElevationsMeters } from '@/features/referrals/lib/elevation'
 import { MapBasemapControl } from '@/features/referrals/components/MapBasemapControl'
 import { MapZoomPosition } from '@/features/referrals/components/MapZoomPosition'
+import { MeasureAnnotations } from '@/features/referrals/components/MeasureAnnotations'
+import { RoofMeasureOverlays } from '@/features/referrals/components/RoofMeasureOverlays'
 import {
   formatAreaDetail,
   formatDistanceDetail,
@@ -18,6 +20,19 @@ import {
   type MeasureTool,
   type MeasureUnitSystem,
 } from '@/features/referrals/lib/mapMeasure'
+import {
+  createFacetId,
+  formatPitchLabel,
+  formatRoofSqFt,
+  formatSideLengthsList,
+  loadRoofPitchRise,
+  pitchedAreaSqMeters,
+  ROOF_PITCH_OPTIONS,
+  saveRoofPitchRise,
+  sumFacetFlatArea,
+  type RoofFacet,
+  type RoofPitchRise,
+} from '@/features/referrals/lib/roofMeasure'
 import { cn } from '@/shared/lib/cn'
 
 const LINE_STYLE = { color: '#0b1f3a', weight: 3, opacity: 0.95 }
@@ -43,9 +58,12 @@ export function MapMeasureTools() {
   const readoutRef = useRef<HTMLDivElement>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [unitsOpen, setUnitsOpen] = useState(false)
+  const [pitchOpen, setPitchOpen] = useState(false)
   const [units, setUnits] = useState<MeasureUnitSystem>(() => loadMeasureUnits())
   const [tool, setTool] = useState<MeasureTool | null>(null)
   const [points, setPoints] = useState<LatLngTuple[]>([])
+  const [facets, setFacets] = useState<RoofFacet[]>([])
+  const [pitchRise, setPitchRise] = useState<RoofPitchRise>(() => loadRoofPitchRise())
   const [cursor, setCursor] = useState<LatLngTuple | null>(null)
   const [finished, setFinished] = useState(false)
   const [elevations, setElevations] = useState<number[]>([])
@@ -58,31 +76,7 @@ export function MapMeasureTools() {
     return [...points, cursor]
   }, [active, cursor, points])
 
-  const selectTool = useCallback((next: MeasureTool) => {
-    setTool((current) => {
-      const turningOff = current === next
-      if (turningOff) {
-        setPoints([])
-        setCursor(null)
-        setFinished(false)
-        setElevations([])
-        setElevationError(null)
-        setElevationLoading(false)
-        return null
-      }
-      setPoints([])
-      setCursor(null)
-      setFinished(false)
-      setElevations([])
-      setElevationError(null)
-      setElevationLoading(false)
-      setUnitsOpen(false)
-      return next
-    })
-    setMenuOpen(true)
-  }, [])
-
-  const clearDrawing = useCallback(() => {
+  const resetDrawingState = useCallback(() => {
     setPoints([])
     setCursor(null)
     setFinished(false)
@@ -91,14 +85,58 @@ export function MapMeasureTools() {
     setElevationLoading(false)
   }, [])
 
+  const selectTool = useCallback(
+    (next: MeasureTool) => {
+      setTool((current) => {
+        const turningOff = current === next
+        if (turningOff) {
+          resetDrawingState()
+          setFacets([])
+          setPitchOpen(false)
+          return null
+        }
+        resetDrawingState()
+        setFacets([])
+        setUnitsOpen(false)
+        setPitchOpen(false)
+        return next
+      })
+      setMenuOpen(true)
+    },
+    [resetDrawingState],
+  )
+
+  const clearDrawing = useCallback(() => {
+    resetDrawingState()
+    if (tool === 'roof') setFacets([])
+  }, [resetDrawingState, tool])
+
   const finishDrawing = useCallback(() => {
+    if (tool === 'roof' && points.length >= 3) {
+      setFacets((current) => [...current, { id: createFacetId(), points: [...points] }])
+      setPoints([])
+      setCursor(null)
+      setFinished(true)
+      return
+    }
     setCursor(null)
     setFinished(true)
+  }, [points, tool])
+
+  const startNextFacet = useCallback(() => {
+    setPoints([])
+    setCursor(null)
+    setFinished(false)
   }, [])
 
   const setUnitSystem = useCallback((next: MeasureUnitSystem) => {
     setUnits(next)
     saveMeasureUnits(next)
+  }, [])
+
+  const setPitch = useCallback((next: RoofPitchRise) => {
+    setPitchRise(next)
+    saveRoofPitchRise(next)
   }, [])
 
   useEffect(() => {
@@ -125,7 +163,7 @@ export function MapMeasureTools() {
       L.DomEvent.disableClickPropagation(node)
       L.DomEvent.disableScrollPropagation(node)
     })
-  }, [menuOpen, tool, points, finished, unitsOpen])
+  }, [menuOpen, tool, points, finished, unitsOpen, pitchOpen, facets, pitchRise])
 
   useEffect(() => {
     if (tool !== 'elevation' || points.length === 0) return
@@ -149,7 +187,7 @@ export function MapMeasureTools() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        if (points.length > 0 || finished) {
+        if (points.length > 0 || finished || facets.length > 0) {
           clearDrawing()
           return
         }
@@ -159,13 +197,13 @@ export function MapMeasureTools() {
       }
       if (event.key === 'Enter' && tool && points.length > 0 && !finished) {
         if (tool === 'distance' && points.length < 2) return
-        if (tool === 'area' && points.length < 3) return
+        if ((tool === 'area' || tool === 'roof') && points.length < 3) return
         finishDrawing()
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [clearDrawing, finishDrawing, finished, points.length, tool])
+  }, [clearDrawing, facets.length, finishDrawing, finished, points.length, tool])
 
   useMapEvents({
     click(event) {
@@ -179,7 +217,7 @@ export function MapMeasureTools() {
         setElevationError(null)
         return
       }
-      if (tool === 'area' && points.length >= 3) {
+      if ((tool === 'area' || tool === 'roof') && points.length >= 3) {
         const first = L.latLng(points[0][0], points[0][1])
         if (map.latLngToContainerPoint(first).distanceTo(map.latLngToContainerPoint(event.latlng)) < 16) {
           finishDrawing()
@@ -192,7 +230,7 @@ export function MapMeasureTools() {
       if (!tool || finished) return
       L.DomEvent.stop(event)
       if (tool === 'distance' && points.length < 2) return
-      if (tool === 'area' && points.length < 3) return
+      if ((tool === 'area' || tool === 'roof') && points.length < 3) return
       finishDrawing()
     },
     mousemove(event) {
@@ -208,13 +246,44 @@ export function MapMeasureTools() {
     Boolean(tool) &&
     !finished &&
     ((tool === 'distance' && points.length >= 2) ||
-      (tool === 'area' && points.length >= 3) ||
+      ((tool === 'area' || tool === 'roof') && points.length >= 3) ||
       (tool === 'elevation' && points.length >= 1))
 
   const distanceMeters = pathLengthMeters(previewPoints)
   const areaSqMeters = polygonAreaSqMeters(
     tool === 'area' && previewPoints.length >= 3 ? previewPoints : points,
   )
+
+  const roofFlatSqMeters = useMemo(() => {
+    const completed = sumFacetFlatArea(facets)
+    const draft =
+      tool === 'roof' && previewPoints.length >= 3 ? polygonAreaSqMeters(previewPoints) : 0
+    return completed + draft
+  }, [facets, previewPoints, tool])
+
+  const roofPitchedSqMeters = pitchedAreaSqMeters(roofFlatSqMeters, pitchRise)
+
+  const sideLengthsText = useMemo(() => {
+    if (tool === 'distance' && previewPoints.length >= 2) {
+      return formatSideLengthsList(previewPoints, false)
+    }
+    if (tool === 'area' && previewPoints.length >= 2) {
+      return formatSideLengthsList(previewPoints, previewPoints.length >= 3)
+    }
+    if (tool === 'roof') {
+      const parts: string[] = []
+      for (const facet of facets) {
+        const text = formatSideLengthsList(facet.points, true)
+        if (text) parts.push(text)
+      }
+      if (previewPoints.length >= 2) {
+        const draft = formatSideLengthsList(previewPoints, previewPoints.length >= 3)
+        if (draft) parts.push(draft)
+      }
+      return parts.join(' · ')
+    }
+    return ''
+  }, [facets, previewPoints, tool])
 
   const readout = (() => {
     if (!tool) return null
@@ -225,6 +294,13 @@ export function MapMeasureTools() {
     if (tool === 'area') {
       if (points.length < 3) return 'Click a shape to get acres and hectares. Add at least 3 points.'
       return `Area: ${formatAreaDetail(areaSqMeters, units)}`
+    }
+    if (tool === 'roof') {
+      if (facets.length === 0 && points.length < 3) {
+        return 'Trace each roof plane. Add at least 3 points per facet.'
+      }
+      const pitchNote = pitchRise > 0 ? ` · pitch ${formatPitchLabel(pitchRise)}` : ' · flat'
+      return `Roof: ${formatRoofSqFt(roofPitchedSqMeters)} surface (${formatRoofSqFt(roofFlatSqMeters)} flat)${pitchNote}`
     }
     if (elevationLoading && elevations.length === 0) return 'Looking up elevation…'
     if (elevationError) return elevationError
@@ -241,10 +317,16 @@ export function MapMeasureTools() {
     tool && !finished
       ? tool === 'elevation'
         ? 'Click more points for a path, or press Done.'
-        : 'Double-click, press Enter, or tap Done to finish.'
-      : tool && finished
-        ? 'Click the map to start a new measurement.'
-        : null
+        : tool === 'roof'
+          ? 'Double-click, press Enter, or tap Done to save this facet.'
+          : 'Double-click, press Enter, or tap Done to finish.'
+      : tool === 'roof' && finished
+        ? facets.length > 0
+          ? 'Add another facet, change pitch, or clear.'
+          : 'Click the map to start a roof facet.'
+        : tool && finished
+          ? 'Click the map to start a new measurement.'
+          : null
 
   const overlay = (
     <>
@@ -274,7 +356,10 @@ export function MapMeasureTools() {
             </p>
             <button
               type="button"
-              onClick={() => setUnitsOpen((open) => !open)}
+              onClick={() => {
+                setUnitsOpen((open) => !open)
+                setPitchOpen(false)
+              }}
               className={cn(
                 'flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition hover:bg-mist',
                 unitsOpen ? 'bg-mist/80 text-ink' : 'text-ink',
@@ -317,6 +402,13 @@ export function MapMeasureTools() {
               onClick={() => selectTool('area')}
             />
             <ToolRow
+              icon={<Home className="h-4 w-4 shrink-0" />}
+              label="Roof"
+              hint="sqft + pitch"
+              active={tool === 'roof'}
+              onClick={() => selectTool('roof')}
+            />
+            <ToolRow
               icon={<Mountain className="h-4 w-4 shrink-0" />}
               label="Elevation"
               hint="ft, m"
@@ -340,30 +432,89 @@ export function MapMeasureTools() {
               onClick={() => {
                 clearDrawing()
                 setTool(null)
+                setPitchOpen(false)
               }}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-mist text-ink hover:bg-line"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
+          {tool === 'roof' ? (
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => setPitchOpen((open) => !open)}
+                className="flex w-full items-center justify-between rounded-lg border border-line bg-mist/60 px-2.5 py-1.5 text-left text-xs font-semibold text-ink"
+              >
+                <span>Roof pitch</span>
+                <span className="text-muted">{formatPitchLabel(pitchRise)}</span>
+              </button>
+              {pitchOpen ? (
+                <div className="mt-1.5 grid grid-cols-4 gap-1 sm:grid-cols-6">
+                  {ROOF_PITCH_OPTIONS.map((rise) => (
+                    <button
+                      key={rise}
+                      type="button"
+                      onClick={() => {
+                        setPitch(rise)
+                        setPitchOpen(false)
+                      }}
+                      className={cn(
+                        'rounded-md px-1.5 py-1 text-[11px] font-semibold',
+                        pitchRise === rise
+                          ? 'bg-brand text-white'
+                          : 'bg-mist text-ink hover:bg-line',
+                      )}
+                    >
+                      {rise === 0 ? 'Flat' : `${rise}/12`}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {facets.length > 0 ? (
+                <p className="mt-1.5 text-[11px] text-muted">
+                  {facets.length} facet{facets.length === 1 ? '' : 's'} saved
+                  {pitchRise > 0
+                    ? ` · surface uses ${formatPitchLabel(pitchRise)} pitch factor`
+                    : ' · no pitch correction'}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           {hint ? <p className="mt-1 text-xs text-muted">{hint}</p> : null}
+          {sideLengthsText && (tool === 'roof' || tool === 'area' || tool === 'distance') ? (
+            <p className="mt-1.5 text-[11px] leading-relaxed text-ink">
+              <span className="font-semibold text-muted">Sides: </span>
+              {sideLengthsText}
+            </p>
+          ) : null}
           <div className="mt-2 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={clearDrawing}
-              disabled={points.length === 0 && !finished}
+              disabled={points.length === 0 && !finished && facets.length === 0}
               className="rounded-lg border border-line px-2.5 py-1 text-xs font-semibold text-ink disabled:opacity-40"
             >
               Clear
             </button>
-            <button
-              type="button"
-              onClick={finishDrawing}
-              disabled={!canFinish}
-              className="rounded-lg bg-brand px-2.5 py-1 text-xs font-semibold text-white disabled:opacity-40"
-            >
-              Done
-            </button>
+            {tool === 'roof' && finished && facets.length > 0 ? (
+              <button
+                type="button"
+                onClick={startNextFacet}
+                className="rounded-lg bg-brand px-2.5 py-1 text-xs font-semibold text-white"
+              >
+                Add facet
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={finishDrawing}
+                disabled={!canFinish}
+                className="rounded-lg bg-brand px-2.5 py-1 text-xs font-semibold text-white disabled:opacity-40"
+              >
+                {tool === 'roof' ? 'Save facet' : 'Done'}
+              </button>
+            )}
           </div>
         </div>
       ) : null}
@@ -374,6 +525,15 @@ export function MapMeasureTools() {
     <>
       <MapBasemapControl />
       <MapZoomPosition />
+      {tool === 'roof' ? (
+        <RoofMeasureOverlays
+          facets={facets}
+          draftPoints={points}
+          previewPoints={previewPoints}
+          pitchRise={pitchRise}
+          drawing={active}
+        />
+      ) : null}
       {tool === 'area' && previewPoints.length >= 2 ? (
         previewPoints.length >= 3 ? (
           <Polygon positions={previewPoints} pathOptions={FILL_STYLE} interactive={false} />
@@ -388,7 +548,18 @@ export function MapMeasureTools() {
           interactive={false}
         />
       ) : null}
-      {vertices(points)}
+      {tool === 'distance' && previewPoints.length >= 2 ? (
+        <MeasureAnnotations points={previewPoints} pathKey="distance" />
+      ) : null}
+      {tool === 'area' && previewPoints.length >= 2 ? (
+        <MeasureAnnotations
+          points={previewPoints}
+          closed={previewPoints.length >= 3}
+          showArea={previewPoints.length >= 3}
+          pathKey="area"
+        />
+      ) : null}
+      {tool && tool !== 'roof' ? vertices(points) : null}
       {createPortal(overlay, map.getContainer())}
     </>
   )

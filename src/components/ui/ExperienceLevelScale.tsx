@@ -1,4 +1,5 @@
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { FieldSaveMark } from '@/features/auth/components/FieldSaveContext'
 import { cn } from '@/shared/lib/cn'
 
 const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const
@@ -35,7 +36,11 @@ export function ExperienceLevelScale({
       {label ? (
         <span className="inline-flex items-center gap-1 text-sm font-bold leading-snug text-ink">
           {label}
-          {showQaMark ? <FieldQaMark field={label} /> : null}
+          {showQaMark ? (
+            <FieldQaMark field={label} />
+          ) : (
+            <FieldSaveMark fieldId={name} />
+          )}
         </span>
       ) : null}
 

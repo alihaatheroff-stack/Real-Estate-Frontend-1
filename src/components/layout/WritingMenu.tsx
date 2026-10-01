@@ -7,9 +7,11 @@ import { cn } from '@/shared/lib/cn'
 export function WritingMenu({
   className,
   locked = false,
+  tourId,
 }: {
   className?: string
   locked?: boolean
+  tourId?: string
 }) {
   if (locked) {
     return (
@@ -24,6 +26,7 @@ export function WritingMenu({
   return (
     <Link
       to={PATHS.postOffer}
+      data-tour-id={tourId}
       className={cn(
         'relative inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
         className,

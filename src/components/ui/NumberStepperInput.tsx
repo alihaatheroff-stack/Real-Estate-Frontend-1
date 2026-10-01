@@ -1,6 +1,7 @@
 import type { InputHTMLAttributes } from 'react'
 import { Minus, Plus } from 'lucide-react'
 import { FieldQaMark } from '@/components/ui/FieldQaMark'
+import { FieldSaveMark } from '@/features/auth/components/FieldSaveContext'
 import { cn } from '@/shared/lib/cn'
 
 type NumberStepperInputProps = Omit<
@@ -72,7 +73,11 @@ export function NumberStepperInput({
       {label ? (
         <span className="inline-flex items-center gap-1 font-bold text-ink">
           {label}
-          {showQaMark ? <FieldQaMark field={label} /> : null}
+          {showQaMark ? (
+            <FieldQaMark field={label} />
+          ) : (
+            <FieldSaveMark fieldId={name ?? label} />
+          )}
         </span>
       ) : null}
       <div

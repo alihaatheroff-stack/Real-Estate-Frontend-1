@@ -203,22 +203,22 @@ export function RegisterPspForm() {
           email={form.data.email}
           password={form.data.password}
           confirmPassword={form.data.confirmPassword}
-          acceptedPrivacyPolicy={form.data.acceptedPrivacyPolicy}
-          acceptedTermsOfService={form.data.acceptedTermsOfService}
+          acceptedPolicies={form.data.acceptedPolicies}
           fieldErrors={form.fieldErrors}
           error={form.error}
           homeHref={PATHS.home}
           onEmailChange={(value) => form.update('email', value)}
           onPasswordChange={(value) => form.update('password', value)}
           onConfirmPasswordChange={(value) => form.update('confirmPassword', value)}
-          onAcceptedPrivacyPolicyChange={(value) =>
-            form.update('acceptedPrivacyPolicy', value)
-          }
-          onAcceptedTermsOfServiceChange={(value) =>
-            form.update('acceptedTermsOfService', value)
+          onAcceptedPolicyChange={(id, value) =>
+            form.update('acceptedPolicies', {
+              ...form.data.acceptedPolicies,
+              [id]: value,
+            })
           }
           setFieldErrors={form.setFieldErrors}
           setError={form.setError}
+          registerMode="psp"
         />
       </form>
 

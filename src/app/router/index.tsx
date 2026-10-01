@@ -6,6 +6,7 @@ import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { NetworkLayout } from '@/app/layouts/NetworkLayout'
 import { PATHS } from '@/app/router/paths'
 import { LandingPage } from '@/pages/landing/LandingPage'
+import { MemberHomePage } from '@/pages/landing/MemberHomePage'
 import { CrowdfundingExplorePage } from '@/pages/crowdfunding/CrowdfundingExplorePage'
 import { CrowdfundingLandingPage } from '@/pages/crowdfunding/CrowdfundingLandingPage'
 import { CrowdfundingProfilePage } from '@/pages/crowdfunding/CrowdfundingProfilePage'
@@ -68,6 +69,15 @@ import { AdvertisePage } from '@/pages/advertise/AdvertisePage'
 import { NewsPage } from '@/pages/news/NewsPage'
 import { GlossaryPage } from '@/pages/glossary/GlossaryPage'
 import { HirePage } from '@/pages/hire/HirePage'
+import { PrivacyPolicyPage } from '@/pages/legal/PrivacyPolicyPage'
+import { CompliancePage } from '@/pages/legal/CompliancePage'
+import { AcceptableUsePolicyPage } from '@/pages/legal/AcceptableUsePolicyPage'
+import { CommunityGuidelinesPage } from '@/pages/legal/CommunityGuidelinesPage'
+import { CookiePolicyPage } from '@/pages/legal/CookiePolicyPage'
+import { DataBrokerStatementPage } from '@/pages/legal/DataBrokerStatementPage'
+import { DmcaCopyrightPolicyPage } from '@/pages/legal/DmcaCopyrightPolicyPage'
+import { FairHousingStatementPage } from '@/pages/legal/FairHousingStatementPage'
+import { TermsOfServicePage } from '@/pages/legal/TermsOfServicePage'
 import { DashboardLayout } from '@/app/layouts/DashboardLayout'
 import {
   DashboardAboutPage,
@@ -88,6 +98,7 @@ import {
   DashboardReferralsSentPage,
   DashboardServiceAddonPage,
   DashboardServicesPage,
+  DashboardSettingsPage,
   DashboardStatementsPage,
   DashboardSubmissionServicePage,
 } from '@/pages/dashboard/DashboardPage'
@@ -100,6 +111,7 @@ export const router = createBrowserRouter([
         element: <MarketingLayout />,
         children: [
           { path: PATHS.home, element: <LandingPage /> },
+          { path: PATHS.memberHome, element: <MemberHomePage /> },
           {
             path: PATHS.crowdfunding,
             element: <CrowdfundingLandingPage />,
@@ -149,6 +161,46 @@ export const router = createBrowserRouter([
           {
             path: PATHS.glossary,
             element: <GlossaryPage />,
+          },
+          {
+            path: PATHS.compliance,
+            element: <CompliancePage />,
+          },
+          {
+            path: PATHS.acceptableUsePolicy,
+            element: <AcceptableUsePolicyPage />,
+          },
+          {
+            path: PATHS.communityGuidelines,
+            element: <CommunityGuidelinesPage />,
+          },
+          {
+            path: PATHS.cookiePolicy,
+            element: <CookiePolicyPage />,
+          },
+          {
+            path: PATHS.dataBrokerStatement,
+            element: <DataBrokerStatementPage />,
+          },
+          {
+            path: PATHS.dmcaCopyrightPolicy,
+            element: <DmcaCopyrightPolicyPage />,
+          },
+          {
+            path: PATHS.fairHousingStatement,
+            element: <FairHousingStatementPage />,
+          },
+          {
+            path: PATHS.privacyPolicy,
+            element: <PrivacyPolicyPage />,
+          },
+          {
+            path: '/privacy-policy',
+            element: <Navigate to={PATHS.privacyPolicy} replace />,
+          },
+          {
+            path: PATHS.termsOfService,
+            element: <TermsOfServicePage />,
           },
           {
             path: PATHS.hire,
@@ -246,6 +298,7 @@ export const router = createBrowserRouter([
           { path: PATHS.dashboardApplicationRejected, element: <DashboardApplicationRejectedPage /> },
           { path: PATHS.dashboardApplicationNonComplete, element: <DashboardApplicationNonCompletePage /> },
           { path: PATHS.dashboardReferralsSent, element: <DashboardReferralsSentPage /> },
+          { path: PATHS.dashboardSettings, element: <DashboardSettingsPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

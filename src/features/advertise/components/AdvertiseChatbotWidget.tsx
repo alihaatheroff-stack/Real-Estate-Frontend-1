@@ -21,7 +21,7 @@ export function AdvertiseChatbotWidget({
   }, [reviewRequestId])
 
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className="pointer-events-none fixed bottom-5 right-5 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {open ? (
         <div
           className={cn(

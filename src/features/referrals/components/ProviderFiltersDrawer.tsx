@@ -203,7 +203,7 @@ export function ProviderFiltersDrawer({
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[1100] flex">
+    <div className="fixed inset-x-0 bottom-0 top-[4.75rem] z-[60] flex sm:top-[5.5rem]">
       <aside
         className="relative flex h-full w-full max-w-[400px] flex-col bg-white shadow-2xl animate-drawer-in"
         aria-label="All filters"
@@ -269,7 +269,7 @@ export function ProviderFiltersDrawer({
               onApply()
               onClose()
             }}
-            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-freeio text-base font-semibold text-white transition hover:brightness-95"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand text-base font-semibold text-white transition hover:bg-brand-dark"
           >
             Find Listing
             <ArrowUpRight className="h-4 w-4" />

@@ -43,6 +43,8 @@ type ModulePlatformMenuProps = {
   /** Guest / non-registered: keep the icon, block the feature */
   locked?: boolean
   footer?: ReactNode
+  /** Optional selector for the header product tour spotlight. */
+  tourId?: string
   /**
    * When provided and returns true, the platform row action is handled
    * (e.g. open a composer) instead of drilling into detail items.
@@ -288,6 +290,7 @@ function UnlockedPlatformMenu({
   footerHref,
   demo = false,
   footer,
+  tourId,
   onPlatformOpen,
 }: Omit<ModulePlatformMenuProps, 'locked'>) {
   const navigate = useNavigate()
@@ -369,6 +372,7 @@ function UnlockedPlatformMenu({
     <div ref={rootRef} className={cn('relative', className)}>
       <button
         type="button"
+        data-tour-id={tourId}
         className={cn(
           'relative inline-flex items-center justify-center rounded-lg p-2 text-ink transition hover:bg-mist',
           triggerClassName,

@@ -3,16 +3,14 @@ import { useLocation } from 'react-router-dom'
 import {
   ClientFieldsMarquee,
   ClientHireSection,
+  LandingAssistantWidget,
   LandingFaqSection,
   LandingHero,
   // NewsUpdatesSection, // temporarily hidden
   ReferralsSection,
 } from '@/features/landing'
-import {
-  CrowdfundingTeaser,
-  LoggedInCrowdfundingSection,
-} from '@/features/crowdfunding'
-import { LoggedInNetworkSection, NetworkPreview } from '@/features/network'
+import { CrowdfundingTeaser } from '@/features/crowdfunding'
+import { NetworkPreview } from '@/features/network'
 import { useIsAuthenticated } from '@/features/auth'
 import { splitCsv, useProviderFilters } from '@/features/search'
 import { scrollToSectionInstant } from '@/shared/lib/scrollToSection'
@@ -58,21 +56,7 @@ export function LandingPage() {
         <ClientFieldsMarquee />
         <ClientHireSection />
         <LandingFaqSection />
-      </>
-    )
-  }
-
-  if (isAuthenticated) {
-    return (
-      <>
-        {hero}
-        {/* Temporarily hidden — restore when ready
-        <NewsUpdatesSection />
-        */}
-        <ReferralsSection />
-        <LoggedInCrowdfundingSection />
-        <LoggedInNetworkSection />
-        <LandingFaqSection />
+        <LandingAssistantWidget />
       </>
     )
   }
@@ -84,6 +68,7 @@ export function LandingPage() {
       <CrowdfundingTeaser />
       <NetworkPreview />
       <LandingFaqSection />
+      <LandingAssistantWidget />
     </>
   )
 }
