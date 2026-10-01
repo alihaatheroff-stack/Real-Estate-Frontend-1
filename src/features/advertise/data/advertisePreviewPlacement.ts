@@ -179,7 +179,9 @@ export function isPreviewPageId(value: string): value is PreviewPageId {
   return ALL_PREVIEW_PAGE_IDS.has(value)
 }
 
-export function isNetworkNewsfeedPage(value: string): boolean {
+export function isNetworkNewsfeedPage(
+  value: string,
+): value is Extract<PreviewPageId, 'Network > Newsfeed'> {
   return value === 'Network > Newsfeed'
 }
 

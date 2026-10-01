@@ -122,7 +122,8 @@ export function AdvertisementPreview({
         </p>
       </div>
 
-      {showPlacementPreview ? (
+      {isNetworkNewsfeedPage(previewPage) &&
+      isNetworkPlacementId(previewPlacement) ? (
         <AdPlacementPreview
           draft={draft}
           page={previewPage}
